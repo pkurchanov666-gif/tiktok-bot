@@ -1,27 +1,32 @@
 import os
 import asyncio
+from dotenv import load_dotenv
 from huggingface_hub import InferenceClient
 
+load_dotenv()
+
 POSES = [
-    "standing straight, hands in pockets",
-    "leaning against wall, looking away",
-    "sitting on stairs, relaxed pose",
-    "walking forward, city background",
-    "arms crossed, serious look"
+    "standing straight, hands in pockets, urban street",
+    "leaning against wall, looking away, city background",
+    "sitting on stairs, relaxed pose, urban environment",
+    "walking forward, city street background",
+    "arms crossed, serious look, minimal background"
 ]
 
 async def generate_photo(index):
-    token = os.environ.get("HF_TOKEN")
+    token = os.environ.get("HF_TOKEN") or os.getenv("HF_TOKEN")
 
     if not token:
-        raise Exception("HF_TOKEN не найден в Railway Variables")
+        all_keys = list(os.environ.keys())
+        raise Exception(f"HF_TOKEN не найден. Все ключи: {all_keys}")
 
-    client = InferenceClient(
-        "black-forest-labs/FLUX.1-schnell",
-        token=token
+    client = InferenceClient("black-forest-labs/FLUX.1-schnell", token=token)
+
+    prompt = (
+        f"photorealistic fashion photo of a young stylish male model "
+        f"wearing a high-end streetwear hoodie, {POSES[index]}, "
+        f"fashion photography, 8k resolution, sharp details"
     )
-
-    prompt = f"photorealistic fashion photo of a young male model wearing hoodie, {POSES[index]}, urban street style, 8k"
 
     image = await asyncio.to_thread(client.text_to_image, prompt=prompt)
 
@@ -30,10 +35,8 @@ async def generate_photo(index):
     image.save(path)
     return path
 
-
 async def generate_all_photos():
     return [await generate_photo(i) for i in range(5)]
-
 
 async def regenerate_photo(index):
     return await generate_photo(index)
