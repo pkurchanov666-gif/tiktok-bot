@@ -47,9 +47,10 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
         paths = await asyncio.to_thread(create_slides, text, user_id, photos)
         media = [InputMediaPhoto(open(p, "rb"), caption=text if i==0 else "") for i, p in enumerate(paths)]
         await context.bot.send_media_group(chat_id=user_id, media=media)
-        
-        keyboard = [[InlineKeyboardButton("📤 Отправить в Buffer", callback_data="send_buffer")],
-                    [InlineKeyboardButton("➡️ Следующий пост", callback_data="generate")]]
+        keyboard = [
+            [InlineKeyboardButton("📤 Отправить в Buffer", callback_data="send_buffer")],
+            [InlineKeyboardButton("➡️ Следующий пост", callback_data="generate")]
+        ]
         await context.bot.send_message(chat_id=user_id, text="Слайды готовы!", reply_markup=InlineKeyboardMarkup(keyboard))
         context.user_data["last_slides"] = paths
     except Exception as e:
@@ -66,10 +67,11 @@ async def ai_photoshoot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["ai_photos"] = paths
         media = [InputMediaPhoto(open(p, "rb"), caption="AI Photo" if i==0 else "") for i, p in enumerate(paths)]
         await context.bot.send_media_group(chat_id=user_id, media=media)
-        
-        keyboard = [[InlineKeyboardButton(f"🔄 {i+1}", callback_data=f"regen_{i}") for i in range(5)],
-                    [InlineKeyboardButton("📤 В Buffer", callback_data="send_ai_buffer")]]
-        await context.bot.send_message(chat_id=user_id, text="AI Фотосессия готова! Нажми 🔄 для замены.", reply_markup=InlineKeyboardMarkup(keyboard))
+        keyboard = [
+            [InlineKeyboardButton(f"🔄 {i+1}", callback_data=f"regen_{i}") for i in range(len(paths))],
+            [InlineKeyboardButton("📤 В Buffer", callback_data="send_ai_buffer")]
+        ]
+        await context.bot.send_message(chat_id=user_id, text="AI Фотосессия готова!", reply_markup=InlineKeyboardMarkup(keyboard))
     except Exception as e:
         await context.bot.send_message(chat_id=user_id, text=f"❌ Ошибка AI: {e}")
 
@@ -143,7 +145,7 @@ def main():
             WAITING_BUFFER_KEY: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_buffer_key)],
             WAITING_PROFILE: [CallbackQueryHandler(receive_profile, pattern="^profile_")],
         },
-        fallbacks=[CommandHandler("cancel", lambda u,c: ConversationHandler.END)],
+        fallbacks=[CommandHandler("cancel", lambda u, c: ConversationHandler.END)],
     )
     app.add_handler(CommandHandler("start", start))
     app.add_handler(conv)
@@ -151,14 +153,13 @@ def main():
     app.add_handler(CallbackQueryHandler(ai_photoshoot, pattern="^ai_photoshoot$"))
     app.add_handler(CallbackQueryHandler(regen_photo, pattern="^regen_"))
     app.add_handler(CallbackQueryHandler(send_buffer_handler, pattern="^send_.*buffer$"))
-        print("Бот погнал!")
+    print("Бот погнал!")
     app.run_webhook(
         listen="0.0.0.0",
         port=int(os.environ.get("PORT", 8080)),
         url_path=BOT_TOKEN,
         webhook_url=f"https://tiktok-bot-production-4530.up.railway.app/{BOT_TOKEN}",
     )
-)
 
 if __name__ == "__main__":
     main()
