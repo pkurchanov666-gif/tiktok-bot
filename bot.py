@@ -152,8 +152,12 @@ def main():
     app.add_handler(CallbackQueryHandler(regen_photo, pattern="^regen_"))
     app.add_handler(CallbackQueryHandler(send_buffer_handler, pattern="^send_.*buffer$"))
     print("Бот погнал!")
-    app.run_polling()
+    app.run_webhook(
+    listen="0.0.0.0",
+    port=int(os.environ.get("PORT", 8080)),
+    url_path=BOT_TOKEN,
+    webhook_url=f"https://tiktok-bot-production-4530.up.railway.app/{BOT_TOKEN}",
+)
 
 if __name__ == "__main__":
     main()
-    app = Application.builder().token(BOT_TOKEN).build()
