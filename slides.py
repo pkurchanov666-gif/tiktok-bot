@@ -1,117 +1,59 @@
 import os
 import random
-from PIL import Image, ImageDraw, ImageFont
-from config import PHOTOS_DIR, OUTPUT_DIR, FONT_FILE
-
-MIN_WIDTH = 800
-MIN_HEIGHT = 1200
+from PIL import Image
+from config import PHOTOS_DIR, OUTPUT_DIR, SLIDE_COUNT, VIDEO_SIZE
 
 
-def get_random_photos():
-    all_files = [
+def get_random_photos(count: int = SLIDE_COUNT):
+    all_photos = [
         os.path.join(PHOTOS_DIR, f)
         for f in os.listdir(PHOTOS_DIR)
-        if f.lower().endswith((".jpg", ".jpeg", ".png", ".bmp", ".webp"))
+        if f.lower().endswith((".jpg", ".jpeg", ".png"))
     ]
 
-    valid_imgs = []
+    if len(all_photos) < count:
+        raise ValueError(f"Нужно минимум {count} фото, найдено {len(all_photos)}")
 
-    for path in all_files:
-        try:
-            img = Image.open(path)
-            w, h = img.size
-            if w >= MIN_WIDTH and h >= MIN_HEIGHT:
-                valid_imgs.append(path)
-        except Exception:
-            pass
-
-    if len(valid_imgs) < 5:
-        raise ValueError(f"Нужно минимум 5 качественных фото. Сейчас найдено только {len(valid_imgs)}")
-
-    return random.sample(valid_imgs, 5)
+    return random.sample(all_photos, count)
 
 
-def draw_outlined_text(draw, x, y, text, font, fill="white", outline="black", outline_width=2):
-    for dx in range(-outline_width, outline_width + 1):
-        for dy in range(-outline_width, outline_width + 1):
-            if dx == 0 and dy == 0:
-                continue
-            draw.text((x + dx, y + dy), text, font=font, fill=outline)
+def resize_photo(img: Image.Image, size: tuple = VIDEO_SIZE) -> Image.Image:
+    target_w, target_h = size
+    target_ratio = target_w / target_h
 
-    draw.text((x, y), text, font=font, fill=fill)
+    img_w, img_h = img.size
+    img_ratio = img_w / img_h
 
+    if img_ratio > target_ratio:
+        new_h = img_h
+        new_w = int(img_h * target_ratio)
+    else:
+        new_w = img_w
+        new_h = int(img_w / target_ratio)
 
-def split_into_two_lines(text, draw, font):
-    words = text.split()
+    left = (img_w - new_w) // 2
+    top = (img_h - new_h) // 2
+    right = left + new_w
+    bottom = top + new_h
 
-    if len(words) <= 1:
-        return [text, ""]
-
-    best_lines = None
-    best_score = None
-
-    for i in range(1, len(words)):
-        line1 = " ".join(words[:i])
-        line2 = " ".join(words[i:])
-
-        bbox1 = draw.textbbox((0, 0), line1, font=font)
-        bbox2 = draw.textbbox((0, 0), line2, font=font)
-
-        w1 = bbox1[2] - bbox1[0]
-        w2 = bbox2[2] - bbox2[0]
-
-        score = abs(w1 - w2)
-
-        if best_score is None or score < best_score:
-            best_score = score
-            best_lines = [line1, line2]
-
-    return best_lines
+    img = img.crop((left, top, right, bottom))
+    img = img.resize(size, Image.LANCZOS)
+    return img
 
 
-def create_slides(text, user_id, selected_photos):
+def create_slides(text: str, user_id: int, photos: list):
+    # text оставили в сигнатуре, чтобы не ломать bot.py,
+    # но на фото больше ничего НЕ рисуем
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    result_paths = []
 
-    for i, path in enumerate(selected_photos):
-        img = Image.open(path).convert("RGB")
+    paths = []
 
-        if i == 0:
-            draw = ImageDraw.Draw(img)
-            w, h = img.size
+    for i, photo_path in enumerate(photos):
+        img = Image.open(photo_path).convert("RGB")
+        img = resize_photo(img)
 
-            font_size = max(20, int(h * 0.025))
+        output_path = os.path.join(OUTPUT_DIR, f"slide_{user_id}_{i}.jpg")
+        img.save(output_path, quality=95)
+        paths.append(output_path)
 
-            try:
-                font = ImageFont.truetype(FONT_FILE, font_size)
-            except Exception:
-                font = ImageFont.load_default()
-
-            lines = split_into_two_lines(text, draw, font)
-
-            line_height = int(font_size * 1.5)
-            total_h = line_height * 2
-            y = (h - total_h) // 2
-
-            for line in lines:
-                bbox = draw.textbbox((0, 0), line, font=font)
-                text_w = bbox[2] - bbox[0]
-                x = (w - text_w) // 2
-
-                draw_outlined_text(
-                    draw,
-                    x,
-                    y,
-                    line,
-                    font,
-                    fill="white",
-                    outline="black",
-                    outline_width=2
-                )
-                y += line_height
-
-        out_path = os.path.join(OUTPUT_DIR, f"slide_{user_id}_{i}.jpg")
-        img.save(out_path, quality=100, subsampling=0)
-        result_paths.append(out_path)
-
-    return result_paths
+    return paths
