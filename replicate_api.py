@@ -62,28 +62,22 @@ def generate_image_with_polza(prompt, image_url):
             "input": {
                 "prompt": prompt,
                 "aspect_ratio": "9:16",
+                "image_resolution": "1K",
                 "images": [
                     {
                         "type": "url",
                         "data": image_url
                     }
-                ],
-                "image_resolution": "1K",
-                "quality": "high",
-                "output_format": "png",
-                "max_images": 1,
-                "strength": 0.8,
-                "guidance_scale": 3.0,
-                "enable_safety_checker": True
+                ]
             },
-            "async": False,
-            "user": "fashion-bot"
+            "async": False
         }
     )
 
     print("POLZA MEDIA RESPONSE:", res)
 
     try:
+        # media endpoint возвращает output
         final_url = res["output"][0]
     except Exception:
         raise Exception(f"Unexpected Polza response: {res}")
