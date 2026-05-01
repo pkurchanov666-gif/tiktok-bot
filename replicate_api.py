@@ -1,5 +1,4 @@
 import os
-import re
 import time
 import requests
 import asyncio
@@ -7,103 +6,109 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-REF_FRONT = 'https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg'
-REF_BACK = 'https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg'
+REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
+REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
-MEGA_PROMPT = """Ты — топовый fashion prompt engineer для ultra-realistic AI product photography. Специализация: рекламные фото одежды люкс-класса.
+MEGA_PROMPT = """ВСТАВЬ СЮДА СВОЙ ПОЛНЫЙ МЕГА-ПРОМПТ (как у тебя сейчас)"""
 
-Твоя задача: при каждом запросе выдавать только ОДИН финальный промпт на английском языке для image-to-image генератора (FLUX.1 pro). Без пояснений, без заголовков, без списков, без нумерации — только один цельный готовый текст длиной не более 4900 символов.
-
-В самом конце промпта, после всего текста, на отдельной строке обязательно добавляй одну из двух пометок:
-КАДР СПЕРЕДИ — Reference Image 2
-или
-КАДР СЗАДИ — Reference Image 1
-
-КРИТИЧЕСКОЕ ПРАВИЛО СТОРОН:
-- If the selected angle shows the BACK of the hoodie — use the design strictly from Reference Image 1.
-- If the selected angle shows the FRONT or three-quarters front — use the design strictly from Reference Image 2.
-- Never mix elements from both sides in one shot.
-
-ЖЁСТКИЕ ПРАВИЛА:
-- Hoodie must have NO pocket.
-- Do not change the face or body shape.
-- All scenes must be evening or night only.
-- Jeans must always be strictly black AND wide-leg.
-
-СЦЕНЫ — выбери одну случайно: Moscow City skyline, Rolls-Royce interior, Bentley backseat, Lamborghini underground parking, luxury hotel corridor, private jet cabin, wet neon Moscow street, penthouse balcony.
-
-ПОЗЫ — выбери одну случайно: confident standing, walking toward camera, leaning with crossed arms, seated with elbows on knees, hood up, chin raised.
-
-РАКУРСЫ — выбери один случайно: Direct frontal, Slight low angle, Three-quarters left, Three-quarters right.
-
-ВАЙБ: Dark moody luxury. Cold blue or violet shadows. Warm amber highlights. Cinematic color grading.
-
-В КОНЦЕ ВСЕГДА ДОБАВЛЯЙ: The logo and text shown in the correct reference image are the master branding assets. Render the text on the hoodie with maximum clarity and extreme precision. Do not blur, distort, mirror, simplify, stylize, crop, fade, or alter the logo or text in any way whatsoever."""
+POLZA_BASE_URL = os.getenv("POLZA_BASE_URL", "https://api.polza.ai/v1")
 
 
-def generate_prompt_from_groq():
+def _post_json(url: str, headers: dict, payload: dict, timeout: int = 180):
+    r = requests.post(url, headers=headers, json=payload, timeout=timeout)
+    # Если Polza вернула ошибку — сразу покажем её текстом
+    if r.status_code >= 400:
+        raise Exception(f"HTTP {r.status_code} from {url}: {r.text[:1500]}")
+    try:
+        return r.json()
+    except Exception:
+        raise Exception(f"Non-JSON response from {url}: {r.text[:1500]}")
+
+
+def generate_prompt_from_groq() -> str:
     groq_key = os.getenv("GROQ_API_KEY")
-    resp = requests.post(
+    if not groq_key:
+        raise Exception("GROQ_API_KEY is missing in Railway Variables")
+
+    res = _post_json(
         "https://api.groq.com/openai/v1/chat/completions",
-        headers={"Authorization": f"Bearer {groq_key}"},
-        json={
+        headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
+        payload={
             "model": "llama-3.3-70b-versatile",
             "messages": [{"role": "user", "content": MEGA_PROMPT}],
-            "temperature": 1.0
-        }
+            "temperature": 1.0,
+            "max_tokens": 2000
+        },
+        timeout=120
     )
-    return resp.json()['choices'][0]['message']['content'].strip()
+
+    # Если тут снова когда-то будет KeyError — ты увидишь это сразу
+    return res["choices"][0]["message"]["content"].strip()
 
 
-def parse_prompt(raw_text):
-    lines = raw_text.strip().split('\n')
+def parse_prompt(raw_text: str):
+    lines = raw_text.strip().split("\n")
     last_line = lines[-1].upper()
     clean_prompt = "\n".join(lines[:-1]).strip()
+
+    # по твоему правилу
     selected_ref = REF_FRONT if "СПЕРЕДИ" in last_line else REF_BACK
     return clean_prompt, selected_ref
 
 
-def generate_image_with_polza(prompt, image_url):
+def generate_image_with_polza(prompt: str, image_url: str) -> str:
     polza_key = os.getenv("POLZA_API_KEY")
+    if not polza_key:
+        raise Exception("POLZA_API_KEY is missing in Railway Variables")
 
-    headers = {
-        "Authorization": f"Bearer {polza_key}",
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "model": "black-forest-labs/flux.2-pro",
-        "prompt": prompt,
-        "image": image_url,
-        "size": "1024x1024"
-    }
-
-    response = requests.post(
-        "https://api.polza.ai/v1/images/generations",
-        headers=headers,
-        json=payload
+    # ВАЖНО: здесь мы намеренно используем images endpoint, а не chat,
+    # чтобы уйти от истории с 'choices'
+    res = _post_json(
+        f"{POLZA_BASE_URL}/images/generations",
+        headers={"Authorization": f"Bearer {polza_key}", "Content-Type": "application/json"},
+        payload={
+            "model": "black-forest-labs/flux.2-pro",
+            "prompt": prompt,
+            "image": image_url,         # если Polza не принимает image URL — она скажет это в тексте ошибки
+            "size": "1024x1024",
+            "n": 1
+        },
+        timeout=300
     )
 
-    res_json = response.json()
-    print("POLZA RAW RESPONSE:", res_json)
+    # Пытаемся вытащить URL максимально гибко
+    final_url = None
+    if isinstance(res, dict):
+        if "data" in res and isinstance(res["data"], list) and res["data"]:
+            final_url = res["data"][0].get("url")
+        if not final_url and "url" in res:
+            final_url = res["url"]
+        if not final_url and "output" in res:
+            # иногда бывает output: [url]
+            out = res["output"]
+            if isinstance(out, list) and out:
+                final_url = out[0]
+            elif isinstance(out, str):
+                final_url = out
 
-    try:
-        final_url = res_json["data"][0]["url"]
-    except Exception:
-        raise Exception(f"Polza unexpected response: {res_json}")
+    if not final_url or not isinstance(final_url, str) or not final_url.startswith("http"):
+        raise Exception(f"Polza unexpected JSON format: {str(res)[:1500]}")
 
-    img_data = requests.get(final_url).content
+    img = requests.get(final_url, timeout=180)
+    if img.status_code >= 400:
+        raise Exception(f"Failed to download image HTTP {img.status_code}: {img.text[:500]}")
+
     os.makedirs("output", exist_ok=True)
     path = f"output/ai_fashion_{int(time.time())}.jpg"
     with open(path, "wb") as f:
-        f.write(img_data)
+        f.write(img.content)
     return path
 
 
 async def generate_all_photos():
     raw = generate_prompt_from_groq()
-    p, r = parse_prompt(raw)
-    path = await asyncio.to_thread(generate_image_with_polza, p, r)
+    clean_prompt, selected_ref = parse_prompt(raw)
+    path = await asyncio.to_thread(generate_image_with_polza, clean_prompt, selected_ref)
     return [path]
 
 
