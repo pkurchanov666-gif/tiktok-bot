@@ -36,57 +36,68 @@ POSES = [
     "slight forward lean, direct eye contact",
 ]
 
-ANGLES = [
-    ("Direct frontal, chest level", "СПЕРЕДИ"),
-    ("Slight low angle, looking up at subject", "СПЕРЕДИ"),
-    ("Three-quarters left", "СПЕРЕДИ"),
-    ("Three-quarters right", "СПЕРЕДИ"),
-    ("Back view, camera facing the back", "СЗАДИ"),
-    ("Three-quarters back left", "СЗАДИ"),
+ANGLES_FRONT = [
+    "Direct frontal, chest level",
+    "Slight low angle, looking up at subject",
+    "Three-quarters left",
+    "Three-quarters right",
 ]
 
-MEGA_PROMPT_TEMPLATE = """You are a top fashion prompt engineer for ultra-realistic AI product photography. Luxury streetwear editorial.
-
-Generate ONE final image generation prompt in English. No explanations, no headers, no lists — just one solid paragraph of max 1500 characters.
-
-Use exactly this scene: {scene}
-Use exactly this pose: {pose}
-Use exactly this camera angle: {angle}
-
-STRICT RULES:
-- Hoodie has NO pocket, no zipper, no extra stitching.
-- Do NOT change face, body shape or proportions.
-- Evening or night scene only.
-- Jeans: strictly black AND wide-leg, baggy silhouette, deep rich black denim.
-- Dark moody luxury atmosphere. Underexposed 1 stop. Cold blue/violet shadows. Warm amber highlights. Cinematic color grading. Subtle vignette.
-- Camera: Leica Q3 or Hasselblad. Lens 35mm or 85mm. Aperture f/1.4. RAW look.
-- Vertical composition, waist-up framing. Shallow depth of field.
-- Ultra-realistic skin texture, detailed cotton fibers, realistic fabric folds.
-
-{"If angle is FRONT: use front design from Reference Image 2. Logo and text must be fully readable, razor sharp, perfectly placed." if side == "СПЕРЕДИ" else "If angle is BACK: use back design from Reference Image 1. Back print must be fully visible and precisely rendered."}
-
-The logo and text are the most important element. Render every letter with 100% accuracy. Do not blur, distort, mirror or alter the text in any way.
-
-SEED: {seed}"""
+ANGLES_BACK = [
+    "Back view, camera facing the back",
+    "Three-quarters back left",
+    "Three-quarters back right",
+]
 
 
-def build_one_prompt():
+def build_prompt_and_ref():
     scene = random.choice(SCENES)
     pose = random.choice(POSES)
-    angle_text, side = random.choice(ANGLES)
+
+    use_front = random.random() > 0.4
+
+    if use_front:
+        angle = random.choice(ANGLES_FRONT)
+        ref = REF_FRONT
+        side_rule = (
+            "Camera angle is FRONTAL. Use the FRONT design from Reference Image 2. "
+            "The chest logo and text must be fully visible, razor sharp, perfectly readable."
+        )
+    else:
+        angle = random.choice(ANGLES_BACK)
+        ref = REF_BACK
+        side_rule = (
+            "Camera angle is FROM THE BACK. Use the BACK design from Reference Image 1. "
+            "The back print must be fully visible and precisely rendered."
+        )
+
     seed = random.randint(100000, 999999)
 
-    prompt_text = MEGA_PROMPT_TEMPLATE.format(
-        scene=scene,
-        pose=pose,
-        angle=angle_text,
-        side=side,
-        seed=seed
+    prompt = (
+        "You are a top fashion prompt engineer for ultra-realistic AI product photography. "
+        "Generate ONE final image generation prompt in English. "
+        "No explanations, no headers — just one solid paragraph.\n\n"
+        f"Scene: {scene}\n"
+        f"Pose: {pose}\n"
+        f"Camera angle: {angle}\n\n"
+        "STRICT RULES:\n"
+        "- Hoodie has NO pocket, no zipper, no extra stitching.\n"
+        "- Do NOT change face, body shape or proportions.\n"
+        "- Evening or night scene only.\n"
+        "- Jeans: strictly black AND wide-leg, baggy silhouette, deep rich black denim.\n"
+        "- Dark moody luxury atmosphere. Underexposed 1 stop. Cold blue or violet shadows. "
+        "Warm amber highlights. Cinematic color grading. Subtle vignette.\n"
+        "- Camera: Leica Q3 or Hasselblad. Lens 35mm or 85mm. Aperture f/1.4. RAW look.\n"
+        "- Vertical composition, waist-up framing. Shallow depth of field.\n"
+        "- Ultra-realistic skin texture, detailed cotton fibers, realistic fabric folds.\n\n"
+        f"{side_rule}\n\n"
+        "The logo and text are the most important element. "
+        "Render every letter with 100% accuracy. "
+        "Do not blur, distort, mirror or alter the text in any way.\n\n"
+        f"Variation seed: {seed}"
     )
 
-    ref = REF_FRONT if side == "СПЕРЕДИ" else REF_BACK
-
-    return prompt_text, ref
+    return prompt, ref
 
 
 def generate_final_prompt_from_groq(raw_prompt):
@@ -130,7 +141,7 @@ def _extract_url(obj):
 
 
 def generate_single_image():
-    raw_prompt, image_url = build_one_prompt()
+    raw_prompt, image_url = build_prompt_and_ref()
     final_prompt = generate_final_prompt_from_groq(raw_prompt)
 
     polza_key = os.getenv("POLZA_API_KEY")
@@ -173,7 +184,7 @@ def generate_single_image():
 
     img = requests.get(final_url, timeout=180)
     os.makedirs("output", exist_ok=True)
-    path = f"output/ai_{int(time.time() * 1000)}_{random.randint(1000, 9999)}.png"
+    path = f"output/ai_{int(time.time() * 1000)}_{random.randint(1000,9999)}.png"
 
     with open(path, "wb") as f:
         f.write(img.content)
@@ -185,7 +196,6 @@ async def generate_all_photos():
     paths = []
     errors = []
 
-    # Запускаем 5 генераций по очереди
     for i in range(5):
         try:
             path = await asyncio.to_thread(generate_single_image)
@@ -193,7 +203,6 @@ async def generate_all_photos():
         except Exception as e:
             errors.append(str(e))
             print(f"Photo {i+1} failed: {e}")
-
         await asyncio.sleep(1)
 
     if paths:
