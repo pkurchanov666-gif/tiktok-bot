@@ -9,7 +9,6 @@ from telegram.ext import (
 )
 
 from config import BOT_TOKEN
-from templates import get_next_template
 from slides import get_random_photos, create_slides
 from db import save_user_buffer, get_user_buffer
 from buffer_api import get_profiles, send_to_buffer
@@ -54,8 +53,10 @@ POV_PHRASES = [
     "POV: тот самый кент у которого всегда есть план на миллион =>",
 ]
 
-def get_random_ai_caption():
+
+def get_random_caption():
     return random.choice(POV_PHRASES)
+
 
 def build_ai_keyboard(count: int):
     regen_buttons = [
@@ -66,31 +67,29 @@ def build_ai_keyboard(count: int):
     keyboard.append([InlineKeyboardButton("📤 В Buffer", callback_data="send_ai_buffer")])
     return InlineKeyboardMarkup(keyboard)
 
-async def send_ai_gallery(context: ContextTypes.DEFAULT_TYPE, user_id: int, paths: list, caption: str):
-    if not paths:
-        raise Exception("Нет фото для отправки")
+
+async def send_gallery_with_text(
+    context: ContextTypes.DEFAULT_TYPE,
+    user_id: int,
+    paths: list,
+    text: str,
+    keyboard: InlineKeyboardMarkup,
+    done_text: str
+):
+    await context.bot.send_message(chat_id=user_id, text=text)
 
     if len(paths) == 1:
         with open(paths[0], "rb") as photo:
-            await context.bot.send_photo(
-                chat_id=user_id,
-                photo=photo,
-                caption=caption
-            )
+            await context.bot.send_photo(chat_id=user_id, photo=photo)
     else:
         media = []
         opened_files = []
 
         try:
-            for i, p in enumerate(paths):
+            for p in paths:
                 f = open(p, "rb")
                 opened_files.append(f)
-                media.append(
-                    InputMediaPhoto(
-                        media=f,
-                        caption=caption if i == 0 else ""
-                    )
-                )
+                media.append(InputMediaPhoto(media=f))
 
             await context.bot.send_media_group(chat_id=user_id, media=media)
         finally:
@@ -102,9 +101,10 @@ async def send_ai_gallery(context: ContextTypes.DEFAULT_TYPE, user_id: int, path
 
     await context.bot.send_message(
         chat_id=user_id,
-        text=f"✅ AI Фотосессия готова! Фото: {len(paths)}",
-        reply_markup=build_ai_keyboard(len(paths))
+        text=done_text,
+        reply_markup=keyboard
     )
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
@@ -125,6 +125,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
+
 async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     try:
@@ -135,46 +136,32 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = query.from_user.id
 
     try:
-        text = get_next_template()
-        context.user_data["current_text"] = text
+        caption = get_random_caption()
+        context.user_data["current_text"] = caption
 
-        await query.edit_message_text(f"📸 Собираю слайды...\nТекст: {text}")
+        await query.edit_message_text("📸 Собираю реальные фото...")
 
         photos = get_random_photos()
-        paths = await asyncio.to_thread(create_slides, text, user_id, photos)
+        paths = await asyncio.to_thread(create_slides, caption, user_id, photos)
+        context.user_data["last_slides"] = paths
 
-        media = []
-        opened_files = []
-
-        try:
-            for i, p in enumerate(paths):
-                f = open(p, "rb")
-                opened_files.append(f)
-                media.append(InputMediaPhoto(f, caption=text if i == 0 else ""))
-
-            await context.bot.send_media_group(chat_id=user_id, media=media)
-        finally:
-            for f in opened_files:
-                try:
-                    f.close()
-                except:
-                    pass
-
-        keyboard = [
+        keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("📤 Отправить в Buffer", callback_data="send_buffer")],
             [InlineKeyboardButton("➡️ Следующий пост", callback_data="generate")]
-        ]
+        ])
 
-        await context.bot.send_message(
-            chat_id=user_id,
-            text="Слайды готовы!",
-            reply_markup=InlineKeyboardMarkup(keyboard)
+        await send_gallery_with_text(
+            context=context,
+            user_id=user_id,
+            paths=paths,
+            text=caption,
+            keyboard=keyboard,
+            done_text="✅ Реальные фото готовы!"
         )
-
-        context.user_data["last_slides"] = paths
 
     except Exception as e:
         await context.bot.send_message(chat_id=user_id, text=f"❌ Ошибка: {e}")
+
 
 async def ai_photoshoot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -189,15 +176,23 @@ async def ai_photoshoot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("📸 Генерирую AI фотосессию (это может занять 1–3 минуты)...")
 
         paths = await generate_all_photos()
-        caption = get_random_ai_caption()
+        caption = get_random_caption()
 
         context.user_data["ai_photos"] = paths
         context.user_data["ai_caption"] = caption
 
-        await send_ai_gallery(context, user_id, paths, caption)
+        await send_gallery_with_text(
+            context=context,
+            user_id=user_id,
+            paths=paths,
+            text=caption,
+            keyboard=build_ai_keyboard(len(paths)),
+            done_text=f"✅ AI Фотосессия готова! Фото: {len(paths)}"
+        )
 
     except Exception as e:
         await context.bot.send_message(chat_id=user_id, text=f"❌ Ошибка AI: {e}")
+
 
 async def regen_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -225,15 +220,23 @@ async def regen_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         new_path = await regenerate_photo(index)
         paths[index] = new_path
 
-        caption = get_random_ai_caption()
+        caption = get_random_caption()
 
         context.user_data["ai_photos"] = paths
         context.user_data["ai_caption"] = caption
 
-        await send_ai_gallery(context, user_id, paths, caption)
+        await send_gallery_with_text(
+            context=context,
+            user_id=user_id,
+            paths=paths,
+            text=caption,
+            keyboard=build_ai_keyboard(len(paths)),
+            done_text=f"✅ Фото #{index+1} обновлено. Текущий набор: {len(paths)} фото"
+        )
 
     except Exception as e:
         await context.bot.send_message(chat_id=user_id, text=f"❌ Ошибка: {e}")
+
 
 async def send_buffer_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -255,7 +258,10 @@ async def send_buffer_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
         text = context.user_data.get("current_text", "Post")
 
     if not buffer_user or not paths:
-        await context.bot.send_message(chat_id=user_id, text="❌ Ошибка: привяжите Buffer или сначала создайте контент.")
+        await context.bot.send_message(
+            chat_id=user_id,
+            text="❌ Ошибка: привяжите Buffer или сначала создайте контент."
+        )
         return
 
     try:
@@ -271,6 +277,7 @@ async def send_buffer_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     except Exception as e:
         await context.bot.send_message(chat_id=user_id, text=f"❌ Ошибка Buffer: {e}")
 
+
 async def setup_buffer_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     try:
@@ -281,6 +288,7 @@ async def setup_buffer_start(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await query.edit_message_text("🔗 Отправь Buffer API Key:")
     return WAITING_BUFFER_KEY
 
+
 async def receive_buffer_key(update: Update, context: ContextTypes.DEFAULT_TYPE):
     api_key = update.message.text.strip()
     context.user_data["buffer_api_key"] = api_key
@@ -289,7 +297,10 @@ async def receive_buffer_key(update: Update, context: ContextTypes.DEFAULT_TYPE)
         profiles = await get_profiles(api_key)
 
         keyboard = [
-            [InlineKeyboardButton(f"{p['service']} - {p['formatted_username']}", callback_data=f"profile_{p['id']}")]
+            [InlineKeyboardButton(
+                f"{p['service']} - {p['formatted_username']}",
+                callback_data=f"profile_{p['id']}"
+            )]
             for p in profiles
         ]
 
@@ -303,6 +314,7 @@ async def receive_buffer_key(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await update.message.reply_text(f"❌ Ошибка: {e}")
         return ConversationHandler.END
 
+
 async def receive_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     try:
@@ -314,6 +326,7 @@ async def receive_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_user_buffer(query.from_user.id, context.user_data["buffer_api_key"], profile_id)
     await query.edit_message_text("✅ Buffer привязан!")
     return ConversationHandler.END
+
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
@@ -342,6 +355,7 @@ def main():
         url_path=BOT_TOKEN,
         webhook_url=f"https://tiktok-bot-production-4530.up.railway.app/{BOT_TOKEN}",
     )
+
 
 if __name__ == "__main__":
     main()
