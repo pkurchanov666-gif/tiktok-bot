@@ -65,46 +65,32 @@ def parse_prompt(raw_text):
 
 def generate_image_with_polza(prompt, image_url):
     polza_key = os.getenv("POLZA_API_KEY")
+
     headers = {
         "Authorization": f"Bearer {polza_key}",
         "Content-Type": "application/json"
     }
+
     payload = {
         "model": "black-forest-labs/flux.2-pro",
-        "messages": [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": prompt},
-                    {"type": "image_url", "image_url": {"url": image_url}}
-                ]
-            }
-        ]
+        "prompt": prompt,
+        "image": image_url,
+        "size": "1024x1024"
     }
 
     response = requests.post(
-        "https://api.polza.ai/v1/chat/completions",
+        "https://api.polza.ai/v1/images/generations",
         headers=headers,
         json=payload
     )
+
     res_json = response.json()
-    print("POLZA RESPONSE:", res_json)
+    print("POLZA RAW RESPONSE:", res_json)
 
     try:
-        content = res_json['choices'][0]['message']['content']
-        if isinstance(content, str) and content.startswith('http'):
-            final_url = content
-        elif isinstance(content, list):
-            final_url = content[0].get('url', content[0].get('text', ''))
-        else:
-            urls = re.findall(r'(https?://\S+)', str(content))
-            final_url = urls[0] if urls else None
-
-        if not final_url:
-            raise Exception(f"Не удалось найти URL в ответе: {res_json}")
-
-    except KeyError:
-        raise Exception(f"Polza вернула неожиданный ответ: {res_json}")
+        final_url = res_json["data"][0]["url"]
+    except Exception:
+        raise Exception(f"Polza unexpected response: {res_json}")
 
     img_data = requests.get(final_url).content
     os.makedirs("output", exist_ok=True)
