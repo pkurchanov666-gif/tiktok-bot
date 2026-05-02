@@ -486,10 +486,28 @@ def generate_single_image_from_spec(spec):
 
 
 async def generate_all_photos():
-    # ТЕСТ РЕЖИМ: генерим только 1 фото
-    spec = build_spec_for_slot("front_hood_grab")
-    path = await asyncio.to_thread(generate_single_image_from_spec, spec)
-    return [path], [spec]
+    specs = []
+
+    slot_plan = [
+        "front_hood_grab",
+        "front_cross_body",
+        "front_motion",
+        "back_hood_touch",
+        "back_motion",
+    ]
+    random.shuffle(slot_plan)
+
+    for slot_type in slot_plan:
+        spec = build_spec_for_slot(slot_type=slot_type)
+        specs.append(spec)
+
+    paths = []
+    for spec in specs:
+        path = await asyncio.to_thread(generate_single_image_from_spec, spec)
+        paths.append(path)
+        await asyncio.sleep(0.5)
+
+    return paths, specs
 
 
 async def regenerate_photo(index, current_specs):
