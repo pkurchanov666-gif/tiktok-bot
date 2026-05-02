@@ -63,9 +63,10 @@ def build_ai_keyboard(count: int):
         InlineKeyboardButton(f"🔄 {i + 1}", callback_data=f"regen_{i}")
         for i in range(count)
     ]
-    keyboard = [regen_buttons]
-    keyboard.append([InlineKeyboardButton("📤 В Buffer", callback_data="send_ai_buffer")])
-    return InlineKeyboardMarkup(keyboard)
+    return InlineKeyboardMarkup([
+        regen_buttons,
+        [InlineKeyboardButton("📤 В Buffer", callback_data="send_ai_buffer")]
+    ])
 
 
 async def send_gallery_with_text(
@@ -76,38 +77,121 @@ async def send_gallery_with_text(
     keyboard: InlineKeyboardMarkup,
     done_text: str
 ):
-    # 1. сначала текст отдельным сообщением
     await context.bot.send_message(chat_id=user_id, text=text)
 
-    # 2. потом фото
     if len(paths) == 1:
-        with open(paths[0], "rb") as photo:
-            await context.bot.send_photo(chat_id=user_id, photo=photo)
+        with open(paths[0], "rb") as f:
+            await context.bot.send_photo(chat_id=user_id, photo=f)
     else:
         media = []
-        opened_files = []
-
+        opened = []
         try:
             for path in paths:
                 f = open(path, "rb")
-                opened_files.append(f)
+                opened.append(f)
                 media.append(InputMediaPhoto(media=f))
-
             await context.bot.send_media_group(chat_id=user_id, media=media)
         finally:
-            for f in opened_files:
+            for f in opened:
                 try:
                     f.close()
                 except:
                     pass
 
-    # 3. потом сообщение с кнопками
     await context.bot.send_message(
         chat_id=user_id,
         text=done_text,
         reply_markup=keyboard
     )
 
+
+# ===== ФОНОВЫЕ ЗАДАЧИ =====
+
+async def bg_generate_all(context: ContextTypes.DEFAULT_TYPE, user_id: int):
+    try:
+        paths, specs = await generate_all_photos()
+        caption = get_random_caption()
+
+        # Сохраняем в user_data приложения
+        app_data = context.application.user_data
+        if user_id not in app_data:
+            app_data[user_id] = {}
+        app_data[user_id]["ai_photos"] = paths
+        app_data[user_id]["ai_specs"] = specs
+        app_data[user_id]["ai_caption"] = caption
+
+        await send_gallery_with_text(
+            context=context,
+            user_id=user_id,
+            paths=paths,
+            text=caption,
+            keyboard=build_ai_keyboard(len(paths)),
+            done_text=f"✅ AI Фотосессия готова! Фото: {len(paths)}"
+        )
+
+    except Exception as e:
+        print(f"BG generate error: {e}")
+        await context.bot.send_message(
+            chat_id=user_id,
+            text=f"❌ Ошибка генерации: {e}"
+        )
+
+
+async def bg_regenerate_one(
+    context: ContextTypes.DEFAULT_TYPE,
+    user_id: int,
+    index: int
+):
+    try:
+        app_data = context.application.user_data
+        user_storage = app_data.get(user_id, {})
+
+        paths = user_storage.get("ai_photos", [])
+        specs = user_storage.get("ai_specs", [])
+
+        if not paths or not specs:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text="❌ Нет данных. Сначала сгенерируй AI фотосессию."
+            )
+            return
+
+        if index < 0 or index >= len(paths):
+            await context.bot.send_message(
+                chat_id=user_id,
+                text="❌ Неверный индекс фото."
+            )
+            return
+
+        new_path, new_spec = await regenerate_photo(index, specs)
+
+        paths[index] = new_path
+        specs[index] = new_spec
+
+        caption = get_random_caption()
+
+        app_data[user_id]["ai_photos"] = paths
+        app_data[user_id]["ai_specs"] = specs
+        app_data[user_id]["ai_caption"] = caption
+
+        await send_gallery_with_text(
+            context=context,
+            user_id=user_id,
+            paths=paths,
+            text=caption,
+            keyboard=build_ai_keyboard(len(paths)),
+            done_text=f"✅ Фото #{index + 1} обновлено!"
+        )
+
+    except Exception as e:
+        print(f"BG regen error: {e}")
+        await context.bot.send_message(
+            chat_id=user_id,
+            text=f"❌ Ошибка перегенерации: {e}"
+        )
+
+
+# ===== ХЕНДЛЕРЫ =====
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
@@ -140,13 +224,17 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         caption = get_random_caption()
-        context.user_data["current_text"] = caption
+
+        app_data = context.application.user_data
+        if user_id not in app_data:
+            app_data[user_id] = {}
+        app_data[user_id]["current_text"] = caption
 
         await query.edit_message_text("📸 Собираю реальные фото...")
 
         photos = get_random_photos()
         paths = await asyncio.to_thread(create_slides, caption, user_id, photos)
-        context.user_data["last_slides"] = paths
+        app_data[user_id]["last_slides"] = paths
 
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("📤 Отправить в Buffer", callback_data="send_buffer")],
@@ -175,27 +263,15 @@ async def ai_photoshoot(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user_id = query.from_user.id
 
-    try:
-        await query.edit_message_text("📸 Генерирую AI фотосессию (это может занять 1–3 минуты)...")
+    # Сразу отвечаем — не ждём генерацию
+    await query.edit_message_text(
+        "⏳ Запустил генерацию 5 фото.\n"
+        "Займёт 1–3 минуты.\n"
+        "Пришлю когда будет готово 🔥"
+    )
 
-        paths, specs = await generate_all_photos()
-        caption = get_random_caption()
-
-        context.user_data["ai_photos"] = paths
-        context.user_data["ai_specs"] = specs
-        context.user_data["ai_caption"] = caption
-
-        await send_gallery_with_text(
-            context=context,
-            user_id=user_id,
-            paths=paths,
-            text=caption,
-            keyboard=build_ai_keyboard(len(paths)),
-            done_text=f"✅ AI Фотосессия готова! Фото: {len(paths)}"
-        )
-
-    except Exception as e:
-        await context.bot.send_message(chat_id=user_id, text=f"❌ Ошибка AI: {e}")
+    # Запускаем в фоне
+    asyncio.create_task(bg_generate_all(context, user_id))
 
 
 async def regen_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -206,51 +282,16 @@ async def regen_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         pass
 
     user_id = query.from_user.id
+    index = int(query.data.replace("regen_", ""))
 
-    try:
-        if "ai_photos" not in context.user_data or not context.user_data["ai_photos"]:
-            await context.bot.send_message(chat_id=user_id, text="❌ Сначала сгенерируй AI фотосессию")
-            return
+    # Сразу отвечаем
+    await context.bot.send_message(
+        chat_id=user_id,
+        text=f"🔄 Перегенерирую фото #{index + 1}...\nПришлю когда будет готово."
+    )
 
-        if "ai_specs" not in context.user_data or not context.user_data["ai_specs"]:
-            await context.bot.send_message(chat_id=user_id, text="❌ Нет данных для перегенерации")
-            return
-
-        index = int(query.data.replace("regen_", ""))
-        paths = context.user_data["ai_photos"]
-        specs = context.user_data["ai_specs"]
-
-        if index < 0 or index >= len(paths):
-            await context.bot.send_message(chat_id=user_id, text="❌ Неверный индекс фото")
-            return
-
-        await context.bot.send_message(
-            chat_id=user_id,
-            text=f"🔄 Перегенерирую фото #{index + 1} с новым промптом..."
-        )
-
-        new_path, new_spec = await regenerate_photo(index, specs)
-
-        paths[index] = new_path
-        specs[index] = new_spec
-
-        caption = get_random_caption()
-
-        context.user_data["ai_photos"] = paths
-        context.user_data["ai_specs"] = specs
-        context.user_data["ai_caption"] = caption
-
-        await send_gallery_with_text(
-            context=context,
-            user_id=user_id,
-            paths=paths,
-            text=caption,
-            keyboard=build_ai_keyboard(len(paths)),
-            done_text=f"✅ Фото #{index + 1} обновлено новым вариантом"
-        )
-
-    except Exception as e:
-        await context.bot.send_message(chat_id=user_id, text=f"❌ Ошибка: {e}")
+    # Запускаем в фоне
+    asyncio.create_task(bg_regenerate_one(context, user_id, index))
 
 
 async def send_buffer_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -263,19 +304,22 @@ async def send_buffer_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     user_id = query.from_user.id
     buffer_user = get_user_buffer(user_id)
 
+    app_data = context.application.user_data
+    user_storage = app_data.get(user_id, {})
+
     is_ai_mode = "ai_buffer" in query.data
-    key = "ai_photos" if is_ai_mode else "last_slides"
-    paths = context.user_data.get(key)
 
     if is_ai_mode:
-        text = context.user_data.get("ai_caption", "AI Photoshoot")
+        paths = user_storage.get("ai_photos")
+        text = user_storage.get("ai_caption", "AI Photoshoot")
     else:
-        text = context.user_data.get("current_text", "Post")
+        paths = user_storage.get("last_slides")
+        text = user_storage.get("current_text", "Post")
 
     if not buffer_user or not paths:
         await context.bot.send_message(
             chat_id=user_id,
-            text="❌ Ошибка: привяжите Buffer или сначала создайте контент."
+            text="❌ Привяжите Buffer или сначала создайте контент."
         )
         return
 
@@ -283,7 +327,6 @@ async def send_buffer_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
         await query.edit_message_text("☁️ Загружаю в Buffer...")
 
         urls = await upload_images_to_imgbb(paths)
-
         await send_to_buffer(
             buffer_user["buffer_api_key"],
             buffer_user["buffer_profile_id"],
