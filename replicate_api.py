@@ -29,229 +29,378 @@ SCENES = [
     "basketball court edge at dusk, ambient sky light",
 ]
 
-POSES_FRONT = [
-    "one hand gripping the hood string, other hand relaxed at side, slight chin tilt",
-    "both hands pulling hood up over head, looking straight ahead",
-    "one hand in pocket, other hand adjusting hood, casual mid-motion",
-    "arms crossed loosely, hood up, relaxed confident stance",
-    "walking forward, one hand touching the front of the hood lightly",
-    "leaning against wall, one hand raised touching hood edge, legs crossed at ankle",
-    "standing with one hand on chin, elbow resting on other arm, hood up",
-    "mid-step walk toward camera, one hand in pocket, hood slightly back",
-    "crouching slightly, elbows on knees, hood up, looking ahead",
-    "one thumb hooked in pocket, other hand gripping hood, slight forward lean",
-    "both thumbs in pockets, hood up, relaxed weight shift to one leg",
-    "turning slightly to the side, one hand pulling hood down a bit, casual",
-    "arms loosely at sides, head slightly bowed, hood casting shadow on face",
-    "one hand raised adjusting hood from behind, slight profile turn",
-    "leaning forward slightly, hood up, both hands resting on thighs",
+LIGHT_DETAILS = [
+    "natural evening ambient light with soft logical shadows",
+    "neutral warm street lighting with believable shadows",
+    "ordinary night lighting with realistic exposure",
+    "soft mixed practical lighting with natural contrast",
+    "subtle urban evening light without dramatic effects",
 ]
 
-POSES_BACK = [
-    "one hand gripping hood from behind, slight head tilt down",
-    "both hands pulling hood tighter, elbows raised slightly",
-    "one hand in pocket, other hand touching back of hood, walking away slowly",
-    "standing still, arms loosely at sides, hood up, head slightly turned to one side",
-    "leaning against wall with back, one arm raised touching hood from behind",
-    "walking away from camera, one hand swinging naturally, other in pocket",
-    "slight torso turn showing mostly back, one hand adjusting hood",
-    "standing with legs slightly apart, both hands at sides, hood fully up",
-    "crouching with back to camera, hood up, elbows on knees",
-    "one hand gripping the back of the hood, head bowed slightly forward",
-    "mid-step walk away, arms swinging naturally, hood up",
-    "leaning against a wall with shoulder, back facing camera, hood pulled up",
-    "arms crossed behind back, head slightly tilted, hood fully on",
-    "standing at angle, showing three-quarters back, one hand adjusting hood cuff",
-    "slow motion walk away, one hand reaching back touching hood, head down",
+BACKGROUND_DETAILS = [
+    "realistic background depth and natural perspective",
+    "ordinary city details softly blurred in the background",
+    "subtle reflections on pavement or glass",
+    "natural environmental shadows and realistic depth",
+    "normal lived-in urban atmosphere",
 ]
 
-ANGLES_FRONT = [
-    "direct frontal view, eye level",
-    "slight low angle frontal, camera below chest height",
-    "three-quarters left front, 45 degrees",
-    "three-quarters right front, 45 degrees",
-    "slight high angle frontal, camera slightly above",
-    "close frontal, waist-up tight framing",
-    "semi-profile left, still showing front of hoodie",
-    "semi-profile right, still showing front of hoodie",
+CROP_STYLES = [
+    "vertical waist-up composition",
+    "vertical mid-torso composition",
+    "vertical chest-to-head framing",
+    "vertical upper-body framing",
 ]
 
-ANGLES_BACK = [
-    "direct back view, camera eye level",
-    "three-quarters back left",
-    "three-quarters back right",
-    "low angle back view, camera slightly below",
-    "slight high angle back view",
-    "close back view, waist-up tight framing",
+CAMERA_FEELS = [
+    "shot on a quality mirrorless camera",
+    "shot on a modern high-end phone camera",
+    "captured like a real spontaneous street photo",
+    "shot casually but sharply with natural realism",
 ]
 
-HOOD_STATES_FRONT = ["hood up", "hood up", "hood down"]
+# ===== 5 ЖЁСТКО РАЗНЫХ ТИПОВ КАДРОВ =====
+# Это лучше, чем просто random.choice из похожих поз
+
+POSE_SLOT_TYPES = {
+    "front_hood_grab": {
+        "side": "front",
+        "angles": [
+            "direct frontal view, eye level",
+            "slight low angle frontal",
+            "three-quarters left front",
+            "three-quarters right front",
+        ],
+        "hood_states": ["hood up", "hood up", "hood down"],
+        "poses": [
+            {
+                "name": "left_hand_hood",
+                "text": "left hand gripping the edge of the hood near the temple, right arm relaxed close to torso, slight torso turn"
+            },
+            {
+                "name": "right_hand_hood",
+                "text": "right hand gripping the hood edge near the cheek, left arm relaxed across lower torso, calm confident stance"
+            },
+            {
+                "name": "both_hands_hood",
+                "text": "both hands holding the hood near the jawline, elbows slightly lifted, stable confident posture"
+            },
+            {
+                "name": "one_hand_string_pull",
+                "text": "one hand pulling the hood string lightly near the neck, other arm bent across the abdomen"
+            },
+        ],
+    },
+    "front_cross_body": {
+        "side": "front",
+        "angles": [
+            "direct frontal view, eye level",
+            "three-quarters left front",
+            "three-quarters right front",
+            "slight top-down frontal",
+        ],
+        "hood_states": ["hood up", "hood down", "hood up"],
+        "poses": [
+            {
+                "name": "crossed_arms",
+                "text": "arms crossed firmly on chest, shoulders relaxed, subtle forward lean"
+            },
+            {
+                "name": "one_arm_folded_other_hood",
+                "text": "one arm folded across torso, other hand touching hood near the neck, confident relaxed posture"
+            },
+            {
+                "name": "chin_touch_folded_arm",
+                "text": "one hand touching chin thoughtfully, the other arm folded across body, composed stance"
+            },
+            {
+                "name": "forearm_across_torso",
+                "text": "one forearm resting across the lower chest, other hand raised near hood seam, relaxed but assertive pose"
+            },
+        ],
+    },
+    "front_motion": {
+        "side": "front",
+        "angles": [
+            "direct frontal view, eye level",
+            "slight low angle frontal",
+            "three-quarters left front",
+            "three-quarters right front",
+        ],
+        "hood_states": ["hood up", "hood down", "hood up"],
+        "poses": [
+            {
+                "name": "walking_hood_touch",
+                "text": "mid-step walk toward camera, one hand touching the hood edge, the other arm moving naturally"
+            },
+            {
+                "name": "leaning_wall_hood",
+                "text": "leaning lightly against a wall, one hand touching the hood, the other arm bent across torso"
+            },
+            {
+                "name": "forward_lean_thigh",
+                "text": "slight forward lean, one hand resting on thigh, the other hand touching hood near the neck"
+            },
+            {
+                "name": "semi_profile_hood_pull",
+                "text": "semi-profile stance, one hand pulling hood slightly forward, other arm bent near waist"
+            },
+        ],
+    },
+    "back_hood_touch": {
+        "side": "back",
+        "angles": [
+            "direct back view",
+            "three-quarters back left",
+            "three-quarters back right",
+            "slight low angle back view",
+        ],
+        "hood_states": ["hood up"],
+        "poses": [
+            {
+                "name": "back_one_hand_hood",
+                "text": "back facing camera, one hand gripping the back of the hood, other arm relaxed close to torso"
+            },
+            {
+                "name": "back_both_hands_hood",
+                "text": "back facing camera, both hands pulling the hood tighter around the head, elbows slightly raised"
+            },
+            {
+                "name": "back_hood_adjust",
+                "text": "three-quarters back stance, one hand touching the hood seam near the neck, shoulders slightly angled"
+            },
+            {
+                "name": "back_head_down_hands_active",
+                "text": "standing with back to camera, head slightly lowered, both arms active near the hood"
+            },
+        ],
+    },
+    "back_motion": {
+        "side": "back",
+        "angles": [
+            "direct back view",
+            "three-quarters back left",
+            "three-quarters back right",
+            "slight top-down back view",
+        ],
+        "hood_states": ["hood up"],
+        "poses": [
+            {
+                "name": "back_walk_away",
+                "text": "walking away from camera naturally, one hand touching the hood from behind, the other arm swinging naturally"
+            },
+            {
+                "name": "back_slow_walk",
+                "text": "slow natural walk away from camera, arms moving naturally, hood fully up"
+            },
+            {
+                "name": "back_wall_lean",
+                "text": "leaning with shoulder against wall, back fully visible, one hand adjusting hood"
+            },
+            {
+                "name": "back_turn_motion",
+                "text": "moving away in a three-quarters back stance, one arm active near hood, body in natural motion"
+            },
+        ],
+    },
+}
+
+# В одном батче 5 фото — всегда эти 5 разных слотов
+BATCH_SLOT_PLAN = [
+    "front_hood_grab",
+    "front_cross_body",
+    "front_motion",
+    "back_hood_touch",
+    "back_motion",
+]
+
+RECENT_KEYS = []
 
 
-def generate_final_prompt_from_groq(instruction: str) -> str:
-    groq_key = os.getenv("GROQ_API_KEY")
-    if not groq_key:
-        raise Exception("GROQ_API_KEY missing")
+def crop_watermark(path: str, crop_percent: float = 0.07):
+    try:
+        img = Image.open(path)
+        w, h = img.size
+        new_h = int(h * (1 - crop_percent))
+        img = img.crop((0, 0, w, new_h))
+        img.save(path)
+    except Exception as e:
+        print(f"Crop failed: {e}")
 
-    resp = requests.post(
-        "https://api.groq.com/openai/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {groq_key}",
-            "Content-Type": "application/json"
-        },
-        json={
-            "model": "llama-3.3-70b-versatile",
-            "messages": [{"role": "user", "content": instruction}],
-            "temperature": 1.3,
-            "max_tokens": 1200
-        },
-        timeout=120
+
+def combo_key(spec):
+    return (
+        spec["slot_type"],
+        spec["scene"],
+        spec["pose_name"],
+        spec["angle"],
+        spec["hood"],
+        spec["light_detail"],
+        spec["camera_feel"],
+        spec["crop_style"],
     )
 
-    if resp.status_code >= 400:
-        raise Exception(f"Groq error: {resp.text[:1500]}")
 
-    return resp.json()["choices"][0]["message"]["content"].strip()
+def register_key(spec):
+    global RECENT_KEYS
+    RECENT_KEYS.append(combo_key(spec))
+    if len(RECENT_KEYS) > 50:
+        RECENT_KEYS = RECENT_KEYS[-50:]
 
 
-def build_batch_specs(count=5):
-    # Делаем 5 уникальных комбинаций
-    # 3 фронт, 2 бэк — но всегда разные сцены и позы
-    sides = ["front", "front", "front", "back", "back"]
-    random.shuffle(sides)
+def similarity_score(a, b):
+    fields = ["scene", "pose_name", "angle", "hood", "light_detail", "camera_feel", "crop_style"]
+    score = 0
+    for f in fields:
+        if a.get(f) == b.get(f):
+            score += 1
+    return score
 
-    # Берём разные сцены
-    scenes = random.sample(SCENES, count)
 
-    # Берём разные позы (без повторов)
-    front_poses = random.sample(POSES_FRONT, 5)
-    back_poses = random.sample(POSES_BACK, 5)
+def build_spec_for_slot(slot_type, avoid_spec=None, used_pose_names=None, used_scenes=None):
+    slot = POSE_SLOT_TYPES[slot_type]
+    side = slot["side"]
 
-    front_angles = random.sample(ANGLES_FRONT, 5)
-    back_angles = random.sample(ANGLES_BACK, 5)
+    for _ in range(80):
+        pose = random.choice(slot["poses"])
+        scene = random.choice(SCENES)
+        angle = random.choice(slot["angles"])
+        hood = random.choice(slot["hood_states"])
 
-    fi = 0
-    bi = 0
-    specs = []
+        if used_pose_names and pose["name"] in used_pose_names:
+            continue
+        if used_scenes and scene in used_scenes:
+            continue
 
-    for i in range(count):
-        side = sides[i]
-        scene = scenes[i]
-
-        if side == "front":
-            pose = front_poses[fi % len(front_poses)]
-            angle = front_angles[fi % len(front_angles)]
-            hood = random.choice(HOOD_STATES_FRONT)
-            ref = REF_FRONT
-            fi += 1
-        else:
-            pose = back_poses[bi % len(back_poses)]
-            angle = back_angles[bi % len(back_angles)]
-            hood = "hood always up"
-            ref = REF_BACK
-            bi += 1
-
-        specs.append({
+        spec = {
+            "slot_type": slot_type,
             "side": side,
             "scene": scene,
-            "pose": pose,
+            "pose_name": pose["name"],
+            "pose": pose["text"],
             "angle": angle,
             "hood": hood,
-            "ref": ref,
-            "seed": random.randint(100000, 999999)
-        })
+            "ref": REF_FRONT if side == "front" else REF_BACK,
+            "light_detail": random.choice(LIGHT_DETAILS),
+            "background_detail": random.choice(BACKGROUND_DETAILS),
+            "crop_style": random.choice(CROP_STYLES),
+            "camera_feel": random.choice(CAMERA_FEELS),
+            "seed": random.randint(100000, 999999),
+        }
+
+        if combo_key(spec) in RECENT_KEYS:
+            continue
+
+        if avoid_spec and similarity_score(spec, avoid_spec) >= 3:
+            continue
+
+        register_key(spec)
+        return spec
+
+    # fallback
+    pose = random.choice(slot["poses"])
+    spec = {
+        "slot_type": slot_type,
+        "side": side,
+        "scene": random.choice(SCENES),
+        "pose_name": pose["name"],
+        "pose": pose["text"],
+        "angle": random.choice(slot["angles"]),
+        "hood": random.choice(slot["hood_states"]),
+        "ref": REF_FRONT if side == "front" else REF_BACK,
+        "light_detail": random.choice(LIGHT_DETAILS),
+        "background_detail": random.choice(BACKGROUND_DETAILS),
+        "crop_style": random.choice(CROP_STYLES),
+        "camera_feel": random.choice(CAMERA_FEELS),
+        "seed": random.randint(100000, 999999),
+    }
+    register_key(spec)
+    return spec
+
+
+def build_batch_specs():
+    specs = []
+    used_pose_names = set()
+    used_scenes = set()
+
+    slot_plan = BATCH_SLOT_PLAN[:]
+    random.shuffle(slot_plan)
+
+    for slot_type in slot_plan:
+        spec = build_spec_for_slot(
+            slot_type=slot_type,
+            used_pose_names=used_pose_names,
+            used_scenes=used_scenes
+        )
+
+        tries = 0
+        while any(similarity_score(spec, old) >= 3 for old in specs) and tries < 30:
+            spec = build_spec_for_slot(
+                slot_type=slot_type,
+                used_pose_names=used_pose_names,
+                used_scenes=used_scenes
+            )
+            tries += 1
+
+        specs.append(spec)
+        used_pose_names.add(spec["pose_name"])
+        used_scenes.add(spec["scene"])
 
     return specs
 
 
-def build_single_spec(force_side=None):
-    side = force_side if force_side else random.choice(["front", "back"])
-
-    scene = random.choice(SCENES)
-
-    if side == "front":
-        pose = random.choice(POSES_FRONT)
-        angle = random.choice(ANGLES_FRONT)
-        hood = random.choice(HOOD_STATES_FRONT)
-        ref = REF_FRONT
-    else:
-        pose = random.choice(POSES_BACK)
-        angle = random.choice(ANGLES_BACK)
-        hood = "hood always up"
-        ref = REF_BACK
-
-    return {
-        "side": side,
-        "scene": scene,
-        "pose": pose,
-        "angle": angle,
-        "hood": hood,
-        "ref": ref,
-        "seed": random.randint(100000, 999999)
-    }
-
-
-def build_instruction(spec):
-    side = spec["side"]
-    scene = spec["scene"]
-    pose = spec["pose"]
-    angle = spec["angle"]
-    hood = spec["hood"]
-    seed = spec["seed"]
-
+def build_prompt(spec):
     common = (
-        "Write one final English prompt for an ultra-realistic image-to-image fashion photo. "
-        "Output ONLY the final prompt. No explanations, no lists, no headers. "
-        "Keep the same person, same face, same body shape, same hoodie from the reference image. "
-        "Do not redesign the hoodie. "
-        "Hoodie must have no pocket, no zipper, no extra elements. "
-        "Jeans must be strictly black wide-leg baggy jeans. "
-        "The result must look like a normal high-quality realistic photo. "
-        "Not a studio shoot, not editorial, not CGI, not fashion campaign. "
-        "No professional lighting rig. "
+        "Ultra-realistic image-to-image fashion photo of the same person from the reference image. "
+        "Keep the same face, same body shape, same proportions, same hoodie. "
+        "Do not redesign the clothing. "
+        "Hoodie has no pocket, no zipper, no extra stitching, no extra details. "
+        "Strictly black wide-leg jeans, loose fit, baggy silhouette, deep solid black denim. "
+        "Normal high-quality real photo, not a studio shoot, not editorial, not CGI, not overprocessed. "
+        "No professional lighting setup. "
         "No neon colors. "
-        "No cinematic teal-orange grading. "
-        "No HDR. "
-        "Use natural realistic evening or night ambient light. "
-        "Neutral colors, logical soft shadows, believable real-world exposure. "
-        "The image should feel like a very good quality real photo taken on a mirrorless camera by a friend. "
-        f"Scene: {scene}. "
-        f"Pose: {pose}. "
-        f"Hood state: {hood}. "
-        f"Camera angle: {angle}. "
-        "Vertical composition, waist-up framing. "
-        "Realistic proportions, natural fabric folds, realistic cotton texture. "
-        "Render the correct hoodie print with maximum precision. "
+        "No cinematic grading. "
+        "No glossy fashion-magazine lighting. "
+        f"{spec['camera_feel']}. "
+        f"{spec['light_detail']}. "
+        f"{spec['background_detail']}. "
+        f"{spec['crop_style']}. "
+        f"Scene: {spec['scene']}. "
+        f"Pose must be exactly: {spec['pose']}. "
+        f"Camera angle: {spec['angle']}. "
+        f"Hood state: {spec['hood']}. "
+        "Avoid generic straight standing pose. "
+        "Avoid both arms hanging straight down. "
+        "Natural fabric folds, realistic cotton texture, believable real-world shadows, neutral colors. "
     )
 
-    if side == "front":
+    if spec["side"] == "front":
         side_rules = (
             "This is a FRONT shot. "
-            "Use ONLY the front design from Reference Image 2. "
-            "Do not add any back print or back elements whatsoever. "
-            "The chest logo and text must be clear, sharp, readable, correctly placed. "
-            "If hood is up the face may be partially shadowed but the front print must still be visible. "
+            "Use only the front design from Reference Image 2. "
+            "Do not add any back print. "
+            "The chest logo and text must be clear, sharp, readable, and perfectly placed. "
+            "If hood is up, the front print must still remain visible. "
         )
     else:
         side_rules = (
             "This is a BACK shot. "
-            "Use ONLY the back design from Reference Image 1. "
-            "Do not add any front logo or chest print whatsoever. "
-            "The person must NOT look at the camera under any circumstances. "
-            "The hood must always be pulled up on the head. "
+            "Use only the back design from Reference Image 1. "
+            "Do not add any front logo. "
+            "The person must not look at the camera. "
             "No face visible. "
-            "Camera must clearly face the back of the hoodie. "
-            "The back print must be fully visible, accurate, readable, and correctly placed. "
+            "The hood must always be up on the head. "
+            "The camera must clearly face the back of the hoodie. "
+            "The back print must be fully visible and accurate. "
         )
 
-    final_line = (
-        f"Unique variation id: {seed}. "
-        "The print on the hoodie is the most critical detail. "
-        "Reproduce it exactly as in the reference. "
-        "Sharp, readable, correct placement, no distortion."
+    ending = (
+        "Branding on the hoodie is the most important detail. "
+        "Render the text and logo with maximum precision, correct spelling, correct placement, sharp readability. "
+        f"Unique variation seed {spec['seed']}."
     )
 
-    return common + side_rules + final_line
+    return common + side_rules + ending
 
 
 def _extract_url(obj):
@@ -276,17 +425,6 @@ def _extract_url(obj):
         return None
 
     return None
-
-
-def crop_watermark(path: str, crop_percent: float = 0.07):
-    try:
-        img = Image.open(path)
-        w, h = img.size
-        new_h = int(h * (1 - crop_percent))
-        cropped = img.crop((0, 0, w, new_h))
-        cropped.save(path)
-    except Exception as e:
-        print(f"Crop failed: {e}")
 
 
 def generate_image_with_polza(prompt, image_url):
@@ -321,7 +459,7 @@ def generate_image_with_polza(prompt, image_url):
     try:
         res = response.json()
     except Exception:
-        raise Exception(f"Polza non-JSON: {response.text[:1500]}")
+        raise Exception(f"Polza non-JSON response: {response.text[:1500]}")
 
     print("POLZA RESPONSE:", res)
 
@@ -330,11 +468,11 @@ def generate_image_with_polza(prompt, image_url):
     if not final_url:
         if response.status_code >= 400:
             raise Exception(f"HTTP {response.status_code}: {response.text[:1500]}")
-        raise Exception(f"No URL in Polza response: {str(res)[:1500]}")
+        raise Exception(f"Unexpected Polza response: {str(res)[:1500]}")
 
     img = requests.get(final_url, timeout=180)
     if img.status_code >= 400:
-        raise Exception(f"Failed to download: {img.status_code}")
+        raise Exception(f"Failed to download image: {img.status_code}")
 
     os.makedirs("output", exist_ok=True)
     path = f"output/ai_{int(time.time() * 1000)}_{random.randint(1000, 9999)}.png"
@@ -342,109 +480,41 @@ def generate_image_with_polza(prompt, image_url):
     with open(path, "wb") as f:
         f.write(img.content)
 
-    # Обрезаем нижние 7% где вотермарк
     crop_watermark(path, crop_percent=0.07)
-
-    return path
-    polza_key = os.getenv("POLZA_API_KEY")
-    if not polza_key:
-        raise Exception("POLZA_API_KEY missing")
-
-    response = requests.post(
-        "https://polza.ai/api/v1/media",
-        headers={
-            "Authorization": f"Bearer {polza_key}",
-            "Content-Type": "application/json"
-        },
-        json={
-            "model": "black-forest-labs/flux.2-pro",
-            "input": {
-                "prompt": prompt,
-                "aspect_ratio": "9:16",
-                "image_resolution": "1K",
-                "images": [
-                    {
-                        "type": "url",
-                        "data": image_url
-                    }
-                ]
-            },
-            "async": False
-        },
-        timeout=300
-    )
-
-    try:
-        res = response.json()
-    except Exception:
-        raise Exception(f"Polza non-JSON: {response.text[:1500]}")
-
-    print("POLZA RESPONSE:", res)
-
-    final_url = _extract_url(res)
-
-    if not final_url:
-        if response.status_code >= 400:
-            raise Exception(f"HTTP {response.status_code}: {response.text[:1500]}")
-        raise Exception(f"No URL in Polza response: {str(res)[:1500]}")
-
-    img = requests.get(final_url, timeout=180)
-    if img.status_code >= 400:
-        raise Exception(f"Failed to download: {img.status_code}")
-
-    os.makedirs("output", exist_ok=True)
-    path = f"output/ai_{int(time.time() * 1000)}_{random.randint(1000, 9999)}.png"
-
-    with open(path, "wb") as f:
-        f.write(img.content)
-
     return path
 
 
 def generate_single_image_from_spec(spec):
-    instruction = build_instruction(spec)
-    final_prompt = generate_final_prompt_from_groq(instruction)
-    return generate_image_with_polza(final_prompt, spec["ref"])
+    prompt = build_prompt(spec)
+    return generate_image_with_polza(prompt, spec["ref"])
 
 
 async def generate_all_photos():
-    results = []
-    errors = []
+    specs = build_batch_specs()
+    paths = []
 
-    specs = build_batch_specs(5)
-
-    for i, spec in enumerate(specs):
-        try:
-            path = await asyncio.to_thread(generate_single_image_from_spec, spec)
-            if path:
-                results.append(path)
-                print(f"Photo {i+1}/5 done ✅")
-        except Exception as e:
-            errors.append(str(e))
-            print(f"Photo {i+1}/5 failed: {e}")
-
+    for spec in specs:
+        path = await asyncio.to_thread(generate_single_image_from_spec, spec)
+        paths.append(path)
         await asyncio.sleep(0.5)
 
-    # Добиваем если не хватает
-    attempts = 0
-    while len(results) < 5 and attempts < 8:
-        attempts += 1
-        try:
-            spec = build_single_spec()
-            path = await asyncio.to_thread(generate_single_image_from_spec, spec)
-            if path:
-                results.append(path)
-        except Exception as e:
-            errors.append(str(e))
-        await asyncio.sleep(1)
-
-    if results:
-        return results[:5]
-
-    raise Exception(errors[0] if errors else "Все генерации упали")
+    return paths, specs
 
 
-async def regenerate_photo(index):
-    force_side = "front" if index in [0, 1, 2] else "back"
-    spec = build_single_spec(force_side=force_side)
-    return await asyncio.to_thread(generate_single_image_from_spec, spec)
+async def regenerate_photo(index, current_specs):
+    old_spec = current_specs[index]
+    slot_type = old_spec["slot_type"]
+
+    new_spec = build_spec_for_slot(slot_type=slot_type, avoid_spec=old_spec)
+
+    tries = 0
+    while (
+        new_spec["pose_name"] == old_spec["pose_name"] or
+        similarity_score(new_spec, old_spec) >= 3 or
+        any(i != index and similarity_score(new_spec, s) >= 3 for i, s in enumerate(current_specs))
+    ) and tries < 50:
+        new_spec = build_spec_for_slot(slot_type=slot_type, avoid_spec=old_spec)
+        tries += 1
+
+    path = await asyncio.to_thread(generate_single_image_from_spec, new_spec)
+    return path, new_spec
