@@ -20,6 +20,9 @@ logging.basicConfig(level=logging.WARNING)
 WAITING_BUFFER_KEY = 1
 WAITING_PROFILE = 2
 
+# Глобальное хранилище данных юзеров
+USER_DATA = {}
+
 POV_PHRASES = [
     "POV: аура того самого парня который просто делает свое дело =>",
     "POV: твой парень воздуха и это буквально его аура =>",
@@ -56,6 +59,12 @@ POV_PHRASES = [
 
 def get_random_caption():
     return random.choice(POV_PHRASES)
+
+
+def get_user_storage(user_id: int) -> dict:
+    if user_id not in USER_DATA:
+        USER_DATA[user_id] = {}
+    return USER_DATA[user_id]
 
 
 def build_ai_keyboard(count: int):
@@ -112,13 +121,10 @@ async def bg_generate_all(context: ContextTypes.DEFAULT_TYPE, user_id: int):
         paths, specs = await generate_all_photos()
         caption = get_random_caption()
 
-        # Сохраняем в user_data приложения
-        app_data = context.application.user_data
-        if user_id not in app_data:
-            app_data[user_id] = {}
-        app_data[user_id]["ai_photos"] = paths
-        app_data[user_id]["ai_specs"] = specs
-        app_data[user_id]["ai_caption"] = caption
+        storage = get_user_storage(user_id)
+        storage["ai_photos"] = paths
+        storage["ai_specs"] = specs
+        storage["ai_caption"] = caption
 
         await send_gallery_with_text(
             context=context,
@@ -143,11 +149,9 @@ async def bg_regenerate_one(
     index: int
 ):
     try:
-        app_data = context.application.user_data
-        user_storage = app_data.get(user_id, {})
-
-        paths = user_storage.get("ai_photos", [])
-        specs = user_storage.get("ai_specs", [])
+        storage = get_user_storage(user_id)
+        paths = storage.get("ai_photos", [])
+        specs = storage.get("ai_specs", [])
 
         if not paths or not specs:
             await context.bot.send_message(
@@ -170,9 +174,9 @@ async def bg_regenerate_one(
 
         caption = get_random_caption()
 
-        app_data[user_id]["ai_photos"] = paths
-        app_data[user_id]["ai_specs"] = specs
-        app_data[user_id]["ai_caption"] = caption
+        storage["ai_photos"] = paths
+        storage["ai_specs"] = specs
+        storage["ai_caption"] = caption
 
         await send_gallery_with_text(
             context=context,
@@ -224,17 +228,14 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         caption = get_random_caption()
-
-        app_data = context.application.user_data
-        if user_id not in app_data:
-            app_data[user_id] = {}
-        app_data[user_id]["current_text"] = caption
+        storage = get_user_storage(user_id)
+        storage["current_text"] = caption
 
         await query.edit_message_text("📸 Собираю реальные фото...")
 
         photos = get_random_photos()
         paths = await asyncio.to_thread(create_slides, caption, user_id, photos)
-        app_data[user_id]["last_slides"] = paths
+        storage["last_slides"] = paths
 
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("📤 Отправить в Buffer", callback_data="send_buffer")],
@@ -263,14 +264,12 @@ async def ai_photoshoot(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user_id = query.from_user.id
 
-    # Сразу отвечаем — не ждём генерацию
     await query.edit_message_text(
         "⏳ Запустил генерацию 5 фото.\n"
         "Займёт 1–3 минуты.\n"
         "Пришлю когда будет готово 🔥"
     )
 
-    # Запускаем в фоне
     asyncio.create_task(bg_generate_all(context, user_id))
 
 
@@ -284,13 +283,11 @@ async def regen_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = query.from_user.id
     index = int(query.data.replace("regen_", ""))
 
-    # Сразу отвечаем
     await context.bot.send_message(
         chat_id=user_id,
         text=f"🔄 Перегенерирую фото #{index + 1}...\nПришлю когда будет готово."
     )
 
-    # Запускаем в фоне
     asyncio.create_task(bg_regenerate_one(context, user_id, index))
 
 
@@ -303,18 +300,16 @@ async def send_buffer_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     user_id = query.from_user.id
     buffer_user = get_user_buffer(user_id)
-
-    app_data = context.application.user_data
-    user_storage = app_data.get(user_id, {})
+    storage = get_user_storage(user_id)
 
     is_ai_mode = "ai_buffer" in query.data
 
     if is_ai_mode:
-        paths = user_storage.get("ai_photos")
-        text = user_storage.get("ai_caption", "AI Photoshoot")
+        paths = storage.get("ai_photos")
+        text = storage.get("ai_caption", "AI Photoshoot")
     else:
-        paths = user_storage.get("last_slides")
-        text = user_storage.get("current_text", "Post")
+        paths = storage.get("last_slides")
+        text = storage.get("current_text", "Post")
 
     if not buffer_user or not paths:
         await context.bot.send_message(
