@@ -60,7 +60,7 @@ def get_random_caption():
 
 def build_ai_keyboard(count: int):
     regen_buttons = [
-        InlineKeyboardButton(f"🔄 {i+1}", callback_data=f"regen_{i}")
+        InlineKeyboardButton(f"🔄 {i + 1}", callback_data=f"regen_{i}")
         for i in range(count)
     ]
     keyboard = [regen_buttons]
@@ -76,8 +76,10 @@ async def send_gallery_with_text(
     keyboard: InlineKeyboardMarkup,
     done_text: str
 ):
+    # 1. сначала текст отдельным сообщением
     await context.bot.send_message(chat_id=user_id, text=text)
 
+    # 2. потом фото
     if len(paths) == 1:
         with open(paths[0], "rb") as photo:
             await context.bot.send_photo(chat_id=user_id, photo=photo)
@@ -86,8 +88,8 @@ async def send_gallery_with_text(
         opened_files = []
 
         try:
-            for p in paths:
-                f = open(p, "rb")
+            for path in paths:
+                f = open(path, "rb")
                 opened_files.append(f)
                 media.append(InputMediaPhoto(media=f))
 
@@ -99,6 +101,7 @@ async def send_gallery_with_text(
                 except:
                     pass
 
+    # 3. потом сообщение с кнопками
     await context.bot.send_message(
         chat_id=user_id,
         text=done_text,
@@ -175,10 +178,11 @@ async def ai_photoshoot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         await query.edit_message_text("📸 Генерирую AI фотосессию (это может занять 1–3 минуты)...")
 
-        paths = await generate_all_photos()
+        paths, specs = await generate_all_photos()
         caption = get_random_caption()
 
         context.user_data["ai_photos"] = paths
+        context.user_data["ai_specs"] = specs
         context.user_data["ai_caption"] = caption
 
         await send_gallery_with_text(
@@ -208,21 +212,32 @@ async def regen_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(chat_id=user_id, text="❌ Сначала сгенерируй AI фотосессию")
             return
 
+        if "ai_specs" not in context.user_data or not context.user_data["ai_specs"]:
+            await context.bot.send_message(chat_id=user_id, text="❌ Нет данных для перегенерации")
+            return
+
         index = int(query.data.replace("regen_", ""))
         paths = context.user_data["ai_photos"]
+        specs = context.user_data["ai_specs"]
 
         if index < 0 or index >= len(paths):
             await context.bot.send_message(chat_id=user_id, text="❌ Неверный индекс фото")
             return
 
-        await context.bot.send_message(chat_id=user_id, text=f"🔄 Перегенерирую фото #{index+1}...")
+        await context.bot.send_message(
+            chat_id=user_id,
+            text=f"🔄 Перегенерирую фото #{index + 1} с новым промптом..."
+        )
 
-        new_path = await regenerate_photo(index)
+        new_path, new_spec = await regenerate_photo(index, specs)
+
         paths[index] = new_path
+        specs[index] = new_spec
 
         caption = get_random_caption()
 
         context.user_data["ai_photos"] = paths
+        context.user_data["ai_specs"] = specs
         context.user_data["ai_caption"] = caption
 
         await send_gallery_with_text(
@@ -231,7 +246,7 @@ async def regen_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
             paths=paths,
             text=caption,
             keyboard=build_ai_keyboard(len(paths)),
-            done_text=f"✅ Фото #{index+1} обновлено. Текущий набор: {len(paths)} фото"
+            done_text=f"✅ Фото #{index + 1} обновлено новым вариантом"
         )
 
     except Exception as e:
@@ -266,14 +281,18 @@ async def send_buffer_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     try:
         await query.edit_message_text("☁️ Загружаю в Buffer...")
+
         urls = await upload_images_to_imgbb(paths)
+
         await send_to_buffer(
             buffer_user["buffer_api_key"],
             buffer_user["buffer_profile_id"],
             urls,
             text
         )
+
         await context.bot.send_message(chat_id=user_id, text="✅ Отправлено в Buffer!")
+
     except Exception as e:
         await context.bot.send_message(chat_id=user_id, text=f"❌ Ошибка Buffer: {e}")
 
