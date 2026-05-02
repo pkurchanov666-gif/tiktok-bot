@@ -202,14 +202,6 @@ POSE_SLOT_TYPES = {
     },
 }
 
-BATCH_SLOT_PLAN = [
-    "front_hood_grab",
-    "front_cross_body",
-    "front_motion",
-    "back_hood_touch",
-    "back_motion",
-]
-
 RECENT_KEYS = []
 
 
@@ -253,7 +245,7 @@ def similarity_score(a, b):
     return score
 
 
-def build_spec_for_slot(slot_type, avoid_spec=None, used_pose_names=None, used_scenes=None):
+def build_spec_for_slot(slot_type, avoid_spec=None):
     slot = POSE_SLOT_TYPES[slot_type]
     side = slot["side"]
 
@@ -262,11 +254,6 @@ def build_spec_for_slot(slot_type, avoid_spec=None, used_pose_names=None, used_s
         scene = random.choice(SCENES)
         angle = random.choice(slot["angles"])
         hood = random.choice(slot["hood_states"])
-
-        if used_pose_names and pose["name"] in used_pose_names:
-            continue
-        if used_scenes and scene in used_scenes:
-            continue
 
         spec = {
             "slot_type": slot_type,
@@ -311,37 +298,6 @@ def build_spec_for_slot(slot_type, avoid_spec=None, used_pose_names=None, used_s
     }
     register_key(spec)
     return spec
-
-
-def build_batch_specs():
-    specs = []
-    used_pose_names = set()
-    used_scenes = set()
-
-    slot_plan = BATCH_SLOT_PLAN[:]
-    random.shuffle(slot_plan)
-
-    for slot_type in slot_plan:
-        spec = build_spec_for_slot(
-            slot_type=slot_type,
-            used_pose_names=used_pose_names,
-            used_scenes=used_scenes
-        )
-
-        tries = 0
-        while any(similarity_score(spec, old) >= 3 for old in specs) and tries < 30:
-            spec = build_spec_for_slot(
-                slot_type=slot_type,
-                used_pose_names=used_pose_names,
-                used_scenes=used_scenes
-            )
-            tries += 1
-
-        specs.append(spec)
-        used_pose_names.add(spec["pose_name"])
-        used_scenes.add(spec["scene"])
-
-    return specs
 
 
 def build_prompt(spec):
@@ -446,11 +402,9 @@ def submit_job_to_polza(prompt, image_url):
 
     print("POLZA SUBMIT:", res)
 
-    # Достаём job_id
     job_id = res.get("id") or res.get("job_id") or res.get("taskId") or res.get("task_id")
 
     if not job_id:
-        # Может уже сразу вернул результат
         url = _extract_url(res)
         if url:
             return None, url
@@ -468,40 +422,38 @@ def poll_polza_job(job_id, max_wait=300, interval=5):
         time.sleep(interval)
         elapsed += interval
 
+        resp = requests.get(
+            f"https://polza.ai/api/v1/media/{job_id}",
+            headers=headers,
+            timeout=30
+        )
+
         try:
-            resp = requests.get(
-                f"https://polza.ai/api/v1/media/{job_id}",
-                headers=headers,
-                timeout=30
-            )
             res = resp.json()
-            print(f"POLZA POLL [{elapsed}s]:", res)
+        except Exception:
+            continue
 
-            status = (
-                res.get("status") or
-                res.get("state") or
-                res.get("jobStatus") or
-                ""
-            ).lower()
+        print(f"POLZA POLL [{elapsed}s]:", res)
 
-            if status in ["succeeded", "completed", "done", "success", "finished"]:
-                url = _extract_url(res)
-                if url:
-                    return url
-                raise Exception(f"Job done but no URL: {res}")
+        status = (
+            res.get("status") or
+            res.get("state") or
+            res.get("jobStatus") or
+            ""
+        ).lower()
 
-            if status in ["failed", "error", "cancelled"]:
-                raise Exception(f"Polza job failed: {res}")
-
-            # Если статус пустой но URL уже есть — значит готово
+        if status in ["succeeded", "completed", "done", "success", "finished"]:
             url = _extract_url(res)
             if url:
                 return url
+            raise Exception(f"Job completed but no URL: {res}")
 
-        except Exception as e:
-            if "job failed" in str(e).lower() or "polza job" in str(e).lower():
-                raise
-            print(f"Poll error: {e}")
+        if status in ["failed", "error", "cancelled"]:
+            raise Exception(f"Polza job failed: {res}")
+
+        url = _extract_url(res)
+        if url:
+            return url
 
     raise Exception(f"Polza job timeout after {max_wait}s")
 
@@ -534,15 +486,10 @@ def generate_single_image_from_spec(spec):
 
 
 async def generate_all_photos():
-    specs = build_batch_specs()
-    paths = []
-
-    for spec in specs:
-        path = await asyncio.to_thread(generate_single_image_from_spec, spec)
-        paths.append(path)
-        await asyncio.sleep(0.5)
-
-    return paths, specs
+    # ТЕСТ РЕЖИМ: генерим только 1 фото
+    spec = build_spec_for_slot("front_hood_grab")
+    path = await asyncio.to_thread(generate_single_image_from_spec, spec)
+    return [path], [spec]
 
 
 async def regenerate_photo(index, current_specs):
@@ -554,11 +501,7 @@ async def regenerate_photo(index, current_specs):
     tries = 0
     while (
         new_spec["pose_name"] == old_spec["pose_name"] or
-        similarity_score(new_spec, old_spec) >= 3 or
-        any(
-            i != index and similarity_score(new_spec, s) >= 3
-            for i, s in enumerate(current_specs)
-        )
+        similarity_score(new_spec, old_spec) >= 3
     ) and tries < 50:
         new_spec = build_spec_for_slot(slot_type=slot_type, avoid_spec=old_spec)
         tries += 1
