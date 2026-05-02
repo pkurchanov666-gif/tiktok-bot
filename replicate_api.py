@@ -59,9 +59,6 @@ CAMERA_FEELS = [
     "shot casually but sharply with natural realism",
 ]
 
-# ===== 5 ЖЁСТКО РАЗНЫХ ТИПОВ КАДРОВ =====
-# Это лучше, чем просто random.choice из похожих поз
-
 POSE_SLOT_TYPES = {
     "front_hood_grab": {
         "side": "front",
@@ -205,7 +202,6 @@ POSE_SLOT_TYPES = {
     },
 }
 
-# В одном батче 5 фото — всегда эти 5 разных слотов
 BATCH_SLOT_PLAN = [
     "front_hood_grab",
     "front_cross_body",
@@ -297,7 +293,6 @@ def build_spec_for_slot(slot_type, avoid_spec=None, used_pose_names=None, used_s
         register_key(spec)
         return spec
 
-    # fallback
     pose = random.choice(slot["poses"])
     spec = {
         "slot_type": slot_type,
@@ -357,10 +352,7 @@ def build_prompt(spec):
         "Hoodie has no pocket, no zipper, no extra stitching, no extra details. "
         "Strictly black wide-leg jeans, loose fit, baggy silhouette, deep solid black denim. "
         "Normal high-quality real photo, not a studio shoot, not editorial, not CGI, not overprocessed. "
-        "No professional lighting setup. "
-        "No neon colors. "
-        "No cinematic grading. "
-        "No glossy fashion-magazine lighting. "
+        "No professional lighting setup. No neon colors. No cinematic grading. "
         f"{spec['camera_feel']}. "
         f"{spec['light_detail']}. "
         f"{spec['background_detail']}. "
@@ -369,35 +361,26 @@ def build_prompt(spec):
         f"Pose must be exactly: {spec['pose']}. "
         f"Camera angle: {spec['angle']}. "
         f"Hood state: {spec['hood']}. "
-        "Avoid generic straight standing pose. "
-        "Avoid both arms hanging straight down. "
-        "Natural fabric folds, realistic cotton texture, believable real-world shadows, neutral colors. "
+        "Avoid generic straight standing. Avoid both arms hanging straight down. "
+        "Natural fabric folds, realistic cotton texture. "
     )
 
     if spec["side"] == "front":
         side_rules = (
-            "This is a FRONT shot. "
-            "Use only the front design from Reference Image 2. "
-            "Do not add any back print. "
-            "The chest logo and text must be clear, sharp, readable, and perfectly placed. "
-            "If hood is up, the front print must still remain visible. "
+            "FRONT shot. Use only front design from Reference Image 2. "
+            "No back print. Chest logo must be clear, sharp, readable. "
         )
     else:
         side_rules = (
-            "This is a BACK shot. "
-            "Use only the back design from Reference Image 1. "
-            "Do not add any front logo. "
-            "The person must not look at the camera. "
-            "No face visible. "
-            "The hood must always be up on the head. "
-            "The camera must clearly face the back of the hoodie. "
-            "The back print must be fully visible and accurate. "
+            "BACK shot. Use only back design from Reference Image 1. "
+            "No front logo. Person must NOT look at camera. No face visible. "
+            "Hood always up. Camera faces the back. Back print fully visible. "
         )
 
     ending = (
-        "Branding on the hoodie is the most important detail. "
-        "Render the text and logo with maximum precision, correct spelling, correct placement, sharp readability. "
-        f"Unique variation seed {spec['seed']}."
+        "Branding is the most important detail. "
+        "Render text and logo with maximum precision, sharp and readable. "
+        f"Seed: {spec['seed']}."
     )
 
     return common + side_rules + ending
@@ -408,14 +391,12 @@ def _extract_url(obj):
         if obj.startswith("http://") or obj.startswith("https://"):
             return obj
         return None
-
     if isinstance(obj, list):
         for item in obj:
             found = _extract_url(item)
             if found:
                 return found
         return None
-
     if isinstance(obj, dict):
         for key in ["output", "url", "image_url", "image", "src", "data", "result", "results"]:
             if key in obj:
@@ -423,11 +404,10 @@ def _extract_url(obj):
                 if found:
                     return found
         return None
-
     return None
 
 
-def generate_image_with_polza(prompt, image_url):
+def submit_job_to_polza(prompt, image_url):
     polza_key = os.getenv("POLZA_API_KEY")
     if not polza_key:
         raise Exception("POLZA_API_KEY missing")
@@ -451,24 +431,88 @@ def generate_image_with_polza(prompt, image_url):
                     }
                 ]
             },
-            "async": False
+            "async": True
         },
-        timeout=300
+        timeout=30
     )
+
+    if response.status_code >= 400:
+        raise Exception(f"Polza submit error HTTP {response.status_code}: {response.text[:1500]}")
 
     try:
         res = response.json()
     except Exception:
-        raise Exception(f"Polza non-JSON response: {response.text[:1500]}")
+        raise Exception(f"Polza non-JSON: {response.text[:500]}")
 
-    print("POLZA RESPONSE:", res)
+    print("POLZA SUBMIT:", res)
 
-    final_url = _extract_url(res)
+    # Достаём job_id
+    job_id = res.get("id") or res.get("job_id") or res.get("taskId") or res.get("task_id")
 
-    if not final_url:
-        if response.status_code >= 400:
-            raise Exception(f"HTTP {response.status_code}: {response.text[:1500]}")
-        raise Exception(f"Unexpected Polza response: {str(res)[:1500]}")
+    if not job_id:
+        # Может уже сразу вернул результат
+        url = _extract_url(res)
+        if url:
+            return None, url
+        raise Exception(f"No job_id in Polza response: {res}")
+
+    return job_id, None
+
+
+def poll_polza_job(job_id, max_wait=300, interval=5):
+    polza_key = os.getenv("POLZA_API_KEY")
+    headers = {"Authorization": f"Bearer {polza_key}"}
+
+    elapsed = 0
+    while elapsed < max_wait:
+        time.sleep(interval)
+        elapsed += interval
+
+        try:
+            resp = requests.get(
+                f"https://polza.ai/api/v1/media/{job_id}",
+                headers=headers,
+                timeout=30
+            )
+            res = resp.json()
+            print(f"POLZA POLL [{elapsed}s]:", res)
+
+            status = (
+                res.get("status") or
+                res.get("state") or
+                res.get("jobStatus") or
+                ""
+            ).lower()
+
+            if status in ["succeeded", "completed", "done", "success", "finished"]:
+                url = _extract_url(res)
+                if url:
+                    return url
+                raise Exception(f"Job done but no URL: {res}")
+
+            if status in ["failed", "error", "cancelled"]:
+                raise Exception(f"Polza job failed: {res}")
+
+            # Если статус пустой но URL уже есть — значит готово
+            url = _extract_url(res)
+            if url:
+                return url
+
+        except Exception as e:
+            if "job failed" in str(e).lower() or "polza job" in str(e).lower():
+                raise
+            print(f"Poll error: {e}")
+
+    raise Exception(f"Polza job timeout after {max_wait}s")
+
+
+def generate_image_with_polza(prompt, image_url):
+    job_id, immediate_url = submit_job_to_polza(prompt, image_url)
+
+    if immediate_url:
+        final_url = immediate_url
+    else:
+        final_url = poll_polza_job(job_id, max_wait=300, interval=5)
 
     img = requests.get(final_url, timeout=180)
     if img.status_code >= 400:
@@ -511,7 +555,10 @@ async def regenerate_photo(index, current_specs):
     while (
         new_spec["pose_name"] == old_spec["pose_name"] or
         similarity_score(new_spec, old_spec) >= 3 or
-        any(i != index and similarity_score(new_spec, s) >= 3 for i, s in enumerate(current_specs))
+        any(
+            i != index and similarity_score(new_spec, s) >= 3
+            for i, s in enumerate(current_specs)
+        )
     ) and tries < 50:
         new_spec = build_spec_for_slot(slot_type=slot_type, avoid_spec=old_spec)
         tries += 1
