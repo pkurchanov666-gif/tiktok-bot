@@ -8,162 +8,163 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Ссылки на референсы (твои фото)
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
-# Сцены с упором на материалы для четкости фона
+# --- ЭСТЕТИЧНЫЕ ЛОКАЦИИ (БЕЗ МЫЛА И ГРЯЗИ) ---
 SCENES = [
-    "modern city street, 304-grade steel storefronts, 10mm tempered glass windows, sharp pavement texture",
-    "underground parking, raw concrete pillars, industrial LED strips, sharp floor markings",
-    "luxury hotel driveway, dark granite slabs, architectural spotlighting, sharp reflections",
-    "contemporary office lobby, minimalist glass partitions, polished stone flooring",
-    "city alleyway at night, exposed brickwork, sharp metal fire escapes, realistic street lamps",
+    "premium minimalist city street, clean polished stone architecture, sharp glass storefronts",
+    "exclusive modern underground parking, pristine concrete, bright linear LED lighting",
+    "contemporary art gallery exterior, sharp geometric white walls, architectural precision",
+    "luxury hotel driveway at night, dark reflective granite surfaces, flawless modern geometry",
+    "high-tech business district, glass skyscrapers, sharp steel frames, clean urban aesthetic",
+    "modernist pedestrian plaza, pristine stone materials, sharp architectural lines",
+    "premium airport terminal entrance, massive glass panels, sharp 304-grade steel details"
 ]
 
+# --- 10 АКТИВНЫХ ПОЗ (FRONT) - БЕЗ РУК ПО ШВАМ ---
 FRONT_POSES = [
-    "standing close to camera, one hand resting on the hood edge near the temple, other arm relaxed, shoulders squared",
-    "direct frontal view, both hands raised lightly touching the hood sides, elbows pointed outward",
-    "facing camera squared, torso flat and front-facing, one hand adjusting the hood seam, other arm low",
-    "slightly asymmetrical stance, one hand near the jawline gripping the hood, other arm at the side",
+    "one hand actively gripping the edge of the hood near the temple, other hand tucked into the jeans pocket", # 1
+    "both hands raised adjusting the sides of the hood, elbows pointed out and lifted, shoulders squared", # 2
+    "one hand touching the neck area of the hoodie, the other forearm bent and resting across the waistband", # 3
+    "one hand pulling the hood slightly forward over the forehead, the other thumb hooked into the jeans pocket", # 4
+    "one hand adjusting the sleeve cuff, while the other hand is raised to grab the opposite side of the hood", # 5
+    "torso angled slightly, one hand resting on the back of the neck under the hood, other hand near the waist", # 6
+    "both hands high holding the sides of the hood, elbows wide, chest fully open and flat", # 7
+    "mid-stride toward camera, one hand touching the hood seam, the other arm bent naturally in mid-swing", # 8
+    "one shoulder dropped, one hand touching the jawline, the other hand deep inside the baggy jeans pocket", # 9
+    "both hands reaching up pulling the hood down towards the face, creating a strong asymmetrical silhouette" # 10
 ]
 
+# --- 10 АКТИВНЫХ ПОЗ (BACK) ---
 BACK_POSES = [
-    "standing with back to camera, one hand raised resting on the back of the head over the hood",
-    "walking away from camera into the depth of the scene, hood up, arms moving naturally, sharp silhouette",
-    "standing still facing away, both hands adjusting the hood sides, elbows visible and raised",
-    "back view, shoulders slightly angled, head neutral, looking towards the distant sharp architecture",
+    "back facing camera, one hand raised resting on the back of the head over the hood, distant perspective", # 1
+    "walking away into the depth of the scene, hood up, one hand touching the hood from behind", # 2
+    "standing still facing away, both hands raised adjusting the hood sides, elbows visible and pointed out", # 3
+    "back view, shoulders angled, one hand touching the hood seam near the neck, looking at sharp buildings", # 4
+    "leaning with one shoulder against a pristine concrete pillar, back fully visible, one hand adjusting the hood", # 5
+    "moving away in a three-quarters back stance, one hand adjusting the hood near the neck, body in motion", # 6
+    "back fully visible, head slightly tilted, both arms active adjusting the bottom hem of the hoodie", # 7
+    "slow walk away from camera, one arm active near the hood, capturing the expansive architectural scene", # 8
+    "standing with back to lens, arms slightly bent and out to the sides to show hoodie width, no hanging arms", # 9
+    "three-quarters back view, face hidden by hood, one hand raised touching the hood, looking over the shoulder" # 10
 ]
 
-USED_FRONT_POSES = set()
-USED_BACK_POSES = set()
+# Глобальные счетчики для перебора поз по порядку
+CURRENT_FRONT_INDEX = 0
+CURRENT_BACK_INDEX = 0
 
-def reset_used_poses():
-    global USED_FRONT_POSES, USED_BACK_POSES
-    USED_FRONT_POSES = set()
-    USED_BACK_POSES = set()
+# --- СИСТЕМНЫЙ ПРОМПТ ДЛЯ ИИ (GEMINI 1.5 FLASH / LLAMA 3.3) ---
+LLM_SYSTEM_PROMPT = """
+You are a technical architectural and fashion photographer. 
+Your task: Write a 300-word TECHNICAL prompt for a RAW 9:16 photo with TELESCOPIC CLARITY.
 
-def get_unused_front_pose():
-    global USED_FRONT_POSES
-    available = [i for i in range(len(FRONT_POSES)) if i not in USED_FRONT_POSES]
-    if not available:
-        USED_FRONT_POSES = set(); available = list(range(len(FRONT_POSES)))
-    idx = random.choice(available); USED_FRONT_POSES.add(idx)
-    return idx, FRONT_POSES[idx]
+STRICT VISUAL RULES (ZERO TOLERANCE FOR BLUR):
+1. INFINITE HIGH-FREQUENCY DETAIL: Every background element must be rendered with 8K architectural precision. Absolutely NO background blur, NO bokeh, NO soft edges. 
+2. BACKGROUND OBJECTS: Explicitly describe individual bricks, sharp mortar lines, window frames, glass gaskets, street signs, and concrete grain. Everything in the distance must be surgically sharp.
+3. CAMERA: Sony A7R V, 61MP, G-Master lens. Aperture f/22 for maximum depth of field. 
+4. CLOTHING: Black 500GSM hoodie. MANDATORY: NO kangaroo pocket, NO zippers, NO drawstrings. Torso is a seamless flat fabric plane. 
+5. POSE RULES: Strictly NO hanging arms along the body. Use active, asymmetrical hand placement.
+6. SCALE: Front shots = 0.5m distance (85% height). Back shots = 8m distance (30% height).
+7. NO AI SMOOTHING: High micro-contrast and raw photographic grain.
+"""
 
-def get_unused_back_pose():
-    global USED_BACK_POSES
-    available = [i for i in range(len(BACK_POSES)) if i not in USED_BACK_POSES]
-    if not available:
-        USED_BACK_POSES = set(); available = list(range(len(BACK_POSES)))
-    idx = random.choice(available); USED_BACK_POSES.add(idx)
-    return idx, BACK_POSES[idx]
-
-def crop_watermark(path: str, crop_percent: float = 0.07):
-    try:
-        img = Image.open(path)
-        w, h = img.size
-        img = img.crop((0, 0, w, int(h * (1 - crop_percent))))
-        img.save(path)
-    except: pass
-
-def build_spec(side):
+def get_next_spec(side):
+    global CURRENT_FRONT_INDEX, CURRENT_BACK_INDEX
+    scene = random.choice(SCENES)
     if side == "front":
-        idx, text = get_unused_front_pose()
-        return {"side": "front", "pose_idx": idx, "pose": text, "scene": random.choice(SCENES), "seed": random.randint(100000, 999999), "ref": REF_FRONT}
+        pose = FRONT_POSES[CURRENT_FRONT_INDEX % len(FRONT_POSES)]
+        CURRENT_FRONT_INDEX += 1
+        return {"side": "front", "pose": pose, "scene": scene, "ref": REF_FRONT}
     else:
-        idx, text = get_unused_back_pose()
-        return {"side": "back", "pose_idx": idx, "pose": text, "scene": random.choice(SCENES), "seed": random.randint(100000, 999999), "ref": REF_BACK}
+        pose = BACK_POSES[CURRENT_BACK_INDEX % len(BACK_POSES)]
+        CURRENT_BACK_INDEX += 1
+        return {"side": "back", "pose": pose, "scene": scene, "ref": REF_BACK}
 
-def build_prompt(spec):
-    # Каждое предложение имеет технический смысл. Никакой воды.
-    tech_base = (
-        "RAW 9:16 photograph, Sony A7R V, 35mm G-Master lens, f/11 aperture for infinite depth of field. "
-        "Strictly NO background blur, zero bokeh, surgical sharpness from foreground to background. "
-        "High-resolution 61MP sensor quality, realistic micro-contrast, visible skin pores. "
-        "No neon colors, no cinematic grading, neutral realistic exposure. "
-    )
-    
-    clothing = (
-        "Preserve exact identity and clothing from reference. "
-        "Solid black hoodie, 500GSM heavy-weight cotton weave texture. "
-        "MANDATORY: No kangaroo pocket, no front pouch, no zippers, no drawstrings. Seamless flat torso fabric. "
-        "Extra-wide baggy black denim jeans, coarse twill grain, heavy fabric drape. "
-    )
+async def expand_prompt_via_llm(spec):
+    groq_key = os.getenv("GROQ_API_KEY")
+    dist = "0.5 meters (Waist-up, 85% height)" if spec['side'] == 'front' else "8.0 meters (Environmental, 30% height)"
+    blueprint = f"{spec['side'].upper()} VIEW. Distance: {dist}. Scene: {spec['scene']}. Pose: {spec['pose']}."
 
-    if spec["side"] == "front":
-        framing = (
-            "FRONT shot. Distance: 0.5 meters. Framing: waist-up composition. "
-            "Subject occupies 85% of vertical frame height. Positioned to the left side. "
-            "Chest logo is the primary focus, high-density silk-screen print, raised ink texture, razor-sharp readable edges. "
-        )
-    else:
-        framing = (
-            "BACK shot. Distance: 5.0 meters (twice as far as front shots). Framing: environmental wide shot. "
-            "Subject occupies 35-40% of vertical frame height. Vast architectural perspective. "
-            "Hood is UP, face not visible. Focus on back silhouette and sharp background details. "
-        )
-
-    context = f"Scene: {spec['scene']}. Pose: {spec['pose']}. Seed: {spec['seed']}."
-    
-    return tech_base + clothing + framing + context
+    try:
+        response = await asyncio.to_thread(requests.post,
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
+            json={
+                "model": "llama-3.3-70b-versatile",
+                "messages": [
+                    {"role": "system", "content": LLM_SYSTEM_PROMPT},
+                    {"role": "user", "content": f"Write a 300-word technical deep-focus prompt for: {blueprint}. Describe background bricks and windows as surgically sharp."}
+                ],
+                "temperature": 0.5
+            }, timeout=30)
+        return response.json()["choices"][0]["message"]["content"].strip()
+    except Exception as e:
+        print(f"LLM Error: {e}")
+        return f"Hyper-realistic photo, deep focus, f/22, no bokeh, {spec['side']} view, {spec['scene']}"
 
 def submit_job_to_polza(prompt, image_url):
     polza_key = os.getenv("POLZA_API_KEY")
-    if not polza_key: raise Exception("POLZA_API_KEY missing")
-    response = requests.post(
-        "https://polza.ai/api/v1/media",
-        headers={"Authorization": f"Bearer {polza_key}", "Content-Type": "application/json"},
+    res = requests.post("https://polza.ai/api/v1/media", headers={"Authorization": f"Bearer {polza_key}"},
         json={
-            "model": "black-forest-labs/flux.2-pro",
-            "input": {"prompt": prompt, "aspect_ratio": "9:16", "image_resolution": "1K", "images": [{"type": "url", "data": image_url}]},
+            "model": "black-forest-labs/flux.2-pro", 
+            "input": {
+                "prompt": prompt, "aspect_ratio": "9:16", "image_resolution": "1K", 
+                "images": [{"type": "url", "data": image_url}]
+            }, 
             "async": True
-        },
-        timeout=30
-    )
-    res = response.json()
-    return (res.get("id") or res.get("task_id")), None
+        }, timeout=30)
+    return res.json().get("id")
 
-async def poll_polza_job_async(job_id):
+async def poll_polza_job(job_id):
     polza_key = os.getenv("POLZA_API_KEY")
-    headers = {"Authorization": f"Bearer {polza_key}"}
     for _ in range(60):
         await asyncio.sleep(5)
         try:
-            resp = await asyncio.to_thread(requests.get, f"https://polza.ai/api/v1/media/{job_id}", headers=headers, timeout=30)
-            res = resp.json()
-            if (res.get("status") or "").lower() in ["succeeded", "completed", "done"]:
-                output = res.get("output")
-                return output[0] if isinstance(output, list) else output
+            res = await asyncio.to_thread(requests.get, f"https://polza.ai/api/v1/media/{job_id}", headers={"Authorization": f"Bearer {polza_key}"})
+            data = res.json()
+            if data.get("status") in ["succeeded", "completed", "done"]:
+                return data.get("output")[0]
         except: continue
-    raise Exception("Poll Timeout")
+    return None
 
-async def generate_single_image_from_spec(spec):
-    prompt = build_prompt(spec)
-    job_id, _ = await asyncio.to_thread(submit_job_to_polza, prompt, spec["ref"])
-    final_url = await poll_polza_job_async(job_id)
-    img = await asyncio.to_thread(requests.get, final_url, timeout=180)
+async def generate_single_image(spec):
+    # 1. Получаем технический промпт на 300 слов
+    big_prompt = await expand_prompt_via_llm(spec)
+    
+    # 2. Генерируем изображение
+    job_id = await asyncio.to_thread(submit_job_to_polza, big_prompt, spec["ref"])
+    url = await poll_polza_job(job_id)
+    
+    # 3. Сохраняем и чистим ватермарку
+    img_data = await asyncio.to_thread(requests.get, url)
+    path = f"output/ai_{int(time.time()*1000)}.png"
     os.makedirs("output", exist_ok=True)
-    path = f"output/ai_{int(time.time() * 1000)}.png"
-    with open(path, "wb") as f: f.write(img.content)
-    crop_watermark(path)
+    with open(path, "wb") as f: f.write(img_data.content)
+    
+    with Image.open(path) as im:
+        w, h = im.size
+        im.crop((0, 0, w, int(h * 0.93))).save(path) # Удаление ватермарки Polza
+        
     return path
 
+# --- ГЛАВНАЯ ОЧЕРЕДЬ ГЕНЕРАЦИИ (СПИНА - ЛИЦО - СПИНА) ---
 async def generate_all_photos():
-    reset_used_poses()
-    # Твоя очередь: Спина, Лицо, Спина
+    # Ровно 3 фото в нужном порядке
     sides = ["back", "front", "back"]
-    specs = [build_spec(side) for side in sides]
+    specs = [get_next_spec(side) for side in sides]
     
-    # Генерация строго по очереди для контроля
     paths = []
+    # Генерируем по очереди
     for spec in specs:
-        path = await generate_single_image_from_spec(spec)
+        path = await generate_single_image(spec)
         paths.append(path)
         
     return paths, specs
 
 async def regenerate_photo(index, current_specs):
     side = current_specs[index]["side"]
-    new_spec = build_spec(side)
-    path = await generate_single_image_from_spec(new_spec)
+    new_spec = get_next_spec(side)
+    path = await generate_single_image(new_spec)
     return path, new_spec
