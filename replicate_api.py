@@ -218,14 +218,6 @@ async def generate_all_photos():
     for spec in specs:
         path = await generate_single(spec)
         paths.append(path)
-        async def generate_all_photos():
-    sides = ["back", "front", "back"]
-    specs = [get_next_spec(side) for side in sides]
-
-    paths = []
-    for spec in specs:
-        path = await generate_single(spec)
-        paths.append(path)
 
     return paths, specs
 
@@ -235,5 +227,3 @@ async def regenerate_photo(index, current_specs):
     new_spec = get_next_spec(side)
     path = await generate_single(new_spec)
     return path, new_spec
-
-    return paths, specs
