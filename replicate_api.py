@@ -27,6 +27,7 @@ BACK_SCENES = [
     "Вход в люксовый отель с гранитной отделкой"
 ]
 
+# ---------- ПОЗЫ ----------
 FRONT_POSES = [
     "правая рука держит край капюшона у виска, левая рука в кармане джинсов",
     "обе руки подняты и поправляют капюшон",
@@ -35,7 +36,7 @@ FRONT_POSES = [
 ]
 
 BACK_POSES = [
-    "правая рука лежит на затылке поверх капюшона, левая согнута у бедра",
+    "правая рука лежит на затылке поверх капюшона, левая рука согнута у бедра",
     "правая рука касается шва капюшона сзади, левая расслаблена",
     "обе руки подняты и поправляют капюшон",
     "правая рука на капюшоне, левая слегка отведена"
@@ -64,55 +65,60 @@ def get_next_spec(side):
         "side": side,
         "scene": scene,
         "pose": pose,
-        "seed": random.randint(1, 999999),
         "ref": ref
     }
 
 
-# ---------- ДЛИННЫЙ ПРОМПТ ----------
+# ---------- ПРОМПТ ----------
 def build_prompt(spec):
 
-    base = (
-        "Ultra-realistic RAW 9:16 photograph captured on a Sony A7R V with a 35mm lens set to f/11 aperture "
-        "to ensure deep focus across the entire frame. There is absolutely no background blur and no bokeh. "
-        "Every distant architectural surface must remain sharp and clearly defined. "
-        "Natural human skin tones must be preserved with visible pores and realistic softness. "
-        "No metallic reflections and no artificial gloss. "
-        "The hoodie is constructed from heavy 500GSM black cotton fabric with visible textile weave and natural folds. "
-        "STRICT RULE: NO kangaroo pocket, NO front pouch, NO zippers, NO drawstrings. "
-        "The entire hoodie torso must remain smooth and uninterrupted. "
-        "The jeans are wide black denim with relaxed loose fit, natural drape and visible stitching. "
-    )
-
     if spec["side"] == "front":
-        framing = (
-            "FRONT VIEW. Camera distance exactly 0.7 meters from the subject. "
+
+        return (
+            "Ultra-realistic RAW 9:16 portrait photograph. "
+            "Sony A7R V, 35mm lens, f/11 aperture. "
+            "Camera distance exactly 0.7 meters. "
             "Framing from head to knees. "
-            "The subject occupies approximately 80–85 percent of the vertical frame height. "
-            "The chest logo must be sharp, clean-edged and fully readable. "
+            "Subject occupies approximately 80–85 percent of vertical frame height. "
+            "No background blur. No bokeh. "
+
+            "Black heavy cotton hoodie (500GSM). "
+            "STRICT RULE: NO kangaroo pocket. NO front pouch. NO zippers. NO drawstrings. "
+            "Torso must remain completely smooth and flat. "
+
+            "Wide black denim jeans with relaxed loose fit and visible stitching. "
+
+            "Natural skin tones with visible pores. No metallic reflections. "
+
+            f"Scene: {spec['scene']}. "
+            f"Pose: {spec['pose']}."
         )
-    else:
-        framing = (
-            "BACK VIEW. Camera distance MUST be exactly 10 meters. "
+
+    else:  # BACK VIEW
+
+        return (
+            "Ultra-realistic RAW 9:16 environmental wide-angle photograph. "
+            "Sony A7R V, 35mm lens, f/11 aperture. "
+            "Camera distance MUST be exactly 10 meters. "
             "This distance is mandatory and must not be closer. "
             "Wide environmental composition. "
-            "The subject occupies approximately 25–30 percent of the vertical frame height. "
-            "The environment must visually dominate the frame. "
+            "Subject occupies approximately 25 percent of vertical frame height. "
+            "The architecture dominates the frame. "
+            "No portrait framing. No close-up. "
+
+            "Black heavy cotton hoodie (500GSM). "
+            "STRICT RULE: NO kangaroo pocket. NO front pouch. NO zippers. NO drawstrings. "
+
+            "Wide black denim jeans with relaxed loose fit. "
+
             "Hood fully up. Face not visible. "
+
+            f"Scene: {spec['scene']}. "
+            f"Pose: {spec['pose']}."
         )
 
-    scene_block = (
-        f"Scene: {spec['scene']}. "
-        "Architectural lines, pavement seams, building edges and glass reflections must remain crisp and detailed. "
-        "Lighting is neutral urban light around 4500K with balanced exposure and natural shadow falloff. "
-    )
 
-    pose_block = f"Pose: {spec['pose']}. "
-
-    return base + framing + scene_block + pose_block
-
-
-# ---------- POLZA ----------
+# ---------- POLZA API ----------
 def submit_job(prompt, image_url):
     polza_key = os.getenv("POLZA_API_KEY")
 
@@ -147,7 +153,7 @@ def submit_job(prompt, image_url):
 async def poll_job(job_id):
     polza_key = os.getenv("POLZA_API_KEY")
 
-    MAX_WAIT = 1200  # 20 минут
+    MAX_WAIT = 1200
     INTERVAL = 5
     waited = 0
 
@@ -170,34 +176,30 @@ async def poll_job(job_id):
             if isinstance(output, list) and output:
                 return output[0]
 
-    raise Exception("Generation timeout after 20 minutes")
+    raise Exception("Generation timeout")
 
 
 async def generate_single(spec):
-    try:
-        prompt = build_prompt(spec)
-        job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
-        url = await poll_job(job_id)
+    prompt = build_prompt(spec)
+    job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
+    url = await poll_job(job_id)
 
-        img = await asyncio.to_thread(requests.get, url)
+    img = await asyncio.to_thread(requests.get, url)
 
-        os.makedirs(SAVE_DIR, exist_ok=True)
-        path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}.png")
+    os.makedirs(SAVE_DIR, exist_ok=True)
+    path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}.png")
 
-        with open(path, "wb") as f:
-            f.write(img.content)
+    with open(path, "wb") as f:
+        f.write(img.content)
 
-        with Image.open(path) as im:
-            w, h = im.size
-            im.crop((0, 0, w, int(h * 0.93))).save(path)
+    with Image.open(path) as im:
+        w, h = im.size
+        im.crop((0, 0, w, int(h * 0.93))).save(path)
 
-        return path
-
-    except Exception as e:
-        print("Ошибка генерации одного фото:", e)
-        return None
+    return path
 
 
+# ---------- 3 ФОТО ----------
 async def generate_all_photos():
     sides = ["back", "front", "back"]
     specs = [get_next_spec(side) for side in sides]
@@ -205,8 +207,7 @@ async def generate_all_photos():
     paths = []
     for spec in specs:
         path = await generate_single(spec)
-        if path:
-            paths.append(path)
+        paths.append(path)
 
     return paths, specs
 
