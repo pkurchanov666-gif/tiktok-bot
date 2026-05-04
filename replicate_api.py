@@ -8,62 +8,29 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# --- КОНФИГУРАЦИЯ ---
 SAVE_DIR = "generations"
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
-# --- РЕЖИССУРА ПАЙТОНА (РАНДОМ) ---
 SCENES = ["premium minimalist city street", "exclusive underground parking", "luxury hotel driveway", "high-tech business district"]
-MATERIALS = ["polished basalt stone", "raw industrial concrete", "304-grade brushed steel", "tempered reflective glass", "weathered dark brick"]
-LIGHTING = ["3000K warm golden light", "6000K cool-white LED strips", "natural blue hour twilight", "4500K neutral street lamps"]
-DETAILS = ["sharp reflections on wet pavement", "visible rubber gaskets on glass frames", "sharp industrial ceiling pipes", "individual mortar lines between bricks"]
+MATERIALS = ["polished basalt stone", "raw industrial concrete", "304-grade brushed steel", "tempered reflective glass"]
+LIGHTING = ["3000K warm golden light", "6000K cool-white LED strips", "natural blue hour twilight"]
+DETAILS = ["sharp reflections on wet pavement", "visible rubber gaskets on glass frames", "sharp industrial ceiling pipes"]
 
-# --- ПОЗЫ (10 ШТУК) ---
-FRONT_POSES = [
-    "one hand actively gripping the edge of the hood near the temple, elbow out",
-    "both hands raised adjusting the sides of the hood, elbows pointed out and lifted",
-    "one hand touching the neck area of the hoodie, other forearm bent across waistband",
-    "one hand pulling the hood slightly forward over the forehead, thumb in jeans pocket",
-    "adjusting sleeve cuff, other hand raised to grab the hood seam",
-    "torso angled slightly, one hand on the back of the neck under hood",
-    "both hands high holding hood sides, elbows wide, chest open",
-    "mid-stride toward camera, one hand touching hood, other arm in swing",
-    "one shoulder dropped, hand touching jawline, other hand in pocket",
-    "both hands pulling hood down towards face, strong silhouette"
-]
-
-BACK_POSES = [
-    "back facing camera, one hand raised resting on the back of the head over the hood",
-    "walking away into the depth of the scene, hood up, hand touching hood from behind",
-    "standing still facing away, both hands raised adjusting hood sides, elbows out",
-    "back view, shoulders angled, hand touching hood seam near the neck",
-    "leaning with one shoulder against a pillar, back fully visible, hand on hood",
-    "moving away in a 3/4 back stance, one hand adjusting hood",
-    "back fully visible, head tilted, arms active adjusting hoodie hem",
-    "slow walk away from camera, one arm active near hood",
-    "standing with back to lens, arms slightly bent to show hoodie width",
-    "3/4 back view, face hidden by hood, hand touching hood seam"
-]
+FRONT_POSES = ["one hand actively gripping the edge of the hood near the temple, elbow out", "both hands raised adjusting the sides of the hood", "one hand touching the neck area of the hoodie"]
+BACK_POSES = ["back facing camera, one hand raised resting on the back of the head", "walking away into the depth of the scene", "standing still facing away, both hands raised"]
 
 CURRENT_FRONT_INDEX = 0
 CURRENT_BACK_INDEX = 0
 
-# --- СИСТЕМНЫЙ ПРОМПТ ДЛЯ GROQ ---
-LLM_SYSTEM_PROMPT = """
-You are a technical architectural and fashion photographer. 
-Write a 300-word TECHNICAL prompt for a RAW 9:16 photo with TELESCOPIC CLARITY.
-STRICT RULES: f/22 aperture, ZERO BOKEH, NO background blur. NO hoodie pocket, NO zippers.
-FRONT: 0.5m distance (85% height). BACK: 8.0m distance (30% height).
-Every letter of the logo must be sharp and readable. No AI smoothing.
-"""
+LLM_SYSTEM_PROMPT = """You are a technical photographer. Write a 300-word TECHNICAL prompt for a RAW 9:16 photo. f/22, ZERO BOKEH, NO background blur. NO pocket. Front: 0.5m. Back: 8m. Surgical sharpness."""
 
 def get_next_spec(side):
     global CURRENT_FRONT_INDEX, CURRENT_BACK_INDEX
     spec = {
         "side": side, "scene": random.choice(SCENES), "material": random.choice(MATERIALS),
         "lighting": random.choice(LIGHTING), "detail": random.choice(DETAILS),
-        "seed": random.randint(100000, 999999), "ref": REF_FRONT if side == "front" else REF_BACK
+        "seed": random.randint(1, 1000000), "ref": REF_FRONT if side == "front" else REF_BACK
     }
     if side == "front":
         spec["pose"] = FRONT_POSES[CURRENT_FRONT_INDEX % len(FRONT_POSES)]
@@ -75,37 +42,41 @@ def get_next_spec(side):
 
 async def expand_prompt_via_llm(spec):
     groq_key = os.getenv("GROQ_API_KEY")
-    dist = "0.5m (85% height)" if spec['side'] == 'front' else "8.0m (30% height)"
+    dist = "0.5m" if spec['side'] == 'front' else "8.0m"
     blueprint = f"VIEW: {spec['side'].upper()}. Dist: {dist}. Scene: {spec['scene']}. Pose: {spec['pose']}. Material: {spec['material']}."
     try:
         response = await asyncio.to_thread(requests.post, "https://api.groq.com/openai/v1/chat/completions",
             headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
             json={
                 "model": "llama-3.3-70b-versatile",
-                "messages": [{"role": "system", "content": LLM_SYSTEM_PROMPT}, {"role": "user", "content": f"300-word prompt: {blueprint}"}],
+                "messages": [{"role": "system", "content": LLM_SYSTEM_PROMPT}, {"role": "user", "content": f"Write prompt: {blueprint}"}],
                 "temperature": 0.5
             }, timeout=30)
         return response.json()["choices"][0]["message"]["content"].strip()
-    except: return f"RAW photo, f/22, no bokeh, {spec['side']} view, {spec['scene']}"
+    except: return f"Technical RAW photo, f/22, no bokeh, {spec['side']} view, {spec['scene']}, seed {spec['seed']}"
 
 def _extract_url(obj):
     if isinstance(obj, str) and obj.startswith("http"): return obj
     if isinstance(obj, list) and obj: return _extract_url(obj[0])
     if isinstance(obj, dict):
-        for k in ["output", "url", "image", "images"]:
+        for k in ["output", "url", "image", "images", "result"]:
             if k in obj:
                 res = _extract_url(obj[k])
                 if res: return res
+        for v in obj.values():
+            res = _extract_url(v)
+            if res: return res
     return None
 
-def submit_job_to_polza(prompt, image_url):
+def submit_job_to_polza(prompt, image_url, seed):
     polza_key = os.getenv("POLZA_API_KEY")
     payload = {
         "model": "black-forest-labs/flux.2-pro", 
         "input": {
-            "prompt": prompt, 
+            "prompt": f"{prompt} --unique {random.random()}", # Гарантируем уникальность текста
             "aspect_ratio": "9:16", 
-            "image_resolution": "1K", # ЭТА СТРОКА РЕШАЕТ ТВОЮ ОШИБКУ
+            "image_resolution": "1K",
+            "seed": seed, # Передаем сид
             "images": [{"type": "url", "data": image_url}]
         }, 
         "async": True
@@ -113,34 +84,43 @@ def submit_job_to_polza(prompt, image_url):
     res = requests.post("https://polza.ai/api/v1/media", 
                         headers={"Authorization": f"Bearer {polza_key}", "Content-Type": "application/json"},
                         json=payload, timeout=30)
+    print(f"   [API] Submit Status: {res.status_code}")
     data = res.json()
     job_id = data.get("id") or data.get("task_id")
-    if not job_id: raise Exception(f"Polza Error: {data}")
-    return job_id
+    if not job_id:
+        url = _extract_url(data)
+        if url: return url, True
+        raise Exception(f"Polza Error: {data}")
+    return job_id, False
 
 async def poll_polza_job(job_id):
     polza_key = os.getenv("POLZA_API_KEY")
-    for _ in range(60):
+    for attempt in range(60):
         await asyncio.sleep(5)
         try:
             res = await asyncio.to_thread(requests.get, f"https://polza.ai/api/v1/media/{job_id}", headers={"Authorization": f"Bearer {polza_key}"})
             data = res.json()
             status = (data.get("status") or data.get("state") or "").lower()
-            if status in ["succeeded", "completed", "done", "success"]:
-                url = _extract_url(data)
-                if url: return url
+            url = _extract_url(data)
+            if url and (status in ["succeeded", "completed", "done", "success"] or not status):
+                return url
             if status in ["failed", "error"]: raise Exception(f"Polza Failed: {data}")
-        except Exception as e:
-            if "Polza Failed" in str(e): raise e
-            continue
+        except Exception: continue
     return None
 
 async def generate_single_image(spec):
+    print(f"🔎 Начинаю: {spec['side']} (Seed: {spec['seed']})")
     big_prompt = await expand_prompt_via_llm(spec)
-    job_id = await asyncio.to_thread(submit_job_to_polza, big_prompt, spec["ref"])
-    url = await poll_polza_job(job_id)
-    if not url: raise Exception("No image URL received")
+    result, is_final = await asyncio.to_thread(submit_job_to_polza, big_prompt, spec["ref"], spec["seed"])
     
+    if is_final:
+        url = result
+    else:
+        print(f"   📡 Задание принято, ID: {result}. Ждем...")
+        url = await poll_polza_job(result)
+        
+    if not url: raise Exception("URL не найден")
+
     img_data = await asyncio.to_thread(requests.get, url, timeout=180)
     os.makedirs(SAVE_DIR, exist_ok=True)
     path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}.png")
@@ -151,12 +131,21 @@ async def generate_single_image(spec):
     return path
 
 async def generate_all_photos():
+    print("🚀 СТАРТ СЕССИИ (3 ФОТО)")
     sides = ["back", "front", "back"]
     specs = [get_next_spec(side) for side in sides]
     paths = []
-    for spec in specs:
-        path = await generate_single_image(spec)
-        paths.append(path)
+    
+    for i, spec in enumerate(specs):
+        try:
+            print(f"📸 Обработка {i+1}/3...")
+            path = await generate_single_image(spec)
+            paths.append(path)
+            print(f"✅ Готово: {path}")
+            await asyncio.sleep(1) # Короткая пауза для стабильности
+        except Exception as e:
+            print(f"❌ Ошибка на {i+1} фото: {e}")
+            
     return paths, specs
 
 async def regenerate_photo(index, current_specs):
