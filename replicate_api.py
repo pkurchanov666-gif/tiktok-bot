@@ -12,144 +12,177 @@ SAVE_DIR = "generations"
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
-SCENES = ["premium minimalist city street", "exclusive underground parking", "luxury hotel driveway", "high-tech business district"]
-MATERIALS = ["polished basalt stone", "raw industrial concrete", "304-grade brushed steel", "tempered reflective glass"]
-LIGHTING = ["3000K warm golden light", "6000K cool-white LED strips", "natural blue hour twilight"]
-DETAILS = ["sharp reflections on wet pavement", "visible rubber gaskets on glass frames", "sharp industrial ceiling pipes"]
+# ---------- СЦЕНЫ (ЧИСТЫЕ, БЕЗ МЕТАЛЛА) ----------
+SCENES = [
+    "clean modern city street with stone pavement",
+    "minimalist underground parking with smooth concrete",
+    "luxury hotel entrance with neutral architectural lighting",
+    "modern business district plaza with glass buildings",
+    "premium pedestrian zone with clean stone tiles"
+]
 
-FRONT_POSES = ["one hand actively gripping the edge of the hood near the temple, elbow out", "both hands raised adjusting the sides of the hood", "one hand touching the neck area of the hoodie"]
-BACK_POSES = ["back facing camera, one hand raised resting on the back of the head", "walking away into the depth of the scene", "standing still facing away, both hands raised"]
+FRONT_POSES = [
+    "one hand gripping the hood near the temple, other hand inside jeans pocket",
+    "both hands adjusting hood edges near jawline",
+    "one hand touching neck area, other hand hooked into pocket",
+    "one hand pulling hood slightly forward, other arm relaxed but bent"
+]
+
+BACK_POSES = [
+    "back facing camera, one hand resting on back of hood",
+    "walking away from camera with hood up",
+    "standing still facing away, one hand adjusting hood seam",
+    "three-quarters back stance, head slightly lowered"
+]
 
 CURRENT_FRONT_INDEX = 0
 CURRENT_BACK_INDEX = 0
 
-LLM_SYSTEM_PROMPT = """You are a technical photographer. Write a 300-word TECHNICAL prompt for a RAW 9:16 photo. f/22, ZERO BOKEH, NO background blur. NO pocket. Front: 0.5m. Back: 8m. Surgical sharpness."""
 
+# ---------- PYTHON РЕЖИССУРА ----------
 def get_next_spec(side):
     global CURRENT_FRONT_INDEX, CURRENT_BACK_INDEX
-    spec = {
-        "side": side, "scene": random.choice(SCENES), "material": random.choice(MATERIALS),
-        "lighting": random.choice(LIGHTING), "detail": random.choice(DETAILS),
-        "seed": random.randint(1, 1000000), "ref": REF_FRONT if side == "front" else REF_BACK
-    }
+
+    scene = random.choice(SCENES)
+
     if side == "front":
-        spec["pose"] = FRONT_POSES[CURRENT_FRONT_INDEX % len(FRONT_POSES)]
+        pose = FRONT_POSES[CURRENT_FRONT_INDEX % len(FRONT_POSES)]
         CURRENT_FRONT_INDEX += 1
+        ref = REF_FRONT
     else:
-        spec["pose"] = BACK_POSES[CURRENT_BACK_INDEX % len(BACK_POSES)]
+        pose = BACK_POSES[CURRENT_BACK_INDEX % len(BACK_POSES)]
         CURRENT_BACK_INDEX += 1
-    return spec
+        ref = REF_BACK
 
-async def expand_prompt_via_llm(spec):
-    groq_key = os.getenv("GROQ_API_KEY")
-    dist = "0.5m" if spec['side'] == 'front' else "8.0m"
-    blueprint = f"VIEW: {spec['side'].upper()}. Dist: {dist}. Scene: {spec['scene']}. Pose: {spec['pose']}. Material: {spec['material']}."
-    try:
-        response = await asyncio.to_thread(requests.post, "https://api.groq.com/openai/v1/chat/completions",
-            headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
-            json={
-                "model": "llama-3.3-70b-versatile",
-                "messages": [{"role": "system", "content": LLM_SYSTEM_PROMPT}, {"role": "user", "content": f"Write prompt: {blueprint}"}],
-                "temperature": 0.5
-            }, timeout=30)
-        return response.json()["choices"][0]["message"]["content"].strip()
-    except: return f"Technical RAW photo, f/22, no bokeh, {spec['side']} view, {spec['scene']}, seed {spec['seed']}"
-
-def _extract_url(obj):
-    if isinstance(obj, str) and obj.startswith("http"): return obj
-    if isinstance(obj, list) and obj: return _extract_url(obj[0])
-    if isinstance(obj, dict):
-        for k in ["output", "url", "image", "images", "result"]:
-            if k in obj:
-                res = _extract_url(obj[k])
-                if res: return res
-        for v in obj.values():
-            res = _extract_url(v)
-            if res: return res
-    return None
-
-def submit_job_to_polza(prompt, image_url, seed):
-    polza_key = os.getenv("POLZA_API_KEY")
-    payload = {
-        "model": "black-forest-labs/flux.2-pro", 
-        "input": {
-            "prompt": f"{prompt} --unique {random.random()}", # Гарантируем уникальность текста
-            "aspect_ratio": "9:16", 
-            "image_resolution": "1K",
-            "seed": seed, # Передаем сид
-            "images": [{"type": "url", "data": image_url}]
-        }, 
-        "async": True
+    return {
+        "side": side,
+        "pose": pose,
+        "scene": scene,
+        "seed": random.randint(1, 999999),
+        "ref": ref
     }
-    res = requests.post("https://polza.ai/api/v1/media", 
-                        headers={"Authorization": f"Bearer {polza_key}", "Content-Type": "application/json"},
-                        json=payload, timeout=30)
-    print(f"   [API] Submit Status: {res.status_code}")
-    data = res.json()
+
+
+# ---------- ЧИСТЫЙ ПРОМПТ БЕЗ МЕТАЛЛА ----------
+def build_prompt(spec):
+    base = (
+        "Ultra-realistic RAW 9:16 photograph. "
+        "Sony A7R V, 35mm lens, f/11 aperture for deep focus. "
+        "No background blur. No bokeh. "
+        "Natural human skin tones. Visible pores. No metallic shine. "
+        "No plastic effect. "
+        "Black heavy cotton hoodie (500GSM). "
+        "STRICT RULE: NO kangaroo pocket. NO front pouch. NO zippers. NO drawstrings. "
+        "Torso must be seamless flat fabric surface. "
+        "Wide-leg black denim jeans with natural fabric drape and visible stitching. "
+    )
+
+    if spec["side"] == "front":
+        framing = (
+            "FRONT VIEW. "
+            "Camera distance exactly 0.7 meters. "
+            "Framing slightly below the waist. "
+            "Upper jeans and waistband visible. "
+            "Subject occupies about 80% of vertical frame height. "
+            "Chest logo must be sharp, readable, clean-edged. "
+        )
+    else:
+        framing = (
+            "BACK VIEW. "
+            "Camera distance approximately 8 meters. "
+            "Wide environmental composition. "
+            "Subject occupies about 30% of vertical frame height. "
+            "Hood up. Face not visible. "
+        )
+
+    context = f"Scene: {spec['scene']}. Pose: {spec['pose']}. Seed: {spec['seed']}."
+
+    return base + framing + context
+
+
+# ---------- POLZA ----------
+def submit_job(prompt, image_url):
+    polza_key = os.getenv("POLZA_API_KEY")
+
+    response = requests.post(
+        "https://polza.ai/api/v1/media",
+        headers={
+            "Authorization": f"Bearer {polza_key}",
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": "black-forest-labs/flux.2-pro",
+            "input": {
+                "prompt": prompt,
+                "aspect_ratio": "9:16",
+                "image_resolution": "1K",
+                "images": [{"type": "url", "data": image_url}]
+            },
+            "async": True
+        },
+        timeout=30
+    )
+
+    data = response.json()
     job_id = data.get("id") or data.get("task_id")
     if not job_id:
-        url = _extract_url(data)
-        if url: return url, True
-        raise Exception(f"Polza Error: {data}")
-    return job_id, False
+        raise Exception(f"Polza error: {data}")
+    return job_id
 
-async def poll_polza_job(job_id):
+
+async def poll_job(job_id):
     polza_key = os.getenv("POLZA_API_KEY")
-    for attempt in range(60):
+
+    for _ in range(60):
         await asyncio.sleep(5)
+
         try:
-            res = await asyncio.to_thread(requests.get, f"https://polza.ai/api/v1/media/{job_id}", headers={"Authorization": f"Bearer {polza_key}"})
+            res = await asyncio.to_thread(
+                requests.get,
+                f"https://polza.ai/api/v1/media/{job_id}",
+                headers={"Authorization": f"Bearer {polza_key}"},
+                timeout=30
+            )
             data = res.json()
-            status = (data.get("status") or data.get("state") or "").lower()
-            url = _extract_url(data)
-            if url and (status in ["succeeded", "completed", "done", "success"] or not status):
-                return url
-            if status in ["failed", "error"]: raise Exception(f"Polza Failed: {data}")
-        except Exception: continue
-    return None
+            status = (data.get("status") or "").lower()
 
-async def generate_single_image(spec):
-    print(f"🔎 Начинаю: {spec['side']} (Seed: {spec['seed']})")
-    big_prompt = await expand_prompt_via_llm(spec)
-    result, is_final = await asyncio.to_thread(submit_job_to_polza, big_prompt, spec["ref"], spec["seed"])
-    
-    if is_final:
-        url = result
-    else:
-        print(f"   📡 Задание принято, ID: {result}. Ждем...")
-        url = await poll_polza_job(result)
-        
-    if not url: raise Exception("URL не найден")
+            if status in ["succeeded", "completed", "done"]:
+                output = data.get("output")
+                if isinstance(output, list) and output:
+                    return output[0]
+        except:
+            continue
 
-    img_data = await asyncio.to_thread(requests.get, url, timeout=180)
+    raise Exception("Generation timeout")
+
+
+async def generate_single(spec):
+    prompt = build_prompt(spec)
+    job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
+    url = await poll_job(job_id)
+
+    img = await asyncio.to_thread(requests.get, url)
     os.makedirs(SAVE_DIR, exist_ok=True)
+
     path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}.png")
-    with open(path, "wb") as f: f.write(img_data.content)
+    with open(path, "wb") as f:
+        f.write(img.content)
+
     with Image.open(path) as im:
         w, h = im.size
         im.crop((0, 0, w, int(h * 0.93))).save(path)
+
     return path
 
-async def generate_all_photos():
-    print("🚀 СТАРТ СЕССИИ (3 ФОТО)")
-    sides = ["back", "front", "back"]
-    specs = [get_next_spec(side) for side in sides]
-    paths = []
-    
-    for i, spec in enumerate(specs):
-        try:
-            print(f"📸 Обработка {i+1}/3...")
-            path = await generate_single_image(spec)
-            paths.append(path)
-            print(f"✅ Готово: {path}")
-            await asyncio.sleep(1) # Короткая пауза для стабильности
-        except Exception as e:
-            print(f"❌ Ошибка на {i+1} фото: {e}")
-            
-    return paths, specs
 
-async def regenerate_photo(index, current_specs):
-    side = current_specs[index]["side"]
-    new_spec = get_next_spec(side)
-    path = await generate_single_image(new_spec)
-    return path, new_spec
+# ---------- ГЕНЕРАЦИЯ 3 ФОТО ----------
+async def generate_all_photos():
+    sides = ["back", "front", "back"]
+    specs = [get_next_spec(s) for s in sides]
+
+    paths = []
+    for spec in specs:
+        path = await generate_single(spec)
+        paths.append(path)
+
+    return paths, specs
