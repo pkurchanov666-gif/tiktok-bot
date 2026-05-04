@@ -12,12 +12,14 @@ SAVE_DIR = "generations"
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
+# ---------- FRONT СЦЕНЫ ----------
 FRONT_SCENES = [
     "Интерьер премиального автомобиля с кожаным салоном",
     "Современный стеклянный лифт бизнес-центра",
     "Салон автомобиля с панорамной крышей"
 ]
 
+# ---------- BACK СЦЕНЫ ----------
 BACK_SCENES = [
     "Современная городская улица с каменной плиткой",
     "Подземная парковка с гладким бетоном",
@@ -36,13 +38,14 @@ BACK_POSES = [
     "правая рука лежит на затылке поверх капюшона, левая согнута у бедра",
     "правая рука касается шва капюшона сзади, левая расслаблена",
     "обе руки подняты и поправляют капюшон",
-    "правая рука на капюшоне, левая немного отведена от тела"
+    "правая рука на капюшоне, левая слегка отведена"
 ]
 
 CURRENT_FRONT_INDEX = 0
 CURRENT_BACK_INDEX = 0
 
 
+# ---------- СПЕЦИФИКАЦИЯ ----------
 def get_next_spec(side):
     global CURRENT_FRONT_INDEX, CURRENT_BACK_INDEX
 
@@ -66,76 +69,50 @@ def get_next_spec(side):
     }
 
 
+# ---------- ДЛИННЫЙ ПРОМПТ ----------
 def build_prompt(spec):
 
-    camera_block = (
-        "Ultra-realistic RAW 9:16 photograph captured on a Sony A7R V "
-        "with a 35mm lens set to f/11 aperture to ensure deep focus across the entire frame. "
-        "There is absolutely no background blur and no bokeh. "
-        "Every distant surface and architectural line must remain sharp and clearly resolved. "
-    )
-
-    skin_block = (
+    base = (
+        "Ultra-realistic RAW 9:16 photograph captured on a Sony A7R V with a 35mm lens set to f/11 aperture "
+        "to ensure deep focus across the entire frame. There is absolutely no background blur and no bokeh. "
+        "Every distant architectural surface must remain sharp and clearly defined. "
         "Natural human skin tones must be preserved with visible pores and realistic softness. "
-        "Skin texture must not appear metallic or artificial. "
-        "No reflective chrome-like highlights and no plastic gloss. "
-    )
-
-    hoodie_block = (
-        "The hoodie is constructed from heavy 500GSM black cotton fabric with clearly visible textile weave. "
-        "Fabric folds must appear natural and consistent with body movement. "
+        "No metallic reflections and no artificial gloss. "
+        "The hoodie is constructed from heavy 500GSM black cotton fabric with visible textile weave and natural folds. "
         "STRICT RULE: NO kangaroo pocket, NO front pouch, NO zippers, NO drawstrings. "
-        "The entire hoodie torso must remain smooth and uninterrupted with no stitching indicating a pocket. "
-    )
-
-    jeans_block = (
-        "The jeans are wide black denim with relaxed loose fit. "
-        "The fabric must drape naturally around the hips, thighs and knees. "
-        "Subtle creases and visible stitching around waistband and pockets must be present. "
-        "Denim texture should show realistic grain without stiffness. "
+        "The entire hoodie torso must remain smooth and uninterrupted. "
+        "The jeans are wide black denim with relaxed loose fit, natural drape and visible stitching. "
     )
 
     if spec["side"] == "front":
-
-        framing_block = (
-            "FRONT VIEW. Camera distance exactly 0.7 meters. "
+        framing = (
+            "FRONT VIEW. Camera distance exactly 0.7 meters from the subject. "
             "Framing from head to knees. "
-            "The subject occupies approximately 80–85 percent of vertical frame height. "
-            "Upper portion of the wide jeans must be clearly visible. "
-            "The chest logo must be sharp, clean-edged and fully readable without distortion. "
+            "The subject occupies approximately 80–85 percent of the vertical frame height. "
+            "The chest logo must be sharp, clean-edged and fully readable. "
         )
-
     else:
-
-        framing_block = (
+        framing = (
             "BACK VIEW. Camera distance MUST be exactly 10 meters. "
             "This distance is mandatory and must not be closer. "
             "Wide environmental composition. "
-            "The subject occupies approximately 25–30 percent of vertical frame height. "
-            "The surrounding environment must visually dominate the frame. "
+            "The subject occupies approximately 25–30 percent of the vertical frame height. "
+            "The environment must visually dominate the frame. "
             "Hood fully up. Face not visible. "
         )
 
-    environment_block = (
+    scene_block = (
         f"Scene: {spec['scene']}. "
-        "Background surfaces such as pavement seams, building edges, glass reflections "
-        "and structural lines must remain crisp and detailed. "
+        "Architectural lines, pavement seams, building edges and glass reflections must remain crisp and detailed. "
         "Lighting is neutral urban light around 4500K with balanced exposure and natural shadow falloff. "
     )
 
     pose_block = f"Pose: {spec['pose']}. "
 
-    return (
-        camera_block +
-        skin_block +
-        hoodie_block +
-        jeans_block +
-        framing_block +
-        environment_block +
-        pose_block
-    )
+    return base + framing + scene_block + pose_block
 
 
+# ---------- POLZA ----------
 def submit_job(prompt, image_url):
     polza_key = os.getenv("POLZA_API_KEY")
 
@@ -160,6 +137,7 @@ def submit_job(prompt, image_url):
 
     data = response.json()
     job_id = data.get("id") or data.get("task_id")
+
     if not job_id:
         raise Exception(f"Polza error: {data}")
 
@@ -169,8 +147,13 @@ def submit_job(prompt, image_url):
 async def poll_job(job_id):
     polza_key = os.getenv("POLZA_API_KEY")
 
-    for _ in range(60):
-        await asyncio.sleep(5)
+    MAX_WAIT = 1200  # 20 минут
+    INTERVAL = 5
+    waited = 0
+
+    while waited < MAX_WAIT:
+        await asyncio.sleep(INTERVAL)
+        waited += INTERVAL
 
         res = await asyncio.to_thread(
             requests.get,
@@ -187,27 +170,32 @@ async def poll_job(job_id):
             if isinstance(output, list) and output:
                 return output[0]
 
-    raise Exception("Generation timeout")
+    raise Exception("Generation timeout after 20 minutes")
 
 
 async def generate_single(spec):
-    prompt = build_prompt(spec)
-    job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
-    url = await poll_job(job_id)
+    try:
+        prompt = build_prompt(spec)
+        job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
+        url = await poll_job(job_id)
 
-    img = await asyncio.to_thread(requests.get, url)
+        img = await asyncio.to_thread(requests.get, url)
 
-    os.makedirs(SAVE_DIR, exist_ok=True)
-    path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}.png")
+        os.makedirs(SAVE_DIR, exist_ok=True)
+        path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}.png")
 
-    with open(path, "wb") as f:
-        f.write(img.content)
+        with open(path, "wb") as f:
+            f.write(img.content)
 
-    with Image.open(path) as im:
-        w, h = im.size
-        im.crop((0, 0, w, int(h * 0.93))).save(path)
+        with Image.open(path) as im:
+            w, h = im.size
+            im.crop((0, 0, w, int(h * 0.93))).save(path)
 
-    return path
+        return path
+
+    except Exception as e:
+        print("Ошибка генерации одного фото:", e)
+        return None
 
 
 async def generate_all_photos():
@@ -217,7 +205,8 @@ async def generate_all_photos():
     paths = []
     for spec in specs:
         path = await generate_single(spec)
-        paths.append(path)
+        if path:
+            paths.append(path)
 
     return paths, specs
 
