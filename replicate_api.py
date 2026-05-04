@@ -12,32 +12,29 @@ SAVE_DIR = "generations"
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
-# ---------- FRONT СЦЕНЫ ----------
 FRONT_SCENES = [
-    "Интерьер премиального автомобиля ночью с кожаным салоном и мягкой подсветкой",
-    "Современный стеклянный лифт бизнес-центра с холодной LED-подсветкой",
-    "Салон автомобиля с панорамной крышей и естественным светом"
+    "Интерьер премиального автомобиля с кожаным салоном",
+    "Современный стеклянный лифт бизнес-центра",
+    "Салон автомобиля с панорамной крышей"
 ]
 
-# ---------- BACK СЦЕНЫ ----------
 BACK_SCENES = [
-    "Современная городская улица с полированной каменной плиткой и стеклянными фасадами",
-    "Современная подземная парковка с гладким бетоном и LED-подсветкой",
-    "Современная бизнес-площадь со стеклянными небоскрёбами",
-    "Вход в люксовый отель с тёмным гранитом и архитектурной подсветкой"
+    "Современная городская улица с каменной плиткой",
+    "Подземная парковка с гладким бетоном",
+    "Современная бизнес-площадь со стеклянными фасадами",
+    "Вход в люксовый отель с гранитной отделкой"
 ]
 
-# ---------- ПОЗЫ ----------
 FRONT_POSES = [
     "правая рука держит край капюшона у виска, левая рука в кармане джинсов",
-    "обе руки подняты и поправляют капюшон, локти разведены",
-    "правая рука тянет капюшон чуть вперед, левая согнута у пояса",
+    "обе руки подняты и поправляют капюшон",
+    "правая рука тянет капюшон вперед, левая согнута у пояса",
     "левая рука в кармане, правая касается воротника худи"
 ]
 
 BACK_POSES = [
-    "правая рука лежит на затылке поверх капюшона, левая рука согнута у бедра",
-    "правая рука касается шва капюшона сзади, левая рука расслаблена",
+    "правая рука лежит на затылке поверх капюшона, левая согнута у бедра",
+    "правая рука касается шва капюшона сзади, левая расслаблена",
     "обе руки подняты и поправляют капюшон",
     "правая рука на капюшоне, левая немного отведена от тела"
 ]
@@ -46,7 +43,6 @@ CURRENT_FRONT_INDEX = 0
 CURRENT_BACK_INDEX = 0
 
 
-# ---------- СПЕЦИФИКАЦИЯ ----------
 def get_next_spec(side):
     global CURRENT_FRONT_INDEX, CURRENT_BACK_INDEX
 
@@ -70,44 +66,76 @@ def get_next_spec(side):
     }
 
 
-# ---------- ПРОМПТ ----------
 def build_prompt(spec):
 
-    base = (
-        "Ultra-realistic RAW 9:16 photograph. "
-        "Sony A7R V, 35mm lens, f/11 aperture for deep focus. "
-        "No background blur. No bokeh. "
-        "Natural human skin tones. Visible pores. No metallic reflections. "
-        "Black heavy cotton hoodie (500GSM). "
-        "STRICT RULE: NO kangaroo pocket. NO front pouch. NO zippers. NO drawstrings. "
-        "Torso must be seamless flat fabric surface. "
-        "Wide-leg black denim шаровары with heavy drape and visible stitching. "
+    camera_block = (
+        "Ultra-realistic RAW 9:16 photograph captured on a Sony A7R V "
+        "with a 35mm lens set to f/11 aperture to ensure deep focus across the entire frame. "
+        "There is absolutely no background blur and no bokeh. "
+        "Every distant surface and architectural line must remain sharp and clearly resolved. "
+    )
+
+    skin_block = (
+        "Natural human skin tones must be preserved with visible pores and realistic softness. "
+        "Skin texture must not appear metallic or artificial. "
+        "No reflective chrome-like highlights and no plastic gloss. "
+    )
+
+    hoodie_block = (
+        "The hoodie is constructed from heavy 500GSM black cotton fabric with clearly visible textile weave. "
+        "Fabric folds must appear natural and consistent with body movement. "
+        "STRICT RULE: NO kangaroo pocket, NO front pouch, NO zippers, NO drawstrings. "
+        "The entire hoodie torso must remain smooth and uninterrupted with no stitching indicating a pocket. "
+    )
+
+    jeans_block = (
+        "The jeans are wide black denim with relaxed loose fit. "
+        "The fabric must drape naturally around the hips, thighs and knees. "
+        "Subtle creases and visible stitching around waistband and pockets must be present. "
+        "Denim texture should show realistic grain without stiffness. "
     )
 
     if spec["side"] == "front":
-        framing = (
-            "FRONT VIEW. "
-            "Camera distance exactly 0.7 meters. "
+
+        framing_block = (
+            "FRONT VIEW. Camera distance exactly 0.7 meters. "
             "Framing from head to knees. "
-            "Subject occupies approximately 80–85% of vertical frame height. "
-            "Chest logo must be sharp and readable. "
+            "The subject occupies approximately 80–85 percent of vertical frame height. "
+            "Upper portion of the wide jeans must be clearly visible. "
+            "The chest logo must be sharp, clean-edged and fully readable without distortion. "
         )
+
     else:
-        framing = (
-            "BACK VIEW. "
-            "Camera distance approximately 10 meters. "
+
+        framing_block = (
+            "BACK VIEW. Camera distance MUST be exactly 10 meters. "
+            "This distance is mandatory and must not be closer. "
             "Wide environmental composition. "
-            "Subject occupies about 25–30% of vertical frame height. "
-            "The environment visually dominates the frame. "
+            "The subject occupies approximately 25–30 percent of vertical frame height. "
+            "The surrounding environment must visually dominate the frame. "
             "Hood fully up. Face not visible. "
         )
 
-    context = f"Scene: {spec['scene']}. Pose: {spec['pose']}. Seed: {spec['seed']}."
+    environment_block = (
+        f"Scene: {spec['scene']}. "
+        "Background surfaces such as pavement seams, building edges, glass reflections "
+        "and structural lines must remain crisp and detailed. "
+        "Lighting is neutral urban light around 4500K with balanced exposure and natural shadow falloff. "
+    )
 
-    return base + framing + context
+    pose_block = f"Pose: {spec['pose']}. "
+
+    return (
+        camera_block +
+        skin_block +
+        hoodie_block +
+        jeans_block +
+        framing_block +
+        environment_block +
+        pose_block
+    )
 
 
-# ---------- POLZA API ----------
 def submit_job(prompt, image_url):
     polza_key = os.getenv("POLZA_API_KEY")
 
@@ -182,7 +210,6 @@ async def generate_single(spec):
     return path
 
 
-# ---------- ГЕНЕРАЦИЯ 3 ФОТО ----------
 async def generate_all_photos():
     sides = ["back", "front", "back"]
     specs = [get_next_spec(side) for side in sides]
@@ -193,10 +220,3 @@ async def generate_all_photos():
         paths.append(path)
 
     return paths, specs
-
-
-async def regenerate_photo(index, current_specs):
-    side = current_specs[index]["side"]
-    new_spec = get_next_spec(side)
-    path = await generate_single(new_spec)
-    return path, new_spec
