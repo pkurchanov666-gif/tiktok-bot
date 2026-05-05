@@ -1,57 +1,37 @@
-import os
-import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
-from telegram.ext import (
-    Application,
-    CommandHandler,
-    CallbackQueryHandler,
-    ContextTypes
-)
+# bot.py
 
-from config import BOT_TOKEN
+import logging
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, FSInputFile
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 from replicate_api import generate_all_photos, regenerate_photo
+from config import BOT_TOKEN
 
 logging.basicConfig(level=logging.INFO)
 
 USER_DATA = {}
 
 
-def get_user_storage(user_id):
+def get_storage(user_id):
     if user_id not in USER_DATA:
         USER_DATA[user_id] = {}
     return USER_DATA[user_id]
 
 
 def build_keyboard(count):
-    buttons = [
-        InlineKeyboardButton(f"🔄 {i+1}", callback_data=f"regen_{i}")
-        for i in range(count)
-    ]
+    buttons = [InlineKeyboardButton(f"🔄 {i+1}", callback_data=f"regen_{i}") for i in range(count)]
     return InlineKeyboardMarkup([buttons])
 
 
 async def send_gallery(context, user_id, paths):
 
     media = []
-    opened_files = []
 
-    try:
-        for path in paths:
-            f = open(path, "rb")
-            opened_files.append(f)
-            media.append(InputMediaPhoto(f))
+    for path in paths:
+        media.append(InputMediaPhoto(FSInputFile(path)))
 
-        await context.bot.send_media_group(chat_id=user_id, media=media)
-
-    finally:
-        for f in opened_files:
-            try:
-                f.close()
-            except:
-                pass
+    await context.bot.send_media_group(chat_id=user_id, media=media)
 
 
-# ---------- ФОНОВАЯ ГЕНЕРАЦИЯ ----------
 async def background_generate(context, user_id):
 
     try:
@@ -61,7 +41,7 @@ async def background_generate(context, user_id):
             await context.bot.send_message(chat_id=user_id, text="❌ Ошибка генерации")
             return
 
-        storage = get_user_storage(user_id)
+        storage = get_storage(user_id)
         storage["paths"] = paths
         storage["specs"] = specs
 
@@ -77,43 +57,36 @@ async def background_generate(context, user_id):
         await context.bot.send_message(chat_id=user_id, text=f"❌ Ошибка: {e}")
 
 
+async def regen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    user_id = query.from_user.id
+    index = int(query.data.replace("regen_", ""))
+
+    context.application.create_task(background_regen(context, user_id, index))
+
+
 async def background_regen(context, user_id, index):
 
-    try:
-        storage = get_user_storage(user_id)
+    storage = get_storage(user_id)
 
-        if "paths" not in storage:
-            await context.bot.send_message(chat_id=user_id, text="❌ Сначала сгенерируй фото")
-            return
+    new_path, new_spec = await regenerate_photo(index, storage["specs"])
 
-        new_path, new_spec = await regenerate_photo(index, storage["specs"])
+    storage["paths"][index] = new_path
+    storage["specs"][index] = new_spec
 
-        storage["paths"][index] = new_path
-        storage["specs"][index] = new_spec
-
-        await send_gallery(context, user_id, storage["paths"])
-
-        await context.bot.send_message(
-            chat_id=user_id,
-            text=f"✅ Фото {index+1} обновлено",
-            reply_markup=build_keyboard(len(storage["paths"]))
-        )
-
-    except Exception as e:
-        await context.bot.send_message(chat_id=user_id, text=f"❌ Ошибка: {e}")
+    await send_gallery(context, user_id, storage["paths"])
 
 
-# ---------- ХЕНДЛЕРЫ ----------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("📸 AI Фотосессия", callback_data="generate")]
     ])
 
-    await update.message.reply_text(
-        "Выберите действие:",
-        reply_markup=keyboard
-    )
+    await update.message.reply_text("Выберите действие:", reply_markup=keyboard)
 
 
 async def generate_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -123,28 +96,11 @@ async def generate_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user_id = query.from_user.id
 
-    await query.edit_message_text("⏳ Генерация 3 фото... Подожди 1–3 минуты.")
+    await query.edit_message_text("⏳ Генерация...")
 
     context.application.create_task(background_generate(context, user_id))
 
 
-async def regen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    query = update.callback_query
-    await query.answer()
-
-    user_id = query.from_user.id
-    index = int(query.data.replace("regen_", ""))
-
-    await context.bot.send_message(
-        chat_id=user_id,
-        text=f"🔄 Перегенерация фото {index+1}..."
-    )
-
-    context.application.create_task(background_regen(context, user_id, index))
-
-
-# ---------- MAIN ----------
 def main():
 
     app = Application.builder().token(BOT_TOKEN).build()
@@ -155,7 +111,6 @@ def main():
 
     print("Бот погнал!")
 
-    # ✅ САМЫЙ СТАБИЛЬНЫЙ РЕЖИМ
     app.run_polling()
 
 
