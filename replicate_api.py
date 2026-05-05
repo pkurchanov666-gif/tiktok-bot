@@ -1,118 +1,218 @@
-# bot.py
+# replicate_api.py
 
-import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, FSInputFile
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
-from replicate_api import generate_all_photos, regenerate_photo
-from config import BOT_TOKEN
+import os
+import time
+import random
+import requests
+import asyncio
 
-logging.basicConfig(level=logging.INFO)
+SAVE_DIR = "generations"
 
-USER_DATA = {}
+REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
+REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
+
+FRONT_SCENES = [
+    "Standing next to a premium parked car with open door visible",
+    "Inside a modern glass elevator",
+    "Standing in a clean urban street environment"
+]
+
+BACK_SCENES = [
+    "Modern city street with clean stone pavement",
+    "Underground parking level with smooth concrete floor",
+    "Contemporary business plaza with glass buildings"
+]
+
+FRONT_POSES = [
+    "right hand gripping the hood near the temple, left hand in jeans pocket",
+    "both hands adjusting the hood",
+    "right hand pulling hood slightly forward"
+]
+
+BACK_POSES = [
+    "right hand resting on the back of the hood",
+    "walking away with hood up",
+    "standing still facing away"
+]
+
+CURRENT_FRONT_INDEX = 0
+CURRENT_BACK_INDEX = 0
 
 
-def get_storage(user_id):
-    if user_id not in USER_DATA:
-        USER_DATA[user_id] = {}
-    return USER_DATA[user_id]
+def get_next_spec(side):
+    global CURRENT_FRONT_INDEX, CURRENT_BACK_INDEX
+
+    if side == "front":
+        scene = random.choice(FRONT_SCENES)
+        pose = FRONT_POSES[CURRENT_FRONT_INDEX % len(FRONT_POSES)]
+        CURRENT_FRONT_INDEX += 1
+        ref = REF_FRONT
+    else:
+        scene = random.choice(BACK_SCENES)
+        pose = BACK_POSES[CURRENT_BACK_INDEX % len(BACK_POSES)]
+        CURRENT_BACK_INDEX += 1
+        ref = REF_BACK
+
+    return {
+        "side": side,
+        "scene": scene,
+        "pose": pose,
+        "seed": random.randint(100000, 999999),
+        "ref": ref
+    }
 
 
-def build_keyboard(count):
-    buttons = [InlineKeyboardButton(f"🔄 {i+1}", callback_data=f"regen_{i}") for i in range(count)]
-    return InlineKeyboardMarkup([buttons])
+def build_prompt(spec):
+
+    uid = f" UID:{spec['seed']}-{random.random()}"
+
+    if spec["side"] == "front":
+
+        return (
+            "Ultra-realistic RAW 9:16 portrait photograph. "
+            "Sony A7R V, 35mm lens, f/11 aperture. "
+            "Camera distance exactly 0.7 meters. "
+            "Framing from head to knees. "
+            "Subject occupies 80–85% of frame height. "
+            "No background blur. No bokeh. "
+
+            "Use reference image exactly as hoodie source. "
+            "ABSOLUTE RULE: NO kangaroo pocket. NO front pouch. NO zippers. NO drawstrings. "
+            "Preserve chest logo exactly. Do not alter or remove logo. "
+
+            "Loose straight wide-leg black denim jeans. Not slim fit. "
+
+            f"Scene: {spec['scene']}. "
+            f"Pose: {spec['pose']}."
+        ) + uid
+
+    else:
+
+        return (
+            "Ultra-realistic RAW 9:16 ultra-wide environmental photograph. "
+            "Sony A7R V, 35mm lens, f/11 aperture. "
+            "Camera distance exactly 10 meters. "
+            "Subject occupies approximately 20–25% of frame height. "
+            "The environment dominates the frame. "
+            "No close-up. No portrait framing. "
+
+            "Black hoodie without pocket. "
+            "Wide black jeans. "
+            "Hood up. Face not visible. "
+
+            f"Scene: {spec['scene']}. "
+            f"Pose: {spec['pose']}."
+        ) + uid
 
 
-async def send_gallery(context, user_id, paths):
+def submit_job(prompt, image_url):
+    polza_key = os.getenv("POLZA_API_KEY")
 
-    media = []
+    response = requests.post(
+        "https://polza.ai/api/v1/media",
+        headers={
+            "Authorization": f"Bearer {polza_key}",
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": "black-forest-labs/flux.2-pro",
+            "input": {
+                "prompt": prompt,
+                "aspect_ratio": "9:16",
+                "image_resolution": "1K",
+                "images": [{"type": "url", "data": image_url}]
+            },
+            "async": True
+        },
+        timeout=30
+    )
 
-    for path in paths:
-        media.append(InputMediaPhoto(FSInputFile(path)))
+    data = response.json()
+    job_id = data.get("id") or data.get("task_id")
 
-    await context.bot.send_media_group(chat_id=user_id, media=media)
+    if not job_id:
+        raise Exception(f"Polza error: {data}")
+
+    return job_id
 
 
-async def background_generate(context, user_id):
+async def poll_job(job_id):
+    polza_key = os.getenv("POLZA_API_KEY")
 
-    try:
-        paths, specs = await generate_all_photos()
+    MAX_WAIT = 600
+    INTERVAL = 5
+    waited = 0
 
-        if not paths:
-            await context.bot.send_message(chat_id=user_id, text="❌ Ошибка генерации")
-            return
+    while waited < MAX_WAIT:
+        await asyncio.sleep(INTERVAL)
+        waited += INTERVAL
 
-        storage = get_storage(user_id)
-        storage["paths"] = paths
-        storage["specs"] = specs
-
-        await send_gallery(context, user_id, paths)
-
-        await context.bot.send_message(
-            chat_id=user_id,
-            text="✅ Готово",
-            reply_markup=build_keyboard(len(paths))
+        res = requests.get(
+            f"https://polza.ai/api/v1/media/{job_id}",
+            headers={"Authorization": f"Bearer {polza_key}"},
+            timeout=30
         )
 
-    except Exception as e:
-        await context.bot.send_message(chat_id=user_id, text=f"❌ Ошибка: {e}")
+        data = res.json()
+        status = (data.get("status") or "").lower()
+
+        if status in ["succeeded", "completed", "done"]:
+            output = data.get("output")
+            if isinstance(output, list) and output:
+                return output[0]
+
+    raise Exception("Generation timeout")
 
 
-async def regen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def generate_all_photos():
 
-    query = update.callback_query
-    await query.answer()
+    sides = ["back", "front", "back"]
+    specs = [get_next_spec(side) for side in sides]
 
-    user_id = query.from_user.id
-    index = int(query.data.replace("regen_", ""))
+    job_ids = []
 
-    context.application.create_task(background_regen(context, user_id, index))
+    for i, spec in enumerate(specs):
+        prompt = build_prompt(spec)
+        job_id = submit_job(prompt, spec["ref"])
+        job_ids.append(job_id)
 
+        if i < 2:
+            await asyncio.sleep(3)
 
-async def background_regen(context, user_id, index):
+    paths = []
 
-    storage = get_storage(user_id)
+    for index, job_id in enumerate(job_ids):
+        url = await poll_job(job_id)
 
-    new_path, new_spec = await regenerate_photo(index, storage["specs"])
+        img = requests.get(url)
 
-    storage["paths"][index] = new_path
-    storage["specs"][index] = new_spec
+        os.makedirs(SAVE_DIR, exist_ok=True)
+        path = os.path.join(
+            SAVE_DIR, f"ai_{int(time.time()*1000)}_{index}.png"
+        )
 
-    await send_gallery(context, user_id, storage["paths"])
+        with open(path, "wb") as f:
+            f.write(img.content)
 
+        paths.append(path)
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📸 AI Фотосессия", callback_data="generate")]
-    ])
-
-    await update.message.reply_text("Выберите действие:", reply_markup=keyboard)
-
-
-async def generate_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    query = update.callback_query
-    await query.answer()
-
-    user_id = query.from_user.id
-
-    await query.edit_message_text("⏳ Генерация...")
-
-    context.application.create_task(background_generate(context, user_id))
+    return paths, specs
 
 
-def main():
+async def regenerate_photo(index, current_specs):
+    side = current_specs[index]["side"]
+    new_spec = get_next_spec(side)
 
-    app = Application.builder().token(BOT_TOKEN).build()
+    prompt = build_prompt(new_spec)
+    job_id = submit_job(prompt, new_spec["ref"])
+    url = await poll_job(job_id)
 
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(generate_handler, pattern="^generate$"))
-    app.add_handler(CallbackQueryHandler(regen_handler, pattern="^regen_"))
+    img = requests.get(url)
 
-    print("Бот погнал!")
+    os.makedirs(SAVE_DIR, exist_ok=True)
+    path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}_regen.png")
 
-    app.run_polling()
+    with open(path, "wb") as f:
+        f.write(img.content)
 
-
-if __name__ == "__main__":
-    main()
+    return path, new_spec
