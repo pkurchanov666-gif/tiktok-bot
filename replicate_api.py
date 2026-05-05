@@ -9,18 +9,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SAVE_DIR = "generations"
-
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
-# ---------- FRONT СЦЕНЫ ----------
 FRONT_SCENES = [
     "Интерьер премиального автомобиля с кожаным салоном",
     "Современный стеклянный лифт бизнес-центра",
     "Салон автомобиля с панорамной крышей"
 ]
 
-# ---------- BACK СЦЕНЫ ----------
 BACK_SCENES = [
     "Современная городская улица с каменной плиткой",
     "Подземная парковка с гладким бетоном",
@@ -73,26 +70,21 @@ def get_next_spec(side):
 # ---------- ПРОМПТ ----------
 def build_prompt(spec):
 
-    unique_marker = f" Unique ID: {spec['seed']} {random.random()}."
+    unique_marker = f" UniqueID:{spec['seed']}-{random.random()}."
 
     if spec["side"] == "front":
 
         prompt = (
             "Ultra-realistic RAW 9:16 portrait photograph. "
             "Sony A7R V, 35mm lens, f/11 aperture. "
-            "No background blur. No bokeh. "
             "Camera distance exactly 0.7 meters. "
             "Framing from head to knees. "
             "Subject occupies 80–85% of vertical frame height. "
-
-            "Natural human skin tones with visible pores. "
+            "No background blur. No bokeh. "
             "Black heavy cotton hoodie (500GSM). "
             "STRICT RULE: NO kangaroo pocket. NO front pouch. NO zippers. NO drawstrings. "
-            "Torso must remain smooth and flat. "
-
-            "Wide black denim jeans with relaxed loose fit and visible stitching. "
-            "Chest logo must be sharp and readable. "
-
+            "Wide black denim jeans with relaxed loose fit. "
+            "Natural skin tones. "
             f"Scene: {spec['scene']}. "
             f"Pose: {spec['pose']}."
         )
@@ -105,9 +97,8 @@ def build_prompt(spec):
             "Camera distance MUST be exactly 10 meters. "
             "This distance is mandatory and must not be closer. "
             "Subject occupies only 10–12% of vertical frame height. "
-            "The person appears as a distant silhouette. "
-            "The architecture dominates the frame. "
-            "No close-up. No medium shot. No detailed clothing focus. "
+            "The environment dominates the frame. "
+            "No close-up. No medium shot. "
             "Black hoodie without pocket. "
             "Wide black jeans. "
             "Hood up. Face not visible. "
@@ -179,34 +170,42 @@ async def poll_job(job_id):
     raise Exception("Generation timeout")
 
 
-async def generate_single(spec):
-    prompt = build_prompt(spec)
-    job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
-    url = await poll_job(job_id)
-
-    img = await asyncio.to_thread(requests.get, url)
-
-    os.makedirs(SAVE_DIR, exist_ok=True)
-    path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}.png")
-
-    with open(path, "wb") as f:
-        f.write(img.content)
-
-    with Image.open(path) as im:
-        w, h = im.size
-        im.crop((0, 0, w, int(h * 0.93))).save(path)
-
-    return path
-
-
 async def generate_all_photos():
+
     sides = ["back", "front", "back"]
     specs = [get_next_spec(side) for side in sides]
 
+    job_queue = []
+
+    # 🔹 Отправляем 3 задания с паузой 3 секунды
+    for i, spec in enumerate(specs):
+        prompt = build_prompt(spec)
+        job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
+        job_queue.append((job_id, spec))
+
+        if i < 2:
+            await asyncio.sleep(3)
+
+    # 🔹 Ждём результаты
     paths = []
-    for spec in specs:
-        path = await generate_single(spec)
-        paths.append(path)
+
+    for index, (job_id, spec) in enumerate(job_queue):
+        try:
+            url = await poll_job(job_id)
+            img = await asyncio.to_thread(requests.get, url)
+
+            os.makedirs(SAVE_DIR, exist_ok=True)
+            path = os.path.join(
+                SAVE_DIR, f"ai_{int(time.time()*1000)}_{index}.png"
+            )
+
+            with open(path, "wb") as f:
+                f.write(img.content)
+
+            paths.append(path)
+
+        except Exception as e:
+            print(f"Ошибка генерации {index+1}:", e)
 
     return paths, specs
 
@@ -214,5 +213,17 @@ async def generate_all_photos():
 async def regenerate_photo(index, current_specs):
     side = current_specs[index]["side"]
     new_spec = get_next_spec(side)
-    path = await generate_single(new_spec)
+
+    prompt = build_prompt(new_spec)
+    job_id = await asyncio.to_thread(submit_job, prompt, new_spec["ref"])
+    url = await poll_job(job_id)
+
+    img = await asyncio.to_thread(requests.get, url)
+
+    os.makedirs(SAVE_DIR, exist_ok=True)
+    path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}_regen.png")
+
+    with open(path, "wb") as f:
+        f.write(img.content)
+
     return path, new_spec
