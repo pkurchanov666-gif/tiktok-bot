@@ -1,3 +1,5 @@
+# replicate_api.py
+
 import os
 import time
 import random
@@ -28,22 +30,19 @@ BACK_SCENES = [
 FRONT_POSES = [
     "правая рука держит край капюшона у виска, левая рука в кармане джинсов",
     "обе руки подняты и поправляют капюшон",
-    "правая рука тянет капюшон вперед, левая согнута у пояса",
-    "левая рука в кармане, правая касается воротника худи"
+    "правая рука тянет капюшон вперед, левая согнута у пояса"
 ]
 
 BACK_POSES = [
-    "правая рука лежит на затылке поверх капюшона, левая согнута у бедра",
-    "правая рука касается шва капюшона сзади, левая расслаблена",
-    "обе руки подняты и поправляют капюшон",
-    "правая рука на капюшоне, левая слегка отведена"
+    "правая рука лежит на затылке поверх капюшона",
+    "правая рука касается шва капюшона сзади",
+    "обе руки подняты и поправляют капюшон"
 ]
 
 CURRENT_FRONT_INDEX = 0
 CURRENT_BACK_INDEX = 0
 
 
-# ---------- СПЕЦИФИКАЦИЯ ----------
 def get_next_spec(side):
     global CURRENT_FRONT_INDEX, CURRENT_BACK_INDEX
 
@@ -67,49 +66,44 @@ def get_next_spec(side):
     }
 
 
-# ---------- ПРОМПТ ----------
 def build_prompt(spec):
-
-    unique_marker = f" UniqueID:{spec['seed']}-{random.random()}."
 
     if spec["side"] == "front":
 
-        prompt = (
+        return (
             "Ultra-realistic RAW 9:16 portrait photograph. "
             "Sony A7R V, 35mm lens, f/11 aperture. "
             "Camera distance exactly 0.7 meters. "
             "Framing from head to knees. "
-            "Subject occupies 80–85% of vertical frame height. "
+            "Subject occupies 80–85% of frame height. "
             "No background blur. No bokeh. "
             "Black heavy cotton hoodie (500GSM). "
             "STRICT RULE: NO kangaroo pocket. NO front pouch. NO zippers. NO drawstrings. "
             "Wide black denim jeans with relaxed loose fit. "
             "Natural skin tones. "
             f"Scene: {spec['scene']}. "
-            f"Pose: {spec['pose']}."
+            f"Pose: {spec['pose']}. "
+            f"UID:{spec['seed']}"
         )
 
     else:
 
-        prompt = (
+        return (
             "Ultra-realistic RAW 9:16 ultra-wide environmental photograph. "
             "Sony A7R V, 35mm lens, f/11 aperture. "
             "Camera distance MUST be exactly 10 meters. "
-            "This distance is mandatory and must not be closer. "
-            "Subject occupies only 10–12% of vertical frame height. "
+            "Subject occupies only 10–12% of frame height. "
             "The environment dominates the frame. "
             "No close-up. No medium shot. "
             "Black hoodie without pocket. "
             "Wide black jeans. "
             "Hood up. Face not visible. "
             f"Scene: {spec['scene']}. "
-            f"Pose: {spec['pose']}."
+            f"Pose: {spec['pose']}. "
+            f"UID:{spec['seed']}"
         )
 
-    return prompt + unique_marker
 
-
-# ---------- POLZA ----------
 def submit_job(prompt, image_url):
     polza_key = os.getenv("POLZA_API_KEY")
 
@@ -143,8 +137,7 @@ def submit_job(prompt, image_url):
 
 async def poll_job(job_id):
     polza_key = os.getenv("POLZA_API_KEY")
-
-    MAX_WAIT = 900
+    MAX_WAIT = 600
     INTERVAL = 5
     waited = 0
 
@@ -175,37 +168,32 @@ async def generate_all_photos():
     sides = ["back", "front", "back"]
     specs = [get_next_spec(side) for side in sides]
 
-    job_queue = []
+    job_ids = []
 
-    # 🔹 Отправляем 3 задания с паузой 3 секунды
+    # отправляем 3 запроса с паузой 3 секунды
     for i, spec in enumerate(specs):
         prompt = build_prompt(spec)
         job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
-        job_queue.append((job_id, spec))
+        job_ids.append((job_id, spec))
 
         if i < 2:
             await asyncio.sleep(3)
 
-    # 🔹 Ждём результаты
     paths = []
 
-    for index, (job_id, spec) in enumerate(job_queue):
-        try:
-            url = await poll_job(job_id)
-            img = await asyncio.to_thread(requests.get, url)
+    for index, (job_id, spec) in enumerate(job_ids):
+        url = await poll_job(job_id)
+        img = await asyncio.to_thread(requests.get, url)
 
-            os.makedirs(SAVE_DIR, exist_ok=True)
-            path = os.path.join(
-                SAVE_DIR, f"ai_{int(time.time()*1000)}_{index}.png"
-            )
+        os.makedirs(SAVE_DIR, exist_ok=True)
+        path = os.path.join(
+            SAVE_DIR, f"ai_{int(time.time()*1000)}_{index}.png"
+        )
 
-            with open(path, "wb") as f:
-                f.write(img.content)
+        with open(path, "wb") as f:
+            f.write(img.content)
 
-            paths.append(path)
-
-        except Exception as e:
-            print(f"Ошибка генерации {index+1}:", e)
+        paths.append(path)
 
     return paths, specs
 
@@ -221,7 +209,9 @@ async def regenerate_photo(index, current_specs):
     img = await asyncio.to_thread(requests.get, url)
 
     os.makedirs(SAVE_DIR, exist_ok=True)
-    path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}_regen.png")
+    path = os.path.join(
+        SAVE_DIR, f"ai_{int(time.time()*1000)}_regen.png"
+    )
 
     with open(path, "wb") as f:
         f.write(img.content)
