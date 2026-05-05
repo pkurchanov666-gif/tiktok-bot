@@ -8,41 +8,40 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# ✅ Включи True чтобы НЕ тратить генерации
+TEST_MODE = True
+
 SAVE_DIR = "generations"
 
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
-# ---------- СЦЕНЫ ----------
 FRONT_SCENES = [
-    "Standing next to a premium parked car with open door visible",
-    "Inside a modern glass elevator with clean LED lighting",
-    "Standing in front of a luxury car with city reflections on glass"
+    "Интерьер премиального автомобиля",
+    "Современный стеклянный лифт",
+    "Салон автомобиля с панорамной крышей"
 ]
 
 BACK_SCENES = [
-    "Modern city street with clean stone pavement and glass buildings",
-    "Underground parking level with smooth concrete floor",
-    "Contemporary business plaza with architectural symmetry"
+    "Современная городская улица",
+    "Подземная парковка",
+    "Современная бизнес-площадь"
 ]
 
 FRONT_POSES = [
-    "right hand gripping the edge of the hood near the temple, left hand inside the jeans pocket",
-    "both hands raised adjusting the hood edges",
-    "right hand pulling the hood slightly forward, left hand near the waistband"
+    "правая рука держит край капюшона у виска, левая рука в кармане джинсов",
+    "обе руки подняты и поправляют капюшон"
 ]
 
 BACK_POSES = [
-    "right hand resting on the back of the hood, left arm relaxed near hip",
-    "walking away with hood up, one hand touching the hood from behind",
-    "standing still facing away, arms slightly bent"
+    "правая рука лежит на затылке поверх капюшона",
+    "правая рука касается шва капюшона сзади"
 ]
 
 CURRENT_FRONT_INDEX = 0
 CURRENT_BACK_INDEX = 0
 
 
-# ---------- СПЕЦИФИКАЦИЯ ----------
 def get_next_spec(side):
     global CURRENT_FRONT_INDEX, CURRENT_BACK_INDEX
 
@@ -61,65 +60,63 @@ def get_next_spec(side):
         "side": side,
         "scene": scene,
         "pose": pose,
-        "seed": random.randint(100000, 999999),
+        "seed": random.randint(1, 999999),
         "ref": ref
     }
 
 
-# ---------- ПРОМПТ ----------
 def build_prompt(spec):
 
-    uid = f" UID:{spec['seed']}-{random.random()}"
-
     if spec["side"] == "front":
-
         return (
             "Ultra-realistic RAW 9:16 portrait photograph. "
-            "Sony A7R V, 35mm lens, f/11 aperture. "
             "Camera distance exactly 0.7 meters. "
-            "Framing from head to knees. "
-            "Subject occupies 80–85% of vertical frame height. "
-            "No background blur. No bokeh. "
-
-            "Use the provided reference image as the exact hoodie source. "
-            "HIGH PRIORITY: preserve hoodie design exactly as shown in reference. "
-            "The front chest logo must remain identical in size, placement, typography and scale. "
-            "Do not remove, distort, resize or redesign the logo. "
-
-            "Black heavy cotton hoodie (500GSM). "
-            "STRICT RULE: NO kangaroo pocket. NO front pouch. NO zippers. NO drawstrings. "
-            "Torso must remain smooth and flat. "
-
-            "Wide black denim jeans with relaxed loose fit. "
-
-            "Natural skin tones with visible pores. No metallic reflections. "
-
-            f"Scene: {spec['scene']}. "
-            f"Pose: {spec['pose']}."
-        ) + uid
-
-    else:
-
-        return (
-            "Ultra-realistic RAW 9:16 ultra-wide environmental photograph. "
-            "Sony A7R V, 35mm lens, f/11 aperture. "
-            "Camera distance MUST be exactly 10 meters and must not be closer. "
-            "Ultra-wide composition. "
-            "The subject occupies only 8–10% of vertical frame height. "
-            "The person appears as a small distant silhouette. "
-            "The environment dominates the frame. "
-            "No close-up. No medium shot. No fashion framing. "
-
+            "Framing head to knees. "
             "Black hoodie without pocket. "
             "Wide black jeans. "
-            "Hood fully up. Face not visible. "
-
             f"Scene: {spec['scene']}. "
-            f"Pose: {spec['pose']}."
-        ) + uid
+            f"Pose: {spec['pose']}. "
+            f"UID:{spec['seed']}"
+        )
+
+    else:
+        return (
+            "Ultra-wide environmental photograph. "
+            "Camera distance exactly 10 meters. "
+            "Subject occupies only 10% of frame height. "
+            "No close-up. "
+            "Black hoodie without pocket. "
+            "Hood up. "
+            f"Scene: {spec['scene']}. "
+            f"Pose: {spec['pose']}. "
+            f"UID:{spec['seed']}"
+        )
 
 
-# ---------- POLZA ----------
+# ---------------- TEST MODE ----------------
+
+async def generate_test_images():
+    os.makedirs(SAVE_DIR, exist_ok=True)
+
+    paths = []
+
+    for i in range(3):
+        path = os.path.join(SAVE_DIR, f"test_{i}.png")
+        img = Image.new("RGB", (720, 1280), (120 + i * 30, 120, 120))
+        img.save(path)
+        paths.append(path)
+
+    specs = [
+        {"side": "back"},
+        {"side": "front"},
+        {"side": "back"}
+    ]
+
+    return paths, specs
+
+
+# ---------------- REAL GENERATION ----------------
+
 def submit_job(prompt, image_url):
     polza_key = os.getenv("POLZA_API_KEY")
 
@@ -154,13 +151,8 @@ def submit_job(prompt, image_url):
 async def poll_job(job_id):
     polza_key = os.getenv("POLZA_API_KEY")
 
-    MAX_WAIT = 600
-    INTERVAL = 5
-    waited = 0
-
-    while waited < MAX_WAIT:
-        await asyncio.sleep(INTERVAL)
-        waited += INTERVAL
+    for _ in range(120):
+        await asyncio.sleep(5)
 
         res = await asyncio.to_thread(
             requests.get,
@@ -180,14 +172,12 @@ async def poll_job(job_id):
     raise Exception("Generation timeout")
 
 
-async def generate_all_photos():
-
+async def generate_real_images():
     sides = ["back", "front", "back"]
     specs = [get_next_spec(side) for side in sides]
 
     job_ids = []
 
-    # отправляем 3 запроса с интервалом 3 секунды
     for i, spec in enumerate(specs):
         prompt = build_prompt(spec)
         job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
@@ -203,9 +193,7 @@ async def generate_all_photos():
         img = await asyncio.to_thread(requests.get, url)
 
         os.makedirs(SAVE_DIR, exist_ok=True)
-        path = os.path.join(
-            SAVE_DIR, f"ai_{int(time.time()*1000)}_{index}.png"
-        )
+        path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}_{index}.png")
 
         with open(path, "wb") as f:
             f.write(img.content)
@@ -215,20 +203,30 @@ async def generate_all_photos():
     return paths, specs
 
 
+# ---------------- MAIN ENTRY ----------------
+
+async def generate_all_photos():
+    if TEST_MODE:
+        return await generate_test_images()
+    else:
+        return await generate_real_images()
+
+
 async def regenerate_photo(index, current_specs):
-    side = current_specs[index]["side"]
-    new_spec = get_next_spec(side)
+    if TEST_MODE:
+        return await generate_test_images()
+    else:
+        spec = get_next_spec(current_specs[index]["side"])
+        prompt = build_prompt(spec)
+        job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
+        url = await poll_job(job_id)
 
-    prompt = build_prompt(new_spec)
-    job_id = await asyncio.to_thread(submit_job, prompt, new_spec["ref"])
-    url = await poll_job(job_id)
+        img = await asyncio.to_thread(requests.get, url)
 
-    img = await asyncio.to_thread(requests.get, url)
+        os.makedirs(SAVE_DIR, exist_ok=True)
+        path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}_regen.png")
 
-    os.makedirs(SAVE_DIR, exist_ok=True)
-    path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}_regen.png")
+        with open(path, "wb") as f:
+            f.write(img.content)
 
-    with open(path, "wb") as f:
-        f.write(img.content)
-
-    return path, new_spec
+        return path, spec
