@@ -12,14 +12,13 @@ SAVE_DIR = "generations"
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
-# ---------- FRONT СЦЕНЫ ----------
+# ---------- СЦЕНЫ ----------
 FRONT_SCENES = [
     "Интерьер премиального автомобиля с кожаным салоном",
     "Современный стеклянный лифт бизнес-центра",
     "Салон автомобиля с панорамной крышей"
 ]
 
-# ---------- BACK СЦЕНЫ ----------
 BACK_SCENES = [
     "Современная городская улица с каменной плиткой",
     "Подземная парковка с гладким бетоном",
@@ -36,7 +35,7 @@ FRONT_POSES = [
 ]
 
 BACK_POSES = [
-    "правая рука лежит на затылке поверх капюшона, левая рука согнута у бедра",
+    "правая рука лежит на затылке поверх капюшона, левая согнута у бедра",
     "правая рука касается шва капюшона сзади, левая расслаблена",
     "обе руки подняты и поправляют капюшон",
     "правая рука на капюшоне, левая слегка отведена"
@@ -65,60 +64,78 @@ def get_next_spec(side):
         "side": side,
         "scene": scene,
         "pose": pose,
+        "seed": random.randint(1, 999999),
         "ref": ref
     }
 
 
-# ---------- ПРОМПТ ----------
+# ---------- ДЛИННЫЙ ПРОМПТ 200+ СЛОВ ----------
 def build_prompt(spec):
+
+    camera_block = (
+        "Ultra-realistic RAW 9:16 photograph captured on a Sony A7R V with a 35mm lens set to f/11 aperture. "
+        "The image maintains deep focus across the entire frame with absolutely no background blur and no bokeh. "
+        "Every distant architectural surface remains sharp and clearly defined. "
+    )
+
+    skin_block = (
+        "Natural human skin tones must be preserved with visible pores and realistic softness. "
+        "Skin should not appear metallic, glossy, plastic-like or artificially smoothed. "
+        "Subtle natural texture and authentic light falloff must be present. "
+    )
+
+    hoodie_block = (
+        "The hoodie is made from heavy 500GSM black cotton fabric with visible textile weave and natural folds. "
+        "STRICT RULE: NO kangaroo pocket, NO front pouch, NO zippers, NO drawstrings. "
+        "The entire torso must remain smooth and uninterrupted without stitching indicating a pocket. "
+    )
+
+    jeans_block = (
+        "The jeans are wide black denim with relaxed loose fit. "
+        "Fabric drapes naturally around hips and knees with visible stitching at waistband and pockets. "
+        "Denim grain appears realistic without stiffness. "
+    )
 
     if spec["side"] == "front":
 
-        return (
-            "Ultra-realistic RAW 9:16 portrait photograph. "
-            "Sony A7R V, 35mm lens, f/11 aperture. "
-            "Camera distance exactly 0.7 meters. "
+        framing_block = (
+            "FRONT VIEW. Camera distance exactly 0.7 meters. "
             "Framing from head to knees. "
             "Subject occupies approximately 80–85 percent of vertical frame height. "
-            "No background blur. No bokeh. "
-
-            "Black heavy cotton hoodie (500GSM). "
-            "STRICT RULE: NO kangaroo pocket. NO front pouch. NO zippers. NO drawstrings. "
-            "Torso must remain completely smooth and flat. "
-
-            "Wide black denim jeans with relaxed loose fit and visible stitching. "
-
-            "Natural skin tones with visible pores. No metallic reflections. "
-
-            f"Scene: {spec['scene']}. "
-            f"Pose: {spec['pose']}."
+            "The chest logo must be sharply rendered and fully readable. "
         )
 
-    else:  # BACK VIEW
+    else:
 
-        return (
-            "Ultra-realistic RAW 9:16 environmental wide-angle photograph. "
-            "Sony A7R V, 35mm lens, f/11 aperture. "
-            "Camera distance MUST be exactly 10 meters. "
-            "This distance is mandatory and must not be closer. "
-            "Wide environmental composition. "
-            "Subject occupies approximately 25 percent of vertical frame height. "
-            "The architecture dominates the frame. "
-            "No portrait framing. No close-up. "
-
-            "Black heavy cotton hoodie (500GSM). "
-            "STRICT RULE: NO kangaroo pocket. NO front pouch. NO zippers. NO drawstrings. "
-
-            "Wide black denim jeans with relaxed loose fit. "
-
+        framing_block = (
+            "BACK VIEW. Camera distance MUST be exactly 10 meters and must not be closer. "
+            "Ultra-wide environmental composition. "
+            "Subject occupies only 12–15 percent of vertical frame height. "
+            "The environment visually dominates the frame. "
+            "No portrait framing and no close-up crop. "
             "Hood fully up. Face not visible. "
-
-            f"Scene: {spec['scene']}. "
-            f"Pose: {spec['pose']}."
         )
 
+    environment_block = (
+        f"Scene: {spec['scene']}. "
+        "Architectural lines, pavement seams, building edges and glass reflections must remain crisp and clearly resolved. "
+        "Lighting is neutral urban light around 4500K with balanced exposure and realistic shadow falloff. "
+    )
 
-# ---------- POLZA API ----------
+    pose_block = f"Pose: {spec['pose']}. "
+
+    return (
+        camera_block +
+        skin_block +
+        hoodie_block +
+        jeans_block +
+        framing_block +
+        environment_block +
+        pose_block
+    )
+
+
+# ---------- POLZA ----------
 def submit_job(prompt, image_url):
     polza_key = os.getenv("POLZA_API_KEY")
 
@@ -153,7 +170,7 @@ def submit_job(prompt, image_url):
 async def poll_job(job_id):
     polza_key = os.getenv("POLZA_API_KEY")
 
-    MAX_WAIT = 1200
+    MAX_WAIT = 900
     INTERVAL = 5
     waited = 0
 
@@ -199,7 +216,6 @@ async def generate_single(spec):
     return path
 
 
-# ---------- 3 ФОТО ----------
 async def generate_all_photos():
     sides = ["back", "front", "back"]
     specs = [get_next_spec(side) for side in sides]
