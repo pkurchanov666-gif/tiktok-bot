@@ -1,10 +1,15 @@
-# replicate_api.py
-
 import os
 import time
 import random
 import requests
 import asyncio
+from PIL import Image
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# 🔥 ПЕРЕКЛЮЧАТЕЛЬ
+TEST_MODE = True   # ← пока генерации закончились оставляем True
 
 SAVE_DIR = "generations"
 
@@ -12,21 +17,21 @@ REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
 FRONT_SCENES = [
-    "Standing next to a premium parked car with open door visible",
+    "Standing next to a premium parked car",
     "Inside a modern glass elevator",
-    "Standing in a clean urban street environment"
+    "Standing in a clean urban street"
 ]
 
 BACK_SCENES = [
-    "Modern city street with clean stone pavement",
-    "Underground parking level with smooth concrete floor",
-    "Contemporary business plaza with glass buildings"
+    "Modern city street with stone pavement",
+    "Underground parking with smooth concrete",
+    "Contemporary business plaza"
 ]
 
 FRONT_POSES = [
     "right hand gripping the hood near the temple, left hand in jeans pocket",
     "both hands adjusting the hood",
-    "right hand pulling hood slightly forward"
+    "right hand pulling hood forward"
 ]
 
 BACK_POSES = [
@@ -39,6 +44,7 @@ CURRENT_FRONT_INDEX = 0
 CURRENT_BACK_INDEX = 0
 
 
+# ---------- СПЕЦИФИКАЦИЯ ----------
 def get_next_spec(side):
     global CURRENT_FRONT_INDEX, CURRENT_BACK_INDEX
 
@@ -62,6 +68,7 @@ def get_next_spec(side):
     }
 
 
+# ---------- ПРОМПТ ----------
 def build_prompt(spec):
 
     uid = f" UID:{spec['seed']}-{random.random()}"
@@ -72,15 +79,15 @@ def build_prompt(spec):
             "Ultra-realistic RAW 9:16 portrait photograph. "
             "Sony A7R V, 35mm lens, f/11 aperture. "
             "Camera distance exactly 0.7 meters. "
-            "Framing from head to knees. "
+            "Framing head to knees. "
             "Subject occupies 80–85% of frame height. "
-            "No background blur. No bokeh. "
+            "No background blur. "
 
             "Use reference image exactly as hoodie source. "
             "ABSOLUTE RULE: NO kangaroo pocket. NO front pouch. NO zippers. NO drawstrings. "
-            "Preserve chest logo exactly. Do not alter or remove logo. "
+            "Preserve chest logo exactly. "
 
-            "Loose straight wide-leg black denim jeans. Not slim fit. "
+            "Loose straight wide-leg black denim jeans. "
 
             f"Scene: {spec['scene']}. "
             f"Pose: {spec['pose']}."
@@ -92,12 +99,11 @@ def build_prompt(spec):
             "Ultra-realistic RAW 9:16 ultra-wide environmental photograph. "
             "Sony A7R V, 35mm lens, f/11 aperture. "
             "Camera distance exactly 10 meters. "
-            "Subject occupies approximately 20–25% of frame height. "
+            "Subject occupies 10–12% of frame height. "
             "The environment dominates the frame. "
-            "No close-up. No portrait framing. "
+            "No close-up. No medium shot. "
 
             "Black hoodie without pocket. "
-            "Wide black jeans. "
             "Hood up. Face not visible. "
 
             f"Scene: {spec['scene']}. "
@@ -105,6 +111,7 @@ def build_prompt(spec):
         ) + uid
 
 
+# ---------- POLZA ----------
 def submit_job(prompt, image_url):
     polza_key = os.getenv("POLZA_API_KEY")
 
@@ -147,7 +154,8 @@ async def poll_job(job_id):
         await asyncio.sleep(INTERVAL)
         waited += INTERVAL
 
-        res = requests.get(
+        res = await asyncio.to_thread(
+            requests.get,
             f"https://polza.ai/api/v1/media/{job_id}",
             headers={"Authorization": f"Bearer {polza_key}"},
             timeout=30
@@ -164,8 +172,30 @@ async def poll_job(job_id):
     raise Exception("Generation timeout")
 
 
+# ---------- ГЕНЕРАЦИЯ ----------
 async def generate_all_photos():
 
+    # ✅ ТЕСТОВЫЙ РЕЖИМ
+    if TEST_MODE:
+        os.makedirs(SAVE_DIR, exist_ok=True)
+
+        paths = []
+
+        for i in range(3):
+            path = os.path.join(SAVE_DIR, f"test_{i}.png")
+            img = Image.new("RGB", (720, 1280), (100 + i * 30, 120, 150))
+            img.save(path)
+            paths.append(path)
+
+        specs = [
+            {"side": "back"},
+            {"side": "front"},
+            {"side": "back"}
+        ]
+
+        return paths, specs
+
+    # ✅ РЕАЛЬНАЯ ГЕНЕРАЦИЯ
     sides = ["back", "front", "back"]
     specs = [get_next_spec(side) for side in sides]
 
@@ -183,13 +213,10 @@ async def generate_all_photos():
 
     for index, job_id in enumerate(job_ids):
         url = await poll_job(job_id)
-
         img = requests.get(url)
 
         os.makedirs(SAVE_DIR, exist_ok=True)
-        path = os.path.join(
-            SAVE_DIR, f"ai_{int(time.time()*1000)}_{index}.png"
-        )
+        path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}_{index}.png")
 
         with open(path, "wb") as f:
             f.write(img.content)
@@ -200,6 +227,10 @@ async def generate_all_photos():
 
 
 async def regenerate_photo(index, current_specs):
+
+    if TEST_MODE:
+        return await generate_all_photos()
+
     side = current_specs[index]["side"]
     new_spec = get_next_spec(side)
 
