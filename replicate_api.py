@@ -10,15 +10,15 @@ REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
 FRONT_SCENES = [
-    "Standing next to a premium parked car with open door visible",
+    "Standing next to a premium parked car",
     "Inside a modern glass elevator",
-    "Standing in a clean urban street environment"
+    "Standing in a clean urban street"
 ]
 
 BACK_SCENES = [
-    "Modern city street with clean stone pavement",
-    "Underground parking level with smooth concrete floor",
-    "Contemporary business plaza with glass buildings"
+    "Modern city street with stone pavement",
+    "Underground parking level",
+    "Contemporary business plaza"
 ]
 
 FRONT_POSES = [
@@ -37,8 +37,7 @@ CURRENT_FRONT_INDEX = 0
 CURRENT_BACK_INDEX = 0
 
 
-# ---------------- SPEC ----------------
-
+# ---------- SPEC ----------
 def get_next_spec(side):
     global CURRENT_FRONT_INDEX, CURRENT_BACK_INDEX
 
@@ -62,8 +61,7 @@ def get_next_spec(side):
     }
 
 
-# ---------------- PROMPTS ----------------
-
+# ---------- PROMPTS ----------
 def build_front_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
     return (
@@ -74,7 +72,7 @@ def build_front_prompt(spec):
         "Subject occupies 80–85% of vertical frame height. "
         "No background blur. No bokeh. "
 
-        "Use the provided reference image as the exact hoodie source. "
+        "Use the provided reference image exactly as hoodie source. "
         "ABSOLUTE RULE: no kangaroo pocket. No front pouch. No zippers. No drawstrings. "
         "Preserve front chest logo exactly in size and placement. "
 
@@ -88,7 +86,7 @@ def build_front_prompt(spec):
 def build_back_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
     return (
-        "Ultra-realistic RAW 9:16 ultra-wide environmental photograph. "
+        "Ultra-wide environmental RAW 9:16 photograph. "
         "Sony A7R V, 35mm lens, f/11 aperture. "
         "Camera distance exactly 10 meters. "
         "Subject occupies approximately 20–25% of vertical frame height. "
@@ -96,15 +94,14 @@ def build_back_prompt(spec):
         "No close-up. No portrait framing. "
 
         "Black hoodie without pocket. "
-        "Hood fully up. Face not visible. "
+        "Hood up. Face not visible. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}."
     ) + uid
 
 
-# ---------------- POLZA ----------------
-
+# ---------- POLZA ----------
 def submit_job(prompt, image_url):
     polza_key = os.getenv("POLZA_API_KEY")
 
@@ -133,7 +130,7 @@ def submit_job(prompt, image_url):
     job_id = data.get("id") or data.get("task_id")
 
     if not job_id:
-        raise Exception(f"Polza did not return job_id: {data}")
+        raise Exception(f"Polza error: {data}")
 
     return job_id
 
@@ -141,26 +138,23 @@ def submit_job(prompt, image_url):
 def extract_url(obj):
     if isinstance(obj, str) and obj.startswith("http"):
         return obj
-
     if isinstance(obj, list):
         for item in obj:
-            result = extract_url(item)
-            if result:
-                return result
-
+            found = extract_url(item)
+            if found:
+                return found
     if isinstance(obj, dict):
         for value in obj.values():
-            result = extract_url(value)
-            if result:
-                return result
-
+            found = extract_url(value)
+            if found:
+                return found
     return None
 
 
 async def poll_job(job_id):
     polza_key = os.getenv("POLZA_API_KEY")
 
-    MAX_WAIT = 900
+    MAX_WAIT = 600
     INTERVAL = 5
     waited = 0
 
@@ -179,16 +173,14 @@ async def poll_job(job_id):
         print("POLL RESPONSE:", data)
 
         url = extract_url(data)
-
         if url:
             print("✅ URL FOUND:", url)
             return url
 
-    raise Exception("Polza did not return image URL in time")
+    raise Exception("Generation timeout")
 
 
-# ---------------- GENERATION ----------------
-
+# ---------- GENERATE ----------
 async def generate_all_photos():
 
     specs = [
@@ -215,9 +207,7 @@ async def generate_all_photos():
     paths = []
 
     for index, job_id in enumerate(job_ids):
-
         url = await poll_job(job_id)
-
         img = requests.get(url)
 
         os.makedirs(SAVE_DIR, exist_ok=True)
@@ -234,7 +224,6 @@ async def generate_all_photos():
 
 
 async def regenerate_photo(index, current_specs):
-
     side = current_specs[index]["side"]
     spec = get_next_spec(side)
 
@@ -249,9 +238,7 @@ async def regenerate_photo(index, current_specs):
     img = requests.get(url)
 
     os.makedirs(SAVE_DIR, exist_ok=True)
-    path = os.path.join(
-        SAVE_DIR, f"ai_{int(time.time()*1000)}_regen.png"
-    )
+    path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}_regen.png")
 
     with open(path, "wb") as f:
         f.write(img.content)
