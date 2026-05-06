@@ -17,7 +17,7 @@ FRONT_SCENES = [
 
 BACK_SCENES = [
     "Modern city street with stone pavement",
-    "Underground parking level with smooth concrete floor",
+    "Underground parking level",
     "Contemporary business plaza"
 ]
 
@@ -66,19 +66,22 @@ def get_next_spec(side):
 
 def build_front_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
+
     return (
         "Ultra-realistic RAW 9:16 portrait photograph. "
         "Sony A7R V, 35mm lens, f/11 aperture. "
         "Camera distance exactly 0.7 meters. "
         "Framing from head to knees. "
-        "Subject occupies 80–85% of vertical frame height. "
-        "No background blur. No bokeh. "
+        "Subject occupies approximately 80–85 percent of vertical frame height. "
+        "No background blur. "
 
-        "Use the provided reference image exactly as hoodie source. "
+        "Use the reference image exactly as hoodie source. "
         "ABSOLUTE RULE: no kangaroo pocket. No front pouch. No zippers. No drawstrings. "
         "Preserve front chest logo exactly in size and placement. "
 
-        "Loose straight wide-leg black denim jeans. Not slim fit. "
+        "Loose straight wide-leg black denim jeans. "
+        "Clearly wide silhouette around thighs and calves. "
+        "Not slim fit. Not skinny. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}."
@@ -87,15 +90,17 @@ def build_front_prompt(spec):
 
 def build_back_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
+
     return (
         "Ultra-realistic RAW 9:16 environmental photograph. "
         "Sony A7R V, 35mm lens, f/11 aperture. "
         "Camera distance exactly 10 meters. "
-        "Subject occupies approximately 20–25% of vertical frame height. "
-        "The environment dominates the frame. "
+        "Subject occupies approximately 18–22 percent of vertical frame height. "
+        "The environment remains clearly visible. "
         "No close-up. No portrait framing. "
 
         "Black hoodie without pocket. "
+        "Loose straight wide black jeans silhouette. "
         "Hood up. Face not visible. "
 
         f"Scene: {spec['scene']}. "
@@ -208,7 +213,6 @@ async def generate_all_photos():
 
     for index, job_id in enumerate(job_ids):
         url = await poll_job(job_id)
-
         img = requests.get(url)
 
         os.makedirs(SAVE_DIR, exist_ok=True)
