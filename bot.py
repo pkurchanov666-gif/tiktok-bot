@@ -1,5 +1,5 @@
 import logging
-import asyncio
+import random
 from telegram import (
     Update,
     InlineKeyboardButton,
@@ -14,11 +14,19 @@ from telegram.ext import (
 )
 
 from config import BOT_TOKEN
+from slides import get_random_photos, create_slides
 from replicate_api import generate_all_photos, regenerate_photo
 
 logging.basicConfig(level=logging.INFO)
 
 USER_DATA = {}
+
+POV_PHRASES = [
+    "POV: аура того самого парня",
+    "POV: дисциплина и характер",
+    "POV: энергия уверенности",
+    "POV: спокойствие и контроль"
+]
 
 
 # ---------------- UTILS ----------------
@@ -29,7 +37,11 @@ def get_user_storage(user_id):
     return USER_DATA[user_id]
 
 
-def build_keyboard(count):
+def get_random_caption():
+    return random.choice(POV_PHRASES)
+
+
+def build_ai_keyboard(count):
     buttons = [
         InlineKeyboardButton(f"🔄 {i+1}", callback_data=f"regen_{i}")
         for i in range(count)
@@ -37,7 +49,9 @@ def build_keyboard(count):
     return InlineKeyboardMarkup([buttons])
 
 
-async def send_gallery(context, user_id, paths):
+# ---------------- SEND MEDIA ----------------
+
+async def send_media(context, user_id, paths):
     media = []
     opened_files = []
 
@@ -47,10 +61,7 @@ async def send_gallery(context, user_id, paths):
             opened_files.append(f)
             media.append(InputMediaPhoto(f))
 
-        await context.bot.send_media_group(
-            chat_id=user_id,
-            media=media
-        )
+        await context.bot.send_media_group(chat_id=user_id, media=media)
 
     finally:
         for f in opened_files:
@@ -60,9 +71,31 @@ async def send_gallery(context, user_id, paths):
                 pass
 
 
-# ---------------- BACKGROUND TASKS ----------------
+# ---------------- SLIDES MODE ----------------
 
-async def background_generate(context, user_id):
+async def generate_slides(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    user_id = query.from_user.id
+    caption = get_random_caption()
+
+    await query.edit_message_text("📸 Генерация слайдов...")
+
+    photos = get_random_photos()
+    paths = create_slides(caption, user_id, photos)
+
+    await send_media(context, user_id, paths)
+
+    await context.bot.send_message(
+        chat_id=user_id,
+        text="✅ Слайды готовы"
+    )
+
+
+# ---------------- AI MODE ----------------
+
+async def background_ai_generate(context, user_id):
     try:
         paths, specs = await generate_all_photos()
 
@@ -77,12 +110,12 @@ async def background_generate(context, user_id):
         storage["paths"] = paths
         storage["specs"] = specs
 
-        await send_gallery(context, user_id, paths)
+        await send_media(context, user_id, paths)
 
         await context.bot.send_message(
             chat_id=user_id,
-            text="✅ Готово",
-            reply_markup=build_keyboard(len(paths))
+            text="✅ AI фотосессия готова",
+            reply_markup=build_ai_keyboard(len(paths))
         )
 
     except Exception as e:
@@ -92,95 +125,76 @@ async def background_generate(context, user_id):
         )
 
 
-async def background_regenerate(context, user_id, index):
-    try:
-        storage = get_user_storage(user_id)
-
-        if "paths" not in storage:
-            await context.bot.send_message(
-                chat_id=user_id,
-                text="❌ Сначала сгенерируй фото"
-            )
-            return
-
-        new_path, new_spec = await regenerate_photo(index, storage["specs"])
-
-        storage["paths"][index] = new_path
-        storage["specs"][index] = new_spec
-
-        await send_gallery(context, user_id, storage["paths"])
-
-        await context.bot.send_message(
-            chat_id=user_id,
-            text=f"✅ Фото {index+1} обновлено",
-            reply_markup=build_keyboard(len(storage["paths"]))
-        )
-
-    except Exception as e:
-        await context.bot.send_message(
-            chat_id=user_id,
-            text=f"❌ Ошибка: {e}"
-        )
-
-
-# ---------------- HANDLERS ----------------
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📸 AI Фотосессия", callback_data="generate")]
-    ])
-
-    await update.message.reply_text(
-        "Выберите действие:",
-        reply_markup=keyboard
-    )
-
-
-async def generate_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def ai_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
     user_id = query.from_user.id
 
-    await query.edit_message_text(
-        "⏳ Генерация 3 фото... Подожди 1–3 минуты."
-    )
+    await query.edit_message_text("⏳ Запуск AI генерации...")
 
-    # Важно: используем application.create_task
     context.application.create_task(
-        background_generate(context, user_id)
+        background_ai_generate(context, user_id)
     )
 
 
-async def regenerate_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def regen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
     user_id = query.from_user.id
     index = int(query.data.replace("regen_", ""))
 
+    storage = get_user_storage(user_id)
+
+    if "paths" not in storage:
+        await context.bot.send_message(
+            chat_id=user_id,
+            text="❌ Сначала сгенерируй AI фотосессию"
+        )
+        return
+
     await context.bot.send_message(
         chat_id=user_id,
         text=f"🔄 Перегенерация фото {index+1}..."
     )
 
-    context.application.create_task(
-        background_regenerate(context, user_id, index)
+    new_path, new_spec = await regenerate_photo(index, storage["specs"])
+
+    storage["paths"][index] = new_path
+    storage["specs"][index] = new_spec
+
+    await send_media(context, user_id, storage["paths"])
+
+
+# ---------------- START ----------------
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🎬 Слайды", callback_data="slides")],
+        [InlineKeyboardButton("📸 AI Фотосессия", callback_data="ai")]
+    ])
+
+    await update.message.reply_text(
+        "Выберите режим:",
+        reply_markup=keyboard
     )
 
 
 # ---------------- MAIN ----------------
 
 def main():
+
     app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(generate_handler, pattern="^generate$"))
-    app.add_handler(CallbackQueryHandler(regenerate_handler, pattern="^regen_"))
+    app.add_handler(CallbackQueryHandler(generate_slides, pattern="^slides$"))
+    app.add_handler(CallbackQueryHandler(ai_handler, pattern="^ai$"))
+    app.add_handler(CallbackQueryHandler(regen_handler, pattern="^regen_"))
 
     print("Бот погнал!")
 
-    # Используем polling (без webhook)
     app.run_polling()
 
 
