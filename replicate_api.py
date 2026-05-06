@@ -17,7 +17,7 @@ FRONT_SCENES = [
 
 BACK_SCENES = [
     "Modern city street with stone pavement",
-    "Underground parking level",
+    "Underground parking level with smooth concrete floor",
     "Contemporary business plaza"
 ]
 
@@ -37,7 +37,8 @@ CURRENT_FRONT_INDEX = 0
 CURRENT_BACK_INDEX = 0
 
 
-# ---------- SPEC ----------
+# ---------------- SPEC ----------------
+
 def get_next_spec(side):
     global CURRENT_FRONT_INDEX, CURRENT_BACK_INDEX
 
@@ -61,7 +62,8 @@ def get_next_spec(side):
     }
 
 
-# ---------- PROMPTS ----------
+# ---------------- PROMPTS ----------------
+
 def build_front_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
     return (
@@ -86,7 +88,7 @@ def build_front_prompt(spec):
 def build_back_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
     return (
-        "Ultra-wide environmental RAW 9:16 photograph. "
+        "Ultra-realistic RAW 9:16 environmental photograph. "
         "Sony A7R V, 35mm lens, f/11 aperture. "
         "Camera distance exactly 10 meters. "
         "Subject occupies approximately 20–25% of vertical frame height. "
@@ -101,7 +103,8 @@ def build_back_prompt(spec):
     ) + uid
 
 
-# ---------- POLZA ----------
+# ---------------- POLZA ----------------
+
 def submit_job(prompt, image_url):
     polza_key = os.getenv("POLZA_API_KEY")
 
@@ -125,8 +128,6 @@ def submit_job(prompt, image_url):
     )
 
     data = response.json()
-    print("SUBMIT RESPONSE:", data)
-
     job_id = data.get("id") or data.get("task_id")
 
     if not job_id:
@@ -170,17 +171,16 @@ async def poll_job(job_id):
         )
 
         data = response.json()
-        print("POLL RESPONSE:", data)
-
         url = extract_url(data)
+
         if url:
-            print("✅ URL FOUND:", url)
             return url
 
     raise Exception("Generation timeout")
 
 
-# ---------- GENERATE ----------
+# ---------------- GENERATION ----------------
+
 async def generate_all_photos():
 
     specs = [
@@ -208,6 +208,7 @@ async def generate_all_photos():
 
     for index, job_id in enumerate(job_ids):
         url = await poll_job(job_id)
+
         img = requests.get(url)
 
         os.makedirs(SAVE_DIR, exist_ok=True)
