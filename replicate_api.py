@@ -9,28 +9,32 @@ SAVE_DIR = "generations"
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
+# ---------------- СЦЕНЫ ----------------
+
 FRONT_SCENES = [
-    "Standing next to a premium parked car",
-    "Inside a modern glass elevator",
-    "Standing in a clean urban street"
+    "Standing next to a premium parked car on an empty parking lot",
+    "Standing in a clean minimalist urban street, modern architecture behind",
+    "Standing in front of a luxury building entrance, glass doors behind"
 ]
 
 BACK_SCENES = [
-    "Modern city street with stone pavement",
-    "Underground parking level",
-    "Contemporary business plaza"
+    # Убрал лифт — модель рисует его крупно
+    "Wide open modern city street with stone pavement, shot from far distance",
+    "Large underground parking garage, wide space, concrete pillars",
+    "Contemporary business plaza, wide open area with fountain",
+    "Wide empty rooftop terrace of a skyscraper, city skyline behind"
 ]
 
 FRONT_POSES = [
     "right hand gripping the hood near the temple, left hand in jeans pocket",
-    "both hands adjusting the hood",
-    "right hand pulling hood slightly forward"
+    "both hands adjusting the hood from the front",
+    "right hand pulling hood slightly forward, chin slightly down"
 ]
 
 BACK_POSES = [
-    "right hand resting on the back of the hood",
-    "walking away with hood up",
-    "standing still facing away"
+    "standing completely still, arms relaxed at sides, facing away",
+    "slowly walking away from camera, natural stride",
+    "right hand resting on the back of the hood, facing away"
 ]
 
 CURRENT_FRONT_INDEX = 0
@@ -62,7 +66,7 @@ def get_next_spec(side):
     }
 
 
-# ---------------- PROMPTS ----------------
+# ---------------- ПРОМПТЫ ----------------
 
 def build_front_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
@@ -70,21 +74,21 @@ def build_front_prompt(spec):
     return (
         "Ultra-realistic RAW 9:16 portrait photograph. "
         "Sony A7R V, 35mm lens, f/11 aperture. "
-        "Camera distance exactly 0.7 meters. "
-        "Framing from head to knees. "
-        "Subject occupies approximately 80–85 percent of vertical frame height. "
-        "No background blur. "
+        "Camera placed exactly 0.7 meters from subject. "
+        "Framing from top of head to knees, nothing more. "
+        "Subject occupies 80 to 85 percent of vertical frame height. "
+        "Sharp background, no bokeh, no blur. "
 
-        "Use the reference image exactly as hoodie source. "
-        "ABSOLUTE RULE: no kangaroo pocket. No front pouch. No zippers. No drawstrings. "
-        "Preserve front chest logo exactly in size and placement. "
+        "Hoodie copied exactly from reference image. "
+        "STRICT: absolutely no kangaroo pocket, no front pouch, no zipper, no drawstrings visible. "
+        "Front chest logo preserved exactly — same size, same position. "
 
-        "Loose straight wide-leg black denim jeans. "
-        "Clearly wide silhouette around thighs and calves. "
-        "Not slim fit. Not skinny. "
+        "Bottoms: loose straight wide-leg black denim jeans. "
+        "Clearly baggy silhouette around thighs and calves. "
+        "Not slim fit. Not skinny jeans. Not tapered. "
 
         f"Scene: {spec['scene']}. "
-        f"Pose: {spec['pose']}."
+        f"Pose: {spec['pose']}. "
     ) + uid
 
 
@@ -92,19 +96,32 @@ def build_back_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
-        "Ultra-realistic RAW 9:16 environmental photograph. "
-        "Sony A7R V, 35mm lens, f/11 aperture. "
-        "Camera distance exactly 10 meters. "
-        "Subject occupies approximately 18–22 percent of vertical frame height. "
-        "The environment remains clearly visible. "
-        "No close-up. No portrait framing. "
+        "Ultra-realistic RAW 9:16 environmental street photograph. "
+        "Sony A7R V, 24mm wide-angle lens, f/11 aperture. "
 
-        "Black hoodie without pocket. "
-        "Loose straight wide black jeans silhouette. "
-        "Hood up. Face not visible. "
+        # Главное — расстояние и размер фигуры
+        "CRITICAL: camera is placed very far from the subject, minimum 15 to 20 meters away. "
+        "CRITICAL: the human figure must be very small — occupying only 15 to 20 percent "
+        "of the total vertical frame height. "
+        "CRITICAL: do not crop. Do not zoom in. Do not fill frame with the person. "
+        "The person is a small silhouette inside a large environment. "
+
+        # Окружение важнее персонажа
+        "The environment, architecture and background occupy at least 80 percent of the frame. "
+        "Show the full width and depth of the location. "
+        "Large open space. Strong sense of depth and distance. "
+
+        # Персонаж
+        "Person: wearing a plain black hoodie with hood up, face completely hidden. "
+        "Loose wide black jeans. "
+        "Viewed entirely from behind. No face visible at any angle. "
+
+        # Стиль
+        "Cinematic mood. Natural lighting. Sharp everywhere. No blur. "
+        "No portrait framing. No close-up. Wide establishing shot. "
 
         f"Scene: {spec['scene']}. "
-        f"Pose: {spec['pose']}."
+        f"Pose: {spec['pose']}. "
     ) + uid
 
 
@@ -176,9 +193,8 @@ async def poll_job(job_id):
         )
 
         data = response.json()
-
-        # Пропускаем ссылки на сами референсы чтобы не вернуть input вместо output
         url = extract_url(data)
+
         if url and "ibb.co" not in url:
             return url
 
@@ -203,7 +219,6 @@ async def generate_all_photos():
         get_next_spec("back")
     ]
 
-    # Сабмитим все джобы подряд
     job_ids = []
 
     for i, spec in enumerate(specs):
@@ -218,18 +233,15 @@ async def generate_all_photos():
         if i < len(specs) - 1:
             await asyncio.sleep(3)
 
-    # Поллим все джобы параллельно
+    # Поллим параллельно
     urls = await asyncio.gather(*[poll_job(job_id) for job_id in job_ids])
 
-    # Скачиваем все фото
     paths = []
-
     for index, url in enumerate(urls):
         path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}_{index}.png")
         await download_image(url, path)
         paths.append(path)
 
-    # Возвращаем paths, specs, urls — urls нужны для Buffer
     return paths, specs, list(urls)
 
 
@@ -248,5 +260,4 @@ async def regenerate_photo(index, current_specs):
     path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}_regen.png")
     await download_image(url, path)
 
-    # Возвращаем path, spec, url — url нужен чтобы обновить storage["urls"]
     return path, spec, url
