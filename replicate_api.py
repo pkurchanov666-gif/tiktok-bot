@@ -13,154 +13,149 @@ REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
 FRONT_SCENES = [
     {
-        "scene": "standing next to a matte black luxury SUV on a quiet city street at golden hour, "
-                 "warm light reflecting on the car surface and wet asphalt",
+        "scene": "standing next to a matte black luxury SUV on a quiet empty city street at golden hour, "
+                 "warm light reflecting on the car surface and wet asphalt below, "
+                 "clean urban architecture visible in the background",
         "light": "warm golden side light from low sun on the left, "
                  "soft natural shadow falling to the right, "
-                 "slight warm reflection bouncing up from wet ground"
+                 "slight warm reflection bouncing up from wet ground, "
+                 "light catches the fabric texture of the hoodie naturally"
     },
     {
         "scene": "standing on a wide empty pedestrian street at blue hour, "
-                 "modern glass buildings on both sides, soft city glow ahead",
+                 "modern glass buildings lining both sides, "
+                 "clean stone pavement below, soft city glow ahead",
         "light": "cool natural blue hour ambient light from open sky above, "
-                 "subtle warm accent from distant streetlights, "
-                 "soft even illumination with no harsh shadows"
+                 "subtle warm accent from distant streetlights ahead, "
+                 "soft even illumination revealing fabric texture clearly, "
+                 "no harsh shadows, natural light wrapping around the figure"
     },
     {
-        "scene": "standing in front of a large glass office building at dusk, "
-                 "warm interior lights glowing through the glass facade behind",
-        "light": "warm ambient glow coming through glass behind as soft backlight, "
-                 "cool blue dusk sky light as front fill, "
-                 "natural rim light on shoulders from building glow"
+        "scene": "standing on a wide modern bridge with clean concrete railings at dusk, "
+                 "calm river below, city skyline glowing softly on the horizon",
+        "light": "soft diffused dusk light from horizon ahead, "
+                 "subtle warm city glow reflecting from water below, "
+                 "even cool ambient light from open sky above, "
+                 "light falls naturally on fabric showing full texture detail"
     },
     {
-        "scene": "standing beside a concrete pillar in a modern open plaza at golden hour, "
-                 "long shadows across stone pavement, warm late sun visible ahead",
-        "light": "warm directional golden hour sunlight from the right side, "
-                 "long natural shadow cast to the left on pavement, "
-                 "warm ambient fill from sky above"
+        "scene": "standing in a clean open-air multi-level parking structure at night, "
+                 "city lights visible through the open concrete barriers behind, "
+                 "smooth concrete floor below",
+        "light": "cool overhead parking lights falling straight down on the subject, "
+                 "soft ambient bounce from concrete walls and floor, "
+                 "warm city glow coming through barriers from behind, "
+                 "overhead light reveals hoodie fabric weave and texture sharply"
     },
     {
-        "scene": "standing on a wide empty bridge over a calm river at dusk, "
-                 "city lights beginning to reflect in the water below, "
-                 "soft purple and orange sky on the horizon",
-        "light": "soft diffused dusk light from the horizon ahead, "
-                 "subtle warm reflections rising from river surface below, "
-                 "even cool ambient light from sky above"
+        "scene": "standing on a clean empty city plaza at golden hour, "
+                 "large modern building facade behind, "
+                 "wide stone pavement stretching to both sides",
+        "light": "warm directional golden hour sunlight from the right, "
+                 "long natural shadow cast to the left on stone pavement, "
+                 "warm light raking across hoodie fabric revealing full texture, "
+                 "warm ambient sky fill from above"
     },
     {
-        "scene": "standing at the entrance of a modern underground parking ramp, "
-                 "geometric ceiling lights overhead, smooth concrete walls on both sides",
-        "light": "cool overhead fluorescent lights falling straight down on the subject, "
-                 "soft ambient bounce from concrete walls on both sides, "
-                 "clean even lighting with soft shadows directly below feet"
+        "scene": "standing on a wide empty urban embankment at blue hour, "
+                 "calm river visible to the side, "
+                 "clean modern city architecture behind",
+        "light": "cool blue hour ambient light from open sky above, "
+                 "subtle warm reflections from water surface, "
+                 "soft even natural illumination across fabric and scene, "
+                 "gentle light showing cotton hoodie texture clearly"
     },
     {
-        "scene": "standing on an empty rooftop terrace at night, "
-                 "illuminated city skyline stretching across the background at horizon level",
-        "light": "soft ambient city glow from skyline behind as wide backlight, "
-                 "cool dark sky light from above as subtle fill, "
-                 "natural nighttime atmosphere with no artificial flash"
-    },
-    {
-        "scene": "standing in a wide concrete tunnel underpass at night, "
-                 "warm ceiling lights lining the tunnel symmetrically, "
-                 "light pooling naturally on the ground",
-        "light": "warm overhead tunnel lights illuminating subject from above and slightly ahead, "
-                 "natural soft shadows falling directly below, "
+        "scene": "standing in a wide clean concrete tunnel underpass at night, "
+                 "warm ceiling lights lining the tunnel symmetrically above, "
+                 "smooth tunnel floor below reflecting light",
+        "light": "warm overhead tunnel lights illuminating subject from directly above, "
+                 "natural soft shadows falling below, "
+                 "overhead light hitting hoodie fabric at an angle revealing texture weave, "
                  "warm ambient bounce from concrete walls"
     },
     {
-        "scene": "standing at the entrance of a luxury apartment building at night, "
-                 "warm marble lobby visible through glass doors behind, "
-                 "clean stone steps below",
-        "light": "warm interior light spilling outward through glass as soft backlight, "
-                 "cool ambient night air light as front fill, "
-                 "gentle natural side shadow from building frame"
-    },
-    {
-        "scene": "standing on a quiet cobblestone alley in a modern city district at night, "
-                 "warm light from nearby shops softly illuminating the stone pavement",
-        "light": "warm scattered ambient light from shop windows on both sides, "
-                 "soft even illumination with no harsh direct light source, "
-                 "golden warm tones reflecting naturally on cobblestone below"
+        "scene": "standing on a clean empty rooftop parking level at night, "
+                 "city skyline stretching across the full background at horizon level, "
+                 "smooth rooftop floor clearly visible below feet",
+        "light": "soft wide ambient backlight from illuminated city skyline behind, "
+                 "cool dark sky light from above as subtle fill on fabric, "
+                 "rim lighting on shoulders from city glow behind, "
+                 "natural nighttime atmosphere"
     }
 ]
 
 BACK_SCENES = [
     {
-        "scene": "walking slowly away on a wide empty pedestrian street at blue hour, "
-                 "modern city buildings lining both sides, soft city lights beginning to glow",
+        "scene": "standing still on a wide empty city street at blue hour, "
+                 "modern buildings lining both sides creating strong perspective depth, "
+                 "clean stone pavement stretching far ahead, "
+                 "person is a small clear silhouette deep in the wide urban space",
         "light": "cool natural blue hour ambient light from open sky above, "
-                 "warm distant streetlight glow ahead in the distance, "
-                 "soft natural shadows on the pavement below"
+                 "warm distant streetlight glow far ahead, "
+                 "soft natural shadows on the wide pavement below"
     },
     {
-        "scene": "standing still on a wide urban embankment facing a calm river at dusk, "
-                 "city skyline glowing softly across the water in the distance",
-        "light": "soft warm dusk light from the horizon ahead as front ambient, "
-                 "subtle warm reflections from water surface below, "
-                 "even cool sky light from above as fill"
-    },
-    {
-        "scene": "walking away through a wide underground parking garage, "
-                 "fluorescent ceiling lights overhead, concrete pillars on both sides",
-        "light": "cool overhead fluorescent lighting falling evenly on subject from above, "
-                 "soft ambient bounce light from concrete floor and walls, "
-                 "clean shadows falling directly below the figure"
-    },
-    {
-        "scene": "standing on an empty wide city plaza at golden hour, "
-                 "modern architecture surrounding the open space, "
-                 "long natural shadows across stone pavement",
-        "light": "warm directional golden hour sunlight from the right side, "
-                 "long soft natural shadow stretching to the left on pavement, "
-                 "warm ambient sky fill from above"
-    },
-    {
-        "scene": "walking away along a long straight city avenue at dusk, "
-                 "rows of trees and buildings on both sides creating natural symmetry",
+        "scene": "walking away across a wide modern bridge at dusk, "
+                 "clean concrete railings on both sides, "
+                 "calm river and city skyline visible far beyond, "
+                 "person small and naturally placed in the wide open bridge space",
         "light": "soft diffused dusk ambient light from open sky above, "
-                 "warm streetlights beginning to glow ahead, "
-                 "even natural cinematic lighting with soft shadows"
+                 "subtle warm city glow from horizon far ahead, "
+                 "gentle reflections from water surface below"
     },
     {
-        "scene": "standing on an empty rooftop terrace at night, "
-                 "illuminated city skyline across the full horizon behind, "
-                 "rooftop floor surface clearly visible below feet",
-        "light": "wide soft backlight from illuminated city skyline behind, "
-                 "subtle cool dark sky light from above, "
-                 "natural nighttime atmosphere no artificial flash"
+        "scene": "standing in a vast open-air parking lot at night, "
+                 "clean asphalt stretching far in all directions, "
+                 "city lights glowing beyond the parking perimeter far away, "
+                 "person small and clearly readable in the vast empty space",
+        "light": "cool overhead parking lot lights falling evenly from above, "
+                 "soft ambient bounce from wide asphalt surface, "
+                 "warm city glow from far beyond the parking perimeter"
     },
     {
-        "scene": "walking away through a wide concrete tunnel underpass at night, "
-                 "warm ceiling lights lining the tunnel ahead, "
-                 "light reflecting naturally on the smooth tunnel floor",
-        "light": "warm overhead tunnel ceiling lights illuminating subject evenly from above, "
-                 "natural light pools on floor ahead creating depth, "
-                 "soft warm ambient bounce from tunnel walls"
+        "scene": "walking away along a wide empty urban embankment at golden hour, "
+                 "calm river stretching far on one side, "
+                 "clean city architecture far on the other, "
+                 "person naturally small in the vast wide open embankment space",
+        "light": "warm golden hour sunlight from the right side, "
+                 "long natural shadows stretching far to the left, "
+                 "soft warm reflection from the river surface"
     },
     {
-        "scene": "standing at the far end of a wide courtyard between modern office buildings at dusk, "
-                 "warm building windows glowing around the open space",
-        "light": "warm ambient glow from surrounding building windows on all sides, "
-                 "soft even diffused dusk light from open sky above, "
-                 "gentle natural shadows on the ground below"
+        "scene": "standing in a massive underground parking garage at night, "
+                 "concrete pillars lining both sides creating strong perspective depth far ahead, "
+                 "fluorescent ceiling lights stretching far into the distance, "
+                 "person small and clearly visible deep in the wide garage corridor",
+        "light": "cool overhead fluorescent lights falling evenly from above, "
+                 "soft ambient bounce from concrete floor and walls, "
+                 "clean even lighting with soft shadows below feet"
     },
     {
-        "scene": "walking away on a quiet cobblestone street at night, "
-                 "warm light from shops and streetlamps softly illuminating the scene",
-        "light": "warm scattered ambient light from street lamps and shop windows, "
-                 "soft golden reflections on wet cobblestone below, "
-                 "even warm natural atmosphere no flash"
+        "scene": "walking away along a long straight empty city avenue at dusk, "
+                 "rows of trees and modern buildings creating natural symmetry far on both sides, "
+                 "person small and naturally placed far down the wide long avenue",
+        "light": "soft diffused dusk ambient light from open sky above, "
+                 "warm streetlights beginning to glow far ahead in the distance, "
+                 "even natural cinematic lighting"
     },
     {
-        "scene": "standing on a wide modern bridge over a river at blue hour, "
-                 "city lights reflected in calm water below, "
-                 "soft purple and orange tones on the horizon ahead",
-        "light": "soft diffused blue hour ambient light from open sky above, "
-                 "warm reflections from city lights on water below as subtle fill, "
-                 "even natural cinematic dusk lighting"
+        "scene": "standing on a wide open rooftop terrace at night, "
+                 "full illuminated city skyline stretching across the entire background at horizon level far behind, "
+                 "clean rooftop floor surface visible below feet and all around the figure, "
+                 "person small against the vast wide city backdrop",
+        "light": "wide soft ambient backlight from the full illuminated city skyline far behind, "
+                 "cool dark sky from above as subtle fill, "
+                 "natural nighttime cinematic atmosphere"
+    },
+    {
+        "scene": "walking away through a vast clean concrete plaza between tall modern office towers, "
+                 "towers rising very high on both sides far above, "
+                 "wide open stone pavement stretching all around, "
+                 "person small and naturally integrated in the massive open urban space",
+        "light": "soft even overcast daylight from open sky above, "
+                 "subtle ambient bounce from stone pavement and tall tower facades, "
+                 "clean natural diffused lighting with soft shadows"
     }
 ]
 
@@ -173,7 +168,7 @@ FRONT_POSES = [
 BACK_POSES = [
     "standing completely still, arms relaxed at sides, facing away",
     "slowly walking away from camera, natural stride",
-    "right hand resting on the back of the hood, facing away"
+    "right hand resting loosely on the back of the hood, facing away"
 ]
 
 CURRENT_FRONT_INDEX = 0
@@ -206,6 +201,60 @@ def get_next_spec(side):
     }
 
 
+def get_unique_specs():
+    global CURRENT_FRONT_INDEX, CURRENT_BACK_INDEX
+
+    used_scenes = set()
+    specs = []
+    sides = ["back", "front", "back"]
+
+    for side in sides:
+        attempts = 0
+        chosen = None
+
+        while attempts < 30:
+            if side == "front":
+                scene_data = random.choice(FRONT_SCENES)
+                pose = FRONT_POSES[CURRENT_FRONT_INDEX % len(FRONT_POSES)]
+                CURRENT_FRONT_INDEX += 1
+                ref = REF_FRONT
+            else:
+                scene_data = random.choice(BACK_SCENES)
+                pose = BACK_POSES[CURRENT_BACK_INDEX % len(BACK_POSES)]
+                CURRENT_BACK_INDEX += 1
+                ref = REF_BACK
+
+            scene_key = scene_data["scene"][:60]
+
+            if scene_key not in used_scenes:
+                used_scenes.add(scene_key)
+                chosen = {
+                    "side": side,
+                    "scene": scene_data["scene"],
+                    "light": scene_data["light"],
+                    "pose": pose,
+                    "seed": random.randint(100000, 999999),
+                    "ref": ref
+                }
+                break
+
+            attempts += 1
+
+        if chosen is None:
+            chosen = {
+                "side": side,
+                "scene": scene_data["scene"],
+                "light": scene_data["light"],
+                "pose": pose,
+                "seed": random.randint(100000, 999999),
+                "ref": ref
+            }
+
+        specs.append(chosen)
+
+    return specs
+
+
 # ---------------- ПРОМПТЫ ----------------
 
 def build_front_prompt(spec):
@@ -214,36 +263,55 @@ def build_front_prompt(spec):
     return (
         "Ultra-realistic RAW 9:16 photograph. "
         "Looks exactly like a real photo taken by a photographer on location. "
-        "Sony A7R V, 35mm lens, f/8 aperture. "
-        "Camera at eye level. Straight-on angle. "
-        "No tilt. No high angle. No low angle. "
-        "Camera distance 1.5 meters from subject. "
+        "Shot on Sony A7R V, 35mm lens, f/8 aperture, ISO 400. "
+        "Camera at eye level. Straight-on angle. No tilt. No high angle. No low angle. "
+        "Camera distance exactly 1.0 meter from subject. "
+        "Framing from top of head to exactly the knees. "
+        "Cut off exactly at the knees — not higher, not lower. "
+        "Subject occupies 80 to 85 percent of the vertical frame height. "
 
-        "Framing from top of head to just below the knees. "
-        "Subject occupies 65 to 70 percent of vertical frame height. "
+        # Единство с фоном
+        "The subject is a natural part of the real scene. "
+        "Subject and background are one single unified photograph. "
+        "Not isolated. Not composited. Not cut out from background. "
+        "Background is sharp, fully detailed, naturally rendered like a real location. "
+        "Deep depth of field. No bokeh. No blur anywhere in the image. "
 
-        "The subject is fully part of the real environment. "
-        "The person and the background are one single unified photograph. "
-        "Not isolated. Not composited. Not cut out. "
-        "Background is fully sharp, detailed, naturally rendered. "
-        "Looks like a real location, not a backdrop. "
-        "Deep depth of field. No bokeh. No blur anywhere. "
-
+        # Свет — максимально реалистичный
         f"Lighting: {spec['light']}. "
-        "Light source is physically real and consistent across the entire image. "
-        "The light falls on the subject from the exact same source as the environment. "
-        "Shadows on the subject match shadows in the scene perfectly. "
-        "Light wraps naturally around the figure. "
-        "No studio flash. No artificial light added separately. "
-        "No overexposed face. No flat lighting. "
-        "Skin tones and fabric tones react naturally to the light source. "
+        "Lighting is physically accurate and fully consistent across the entire image. "
+        "The exact same light source illuminates both the subject and the environment. "
+        "Shadows on the subject match the shadows in the surrounding scene perfectly. "
+        "Light wraps naturally around the figure and the fabric. "
+        "No studio flash. No artificial separate light source. "
+        "No flat lighting. Natural realistic light behavior. "
 
-        "Hoodie from reference image exactly. "
-        "STRICT: no kangaroo pocket. No front pouch. No zipper. No drawstrings. "
-        "Front chest logo preserved exactly — same size, same position, same design. "
+        # Текстура ткани — максимальная детализация
+        "The hoodie fabric texture must be rendered with extreme photorealistic detail. "
+        "Every fiber, weave and stitch of the cotton fabric is clearly visible. "
+        "The fabric has natural micro-texture, subtle wrinkles and folds from real wear. "
+        "Light interacts physically with the fabric surface — "
+        "showing subtle sheen on raised fibers, soft shadows in fabric valleys. "
+        "The cotton material looks tactile and real — you can almost feel the texture. "
+        "No smooth plastic-looking fabric. No flat fabric rendering. "
+        "Maximum fabric realism as if shot with a macro lens on the clothing. "
 
-        "Loose straight wide-leg black denim jeans. "
-        "Baggy silhouette. Not slim. Not skinny. Not tapered. "
+        # Джинсы — обязательно широкие
+        "MANDATORY: extremely wide-leg loose straight black denim jeans. "
+        "The jeans must have a very clearly baggy and wide silhouette. "
+        "Wide around the entire leg — thighs, knees and calves all equally wide. "
+        "Heavy denim fabric with visible denim texture and natural folds at the ankles. "
+        "Not slim fit. Not skinny. Not tapered. Not straight regular fit. "
+        "Visibly and unmistakably wide-leg baggy jeans. "
+
+        # Худи — детальная прорисовка лого
+        "Hoodie taken exactly from reference image. "
+        "STRICT RULES FOR HOODIE: "
+        "absolutely no kangaroo pocket, no front pouch, no zipper, no drawstrings visible. "
+        "The front chest logo must be rendered with maximum sharpness and detail. "
+        "Logo size, position, font, design must match the reference exactly. "
+        "Logo must be clearly readable and sharp in the final image. "
+        "Do not blur, distort, resize or reinterpret the logo in any way. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
@@ -258,34 +326,45 @@ def build_back_prompt(spec):
         "Looks exactly like a real photo taken by a photographer standing on location. "
         "Sony A7R V, 35mm lens, f/8 aperture. "
 
-        "Camera held by a standing photographer at human eye level. "
+        # Камера строго горизонтально
+        "Camera held at normal human eye level by a standing photographer. "
         "Camera height exactly 1.6 meters from ground. "
-        "Camera pointing straight forward, perfectly parallel to ground. "
+        "Camera pointing straight forward, perfectly parallel to the ground. "
         "STRICT: no high angle. No top-down. No aerial. "
         "No drone. No elevated position. No tilt downward. "
-        "No surveillance angle. No bird eye view. "
+        "No surveillance angle. No bird eye view. No rooftop angle. "
 
-        "Camera distance 6 to 8 meters from subject. "
+        # Далеко
+        "Camera distance 12 to 15 meters from subject. "
         "Full body from top of head to feet completely visible. "
-        "Feet flat on ground, fully visible in frame. "
-        "Ground below feet visible — at least 10 percent of frame below feet. "
+        "Feet flat on the ground, fully visible in frame. "
+        "Ground clearly visible below feet — "
+        "at least 15 percent of frame height below the feet. "
         "Do not crop at ankles. Do not crop at shins. Do not crop at knees. "
-        "Subject occupies 28 to 35 percent of vertical frame height. "
+        "Subject occupies only 15 to 20 percent of the vertical frame height. "
+        "The person is a small but clearly readable figure in a large environment. "
+        "The surrounding environment dominates the frame. "
 
-        "The subject naturally belongs to the scene. "
-        "Background is sharp, detailed, fully rendered like a real location. "
+        "Background is sharp, fully detailed, naturally rendered. "
         "Deep depth of field. Everything in focus. No blur. "
 
+        # Свет
         f"Lighting: {spec['light']}. "
-        "Light source is physically real and consistent across the entire image. "
-        "Light falls on the subject from the exact same source as the environment. "
-        "Shadows on subject match shadows in the scene perfectly. "
+        "Lighting is physically accurate and consistent across the full image. "
+        "The same light source illuminates both the subject and the environment. "
+        "Shadows on the subject match the shadows in the scene perfectly. "
         "No studio flash. No artificial separate light. "
-        "Natural realistic light behavior across fabric and ground. "
 
-        "Black hoodie, no pocket. "
+        # Джинсы — обязательно широкие
+        "MANDATORY: extremely wide-leg loose straight black denim jeans. "
+        "Very clearly baggy and wide silhouette visible even from distance. "
+        "Wide around thighs, knees and calves equally. "
+        "Not slim. Not skinny. Not tapered. Visibly wide-leg. "
+
+        "Black hoodie with no pocket. "
         "Loose wide straight black jeans. "
-        "Hood up. Face completely hidden. Body seen entirely from behind. "
+        "Hood up. Face completely hidden. "
+        "Entire body seen from behind. No face visible. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
@@ -380,11 +459,7 @@ async def download_image(url, path):
 # ---------------- GENERATION ----------------
 
 async def generate_all_photos():
-    specs = [
-        get_next_spec("back"),
-        get_next_spec("front"),
-        get_next_spec("back")
-    ]
+    specs = get_unique_specs()
 
     job_ids = []
 
