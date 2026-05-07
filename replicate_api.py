@@ -9,7 +9,7 @@ SAVE_DIR = "generations"
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
-# ---------------- 10 ФОНОВ СПЕРЕДИ ----------------
+# ---------------- ФОНЫ СПЕРЕДИ ----------------
 
 FRONT_SCENES = [
     {
@@ -91,7 +91,7 @@ FRONT_SCENES = [
     }
 ]
 
-# ---------------- 9 ФОНОВ СЗАДИ ----------------
+# ---------------- ФОНЫ СЗАДИ ----------------
 
 BACK_SCENES = [
     {
@@ -171,14 +171,15 @@ BACK_SCENES = [
     }
 ]
 
-# ---------------- ПОЗЫ ----------------
+# ---------------- ПОЗЫ БЕЗ СКУКИ ----------------
 
 FRONT_POSES = [
     "right hand gripping hood edge near temple pulling it tighter, left hand in jeans pocket",
     "both hands adjusting hood from front pulling it forward over forehead",
     "right hand pulling hood down low, left hand gripping hoodie hem at the side",
     "right hand on hood near temple, left hand touching chest logo area lightly",
-    "right hand gripping back of hood from inside pulling it up, chin slightly down"
+    "left hand pulling hood edge forward, right hand hooked into jeans pocket",
+    "both hands holding both hood edges near the jawline, chin slightly down"
 ]
 
 BACK_POSES = [
@@ -419,13 +420,13 @@ def extract_url(obj):
 
 async def poll_job(job_id):
     polza_key = os.getenv("POLZA_API_KEY")
-    MAX_WAIT = 600
-    INTERVAL = 5
+    max_wait = 600
+    interval = 5
     waited = 0
 
-    while waited < MAX_WAIT:
-        await asyncio.sleep(INTERVAL)
-        waited += INTERVAL
+    while waited < max_wait:
+        await asyncio.sleep(interval)
+        waited += interval
 
         response = await asyncio.to_thread(
             requests.get,
@@ -436,6 +437,7 @@ async def poll_job(job_id):
 
         data = response.json()
         url = extract_url(data)
+
         if url and "ibb.co" not in url:
             return url
 
@@ -445,6 +447,7 @@ async def poll_job(job_id):
 async def download_image(url, path):
     response = await asyncio.to_thread(requests.get, url, timeout=60)
     os.makedirs(SAVE_DIR, exist_ok=True)
+
     with open(path, "wb") as f:
         f.write(response.content)
 
@@ -456,22 +459,18 @@ async def generate_all_photos():
     job_ids = []
 
     for i, spec in enumerate(specs):
-        if spec["side"] == "front":
-            prompt = build_front_prompt(spec)
-        else:
-            prompt = build_back_prompt(spec)
-
+        prompt = build_front_prompt(spec) if spec["side"] == "front" else build_back_prompt(spec)
         job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
         job_ids.append(job_id)
 
         if i < len(specs) - 1:
             await asyncio.sleep(3)
 
-    urls = await asyncio.gather(*[poll_job(jid) for jid in job_ids])
-    paths = []
+    urls = await asyncio.gather(*[poll_job(job_id) for job_id in job_ids])
 
+    paths = []
     for index, url in enumerate(urls):
-        path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}_{index}.png")
+        path = os.path.join(SAVE_DIR, f"ai_{int(time.time() * 1000)}_{index}.png")
         await download_image(url, path)
         paths.append(path)
 
@@ -482,15 +481,12 @@ async def regenerate_photo(index, current_specs):
     side = current_specs[index]["side"]
     spec = get_next_spec(side)
 
-    if side == "front":
-        prompt = build_front_prompt(spec)
-    else:
-        prompt = build_back_prompt(spec)
+    prompt = build_front_prompt(spec) if side == "front" else build_back_prompt(spec)
 
     job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
     url = await poll_job(job_id)
 
-    path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}_regen.png")
+    path = os.path.join(SAVE_DIR, f"ai_{int(time.time() * 1000)}_regen.png")
     await download_image(url, path)
 
     return path, spec, url
