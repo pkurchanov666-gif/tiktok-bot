@@ -176,56 +176,61 @@ async def poll_job(job_id):
         )
 
         data = response.json()
-        url = extract_url(data)
 
-        if url:
+        # Пропускаем ссылки на сами референсы чтобы не вернуть input вместо output
+        url = extract_url(data)
+        if url and "ibb.co" not in url:
             return url
 
     raise Exception("Generation timeout")
 
 
+# ---------------- DOWNLOAD ----------------
+
+async def download_image(url, path):
+    response = await asyncio.to_thread(requests.get, url, timeout=60)
+    os.makedirs(SAVE_DIR, exist_ok=True)
+    with open(path, "wb") as f:
+        f.write(response.content)
+
+
 # ---------------- GENERATION ----------------
 
 async def generate_all_photos():
-
     specs = [
         get_next_spec("back"),
         get_next_spec("front"),
         get_next_spec("back")
     ]
 
+    # Сабмитим все джобы подряд
     job_ids = []
 
     for i, spec in enumerate(specs):
-
         if spec["side"] == "front":
             prompt = build_front_prompt(spec)
         else:
             prompt = build_back_prompt(spec)
 
-        job_id = submit_job(prompt, spec["ref"])
+        job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
         job_ids.append(job_id)
 
-        if i < 2:
+        if i < len(specs) - 1:
             await asyncio.sleep(3)
 
+    # Поллим все джобы параллельно
+    urls = await asyncio.gather(*[poll_job(job_id) for job_id in job_ids])
+
+    # Скачиваем все фото
     paths = []
 
-    for index, job_id in enumerate(job_ids):
-        url = await poll_job(job_id)
-        img = requests.get(url)
-
-        os.makedirs(SAVE_DIR, exist_ok=True)
-        path = os.path.join(
-            SAVE_DIR, f"ai_{int(time.time()*1000)}_{index}.png"
-        )
-
-        with open(path, "wb") as f:
-            f.write(img.content)
-
+    for index, url in enumerate(urls):
+        path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}_{index}.png")
+        await download_image(url, path)
         paths.append(path)
 
-    return paths, specs
+    # Возвращаем paths, specs, urls — urls нужны для Buffer
+    return paths, specs, list(urls)
 
 
 async def regenerate_photo(index, current_specs):
@@ -237,15 +242,11 @@ async def regenerate_photo(index, current_specs):
     else:
         prompt = build_back_prompt(spec)
 
-    job_id = submit_job(prompt, spec["ref"])
+    job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
     url = await poll_job(job_id)
 
-    img = requests.get(url)
-
-    os.makedirs(SAVE_DIR, exist_ok=True)
     path = os.path.join(SAVE_DIR, f"ai_{int(time.time()*1000)}_regen.png")
+    await download_image(url, path)
 
-    with open(path, "wb") as f:
-        f.write(img.content)
-
-    return path, spec
+    # Возвращаем path, spec, url — url нужен чтобы обновить storage["urls"]
+    return path, spec, url
