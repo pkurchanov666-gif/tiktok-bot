@@ -1,29 +1,17 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram import Update
+from telegram.ext import Application, CommandHandler, ContextTypes
 from config import BOT_TOKEN
-from replicate_api import generate_all_photos
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Бот жив ✅")
 
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📸 AI Фотосессия", callback_data="ai")]
-    ])
-
-    await update.message.reply_text(
-        "Выберите режим:",
-        reply_markup=keyboard
-    )
-
-async def ai_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    await query.edit_message_text("Тест кнопки ✅")
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
+    print("ОШИБКА:", context.error)
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
-
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(ai_handler, pattern="^ai$"))
+    app.add_error_handler(error_handler)
 
     print("Бот погнал!")
     app.run_polling()
