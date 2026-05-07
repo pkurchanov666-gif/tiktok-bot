@@ -239,4 +239,180 @@ async def buffer_connect_handler(update: Update, context: ContextTypes.DEFAULT_T
     await context.bot.send_message(
         chat_id=user_id,
         text=(
-            
+            "🔗 Отправь мне Buffer Access Token одним сообщением.\n\n"
+            "Где взять токен:\n"
+            "1. Зайди на buffer.com\n"
+            "2. Settings → Apps & Integrations\n"
+            "3. Create an App или открой существующий\n"
+            "4. Скопируй Access Token"
+        )
+    )
+
+
+async def buffer_token_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message or not update.message.text:
+        return
+
+    user_id = update.message.from_user.id
+    storage = get_user_storage(user_id)
+
+    if not storage.get("awaiting_buffer_token"):
+        return
+
+    token = update.message.text.strip()
+    storage["awaiting_buffer_token"] = False
+    save_user_data()
+
+    await update.message.reply_text("⏳ Проверяю Buffer токен...")
+
+    try:
+        profiles = await get_profiles(token)
+
+        if not profiles:
+            await update.message.reply_text(
+                "❌ У Buffer аккаунта не найдено профилей.\n"
+                "Сначала подключи соцсеть в Buffer."
+            )
+            return
+
+        profile = profiles[0]
+        profile_id = profile.get("id")
+        profile_name = profile.get("formatted_username") or profile.get("name") or profile_id
+        profile_service = profile.get("service", "unknown")
+
+        storage["buffer_api_key"] = token
+        storage["buffer_profile_id"] = profile_id
+        storage["buffer_profile_name"] = profile_name
+        storage["buffer_profiles"] = profiles
+        save_user_data()
+
+        await update.message.reply_text(
+            f"✅ Buffer привязан!\n\n"
+            f"Профиль: {profile_name}\n"
+            f"Сервис: {profile_service}\n\n"
+            f"Теперь можешь отправлять фото в Buffer."
+        )
+
+    except Exception as e:
+        await update.message.reply_text(f"❌ Ошибка привязки Buffer: {e}")
+
+
+# ---------------- BUFFER SEND ----------------
+
+async def buffer_send_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    user_id = query.from_user.id
+    storage = get_user_storage(user_id)
+
+    buffer_api_key = storage.get("buffer_api_key")
+    buffer_profile_id = storage.get("buffer_profile_id")
+    image_urls = storage.get("urls")
+    caption = storage.get("caption", get_random_caption())
+
+    if not buffer_api_key or not buffer_profile_id:
+        await context.bot.send_message(
+            chat_id=user_id,
+            text="❌ Сначала привяжи Buffer через кнопку «🔗 Привязать Buffer»"
+        )
+        return
+
+    if not image_urls:
+        await context.bot.send_message(
+            chat_id=user_id,
+            text="❌ Сначала сгенерируй AI фотосессию"
+        )
+        return
+
+    await context.bot.send_message(
+        chat_id=user_id,
+        text="📤 Отправляю в Buffer..."
+    )
+
+    try:
+        await send_to_buffer(
+            api_key=buffer_api_key,
+            profile_id=buffer_profile_id,
+            image_urls=image_urls,
+            caption=caption
+        )
+
+        profile_name = storage.get("buffer_profile_name", "профиль")
+
+        await context.bot.send_message(
+            chat_id=user_id,
+            text=f"✅ Отправлено в Buffer!\nПрофиль: {profile_name}"
+        )
+
+    except Exception as e:
+        error_msg = str(e)
+
+        if "Unauthorized" in error_msg or "401" in error_msg:
+            storage["buffer_api_key"] = None
+            storage["buffer_profile_id"] = None
+            save_user_data()
+
+            await context.bot.send_message(
+                chat_id=user_id,
+                text="❌ Токен Buffer устарел. Привяжи Buffer заново."
+            )
+        else:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text=f"❌ Ошибка Buffer: {e}"
+            )
+
+
+# ---------------- START ----------------
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.message.from_user.id
+    storage = get_user_storage(user_id)
+
+    buffer_connected = bool(
+        storage.get("buffer_api_key") and storage.get("buffer_profile_id")
+    )
+
+    buttons = [
+        [InlineKeyboardButton("📸 AI Фотосессия", callback_data="ai")]
+    ]
+
+    if buffer_connected:
+        profile_name = storage.get("buffer_profile_name", "подключён")
+        buttons.append([
+            InlineKeyboardButton(f"🔁 Buffer: {profile_name}", callback_data="buffer_connect")
+        ])
+    else:
+        buttons.append([
+            InlineKeyboardButton("🔗 Привязать Buffer", callback_data="buffer_connect")
+        ])
+
+    keyboard = InlineKeyboardMarkup(buttons)
+
+    await update.message.reply_text(
+        "Выберите режим:",
+        reply_markup=keyboard
+    )
+
+
+# ---------------- MAIN ----------------
+
+def main():
+    load_user_data()
+
+    app = Application.builder().token(BOT_TOKEN).build()
+
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CallbackQueryHandler(ai_handler, pattern="^ai$"))
+    app.add_handler(CallbackQueryHandler(regen_handler, pattern="^regen_"))
+    app.add_handler(CallbackQueryHandler(buffer_connect_handler, pattern="^buffer_connect$"))
+    app.add_handler(CallbackQueryHandler(buffer_send_handler, pattern="^buffer_send$"))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, buffer_token_message_handler))
+
+    print("Бот погнал!")
+    app.run_polling()
+
+
+if __name__ == "__main__":
+    main()
