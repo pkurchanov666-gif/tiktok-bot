@@ -22,7 +22,7 @@ FRONT_SCENES = [
     {
         "scene": "standing close to a tall glass wall of a modern office building, "
                  "soft reflections in the glass, steel frame visible, "
-                 "clean pavement underfoot, no distant background needed",
+                 "clean pavement underfoot",
         "light": "soft natural daylight reflected from glass surface, "
                  "gentle side fill from open sky, "
                  "even realistic light showing every fiber of the hoodie cotton"
@@ -36,25 +36,22 @@ FRONT_SCENES = [
                  "clean downward light revealing hoodie weave and stitching detail"
     },
     {
-        "scene": "standing beside a modern glass and metal elevator portal in a clean building lobby area, "
-                 "brushed steel frame, glass panels, smooth stone floor, "
-                 "minimal modern architecture around",
+        "scene": "standing beside a modern glass and metal elevator portal in a clean building area, "
+                 "brushed steel frame, glass panels, smooth stone floor",
         "light": "soft even interior ambient light from above, "
                  "subtle reflection from polished floor and metal surfaces, "
                  "balanced light showing extreme fabric texture detail"
     },
     {
         "scene": "standing close to a smooth dark grey stone wall in a modern urban setting, "
-                 "clean surface with subtle stone texture, no distractions, "
-                 "calm minimal background",
+                 "clean surface with subtle stone texture, no distractions, calm minimal background",
         "light": "soft natural side light from open sky on the left, "
                  "gentle shadow on the wall behind, "
                  "light raking across hoodie surface showing every cotton fiber"
     },
     {
         "scene": "standing beside clean metal railings of a modern pedestrian bridge, "
-                 "concrete and steel railing close to body, "
-                 "bridge surface underfoot, minimal urban surroundings",
+                 "concrete and steel railing close to body, bridge surface underfoot",
         "light": "soft overcast daylight from above, "
                  "no harsh shadows, even diffused illumination, "
                  "perfect light for maximum fabric texture visibility"
@@ -68,7 +65,7 @@ FRONT_SCENES = [
                  "sharp overhead light catching every weave and fold of the hoodie"
     },
     {
-        "scene": "standing beside a matte black Lamborghini Urus parked naturally on a clean quiet street, "
+        "scene": "standing beside a matte black Lamborghini Urus parked on a clean quiet street, "
                  "only part of the front fender, headlight and door visible close to the subject, "
                  "car is secondary object in the composition",
         "light": "soft natural daylight from the side, "
@@ -79,7 +76,7 @@ FRONT_SCENES = [
         "scene": "standing beside the open driver door of a matte black Lamborghini Urus, "
                  "dark premium interior softly visible inside the car, "
                  "only the door and part of the car body visible close to the subject, "
-                 "car remains natural and secondary",
+                 "car remains natural and secondary in the frame",
         "light": "soft ambient daylight from above and side, "
                  "subtle warm tone from car interior, "
                  "natural balanced light showing fabric detail and clear readable logo"
@@ -94,13 +91,13 @@ FRONT_SCENES = [
     }
 ]
 
-# ---------------- 10 ФОНОВ СЗАДИ ----------------
+# ---------------- 9 ФОНОВ СЗАДИ ----------------
 
 BACK_SCENES = [
     {
         "scene": "standing far away on a wide empty parking lot near a business center, "
-                 "clean asphalt with parking lines stretching far, overcast grey sky, "
-                 "person is tiny figure in vast empty space",
+                 "clean asphalt with parking lines stretching far in all directions, "
+                 "overcast grey sky, person is tiny figure in vast empty space",
         "light": "soft overcast daylight from grey sky above, "
                  "no harsh shadows, even diffused light across entire wide scene"
     },
@@ -124,7 +121,7 @@ BACK_SCENES = [
     {
         "scene": "standing far away on an empty modern pedestrian bridge, "
                  "clean railings on both sides, overcast sky, "
-                 "bridge stretching far ahead, person small on the bridge",
+                 "bridge stretching far ahead, person small on the wide bridge",
         "light": "soft overcast diffused daylight from above, "
                  "no harsh shadows, even light across entire bridge surface"
     },
@@ -147,9 +144,9 @@ BACK_SCENES = [
                  "even clean realistic light"
     },
     {
-        "scene": "standing far away on a long straight clean city road at early morning, "
+        "scene": "standing far away on a long straight clean empty city road at early morning, "
                  "empty road stretching very far ahead, "
-                 "buildings far on sides, cold morning atmosphere, "
+                 "buildings far on both sides, cold morning atmosphere, "
                  "person tiny far down the long road",
         "light": "cool early morning ambient light from grey sky, "
                  "soft cold tones, no harsh shadows, "
@@ -158,7 +155,7 @@ BACK_SCENES = [
     {
         "scene": "standing far away on an open rooftop parking level, "
                  "clean concrete floor, low barriers at edges, "
-                 "grey city skyline visible on horizon, overcast sky, "
+                 "grey city visible on horizon, overcast sky, "
                  "person small on wide open rooftop",
         "light": "soft overcast daylight from grey sky above, "
                  "even diffused light, no harsh shadows, "
@@ -167,8 +164,8 @@ BACK_SCENES = [
     {
         "scene": "standing far away at the end of a wide modern covered walkway, "
                  "concrete ceiling above, pillars on sides, "
-                 "walkway stretching far, person small at the far end",
-        "light": "soft overhead light filtering through walkway, "
+                 "walkway stretching far ahead, person small at the far end",
+        "light": "soft overhead light filtering through walkway opening, "
                  "gentle bounce from concrete surfaces, "
                  "even realistic light down entire walkway length"
     }
@@ -179,16 +176,20 @@ BACK_SCENES = [
 FRONT_POSES = [
     "right hand gripping hood edge near temple pulling it tighter, left hand in jeans pocket",
     "both hands adjusting hood from front pulling it forward over forehead",
-    "right hand pulling hood down low covering eyes, left hand gripping hoodie hem",
-    "right hand on hood near temple, left hand touching chest logo area",
-    "right hand gripping back of hood from inside pulling it up, chin down"
+    "right hand pulling hood down low, left hand gripping hoodie hem at the side",
+    "right hand on hood near temple, left hand touching chest logo area lightly",
+    "right hand gripping back of hood from inside pulling it up, chin slightly down"
 ]
 
 BACK_POSES = [
-    "standing still, right hand on back of hood, left hand in jeans pocket",
-    "walking away, right hand pulling hood from behind, left hand swinging naturally",
-    "standing, both hands adjusting hood from behind, head slightly down",
-    "walking away slowly, right hand in jeans pocket, left hand on hood"
+    "standing facing away, right hand holding the back edge of the hood, left hand in jeans pocket",
+    "walking away, right hand pulling the hood slightly backward, left hand in jeans pocket",
+    "standing facing away, both hands adjusting the hood from behind",
+    "walking away slowly, left hand holding the back of the hood, right hand in jeans pocket",
+    "standing facing away, right hand on hood, left hand touching the side seam of the jeans",
+    "walking away, right hand gripping the hood edge, left hand touching waistband",
+    "standing facing away, left hand holding the hood from behind, right hand hooked in pocket",
+    "walking away slowly, both hands briefly adjusting the hood from behind"
 ]
 
 CURRENT_FRONT_INDEX = 0
@@ -277,7 +278,6 @@ def build_front_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
-        # Камера и кадр
         "Ultra-realistic RAW 9:16 photograph. "
         "Real photo by a professional photographer on location. "
         "Sony A7R V, 35mm, f/8, ISO 200. "
@@ -285,40 +285,39 @@ def build_front_prompt(spec):
         "Camera 1.0 meter from subject. "
         "Framing head to knees exactly. Subject fills 80-85 percent of frame. "
 
-        # Макро-детализация ткани
         "EXTREME MACRO-LEVEL FABRIC DETAIL. "
-        "Every single cotton fiber of the hoodie is visible. "
-        "Every weave pattern, stitch line, micro wrinkle is rendered in extreme clarity. "
-        "Light interacts physically with the fabric surface: "
+        "Every single cotton fiber of the hoodie is visible and sharp. "
+        "Every weave pattern, stitch line, micro wrinkle rendered in extreme clarity. "
+        "Light interacts physically with fabric: "
         "micro shadows in every fold, highlights on raised fibers, natural cotton sheen. "
-        "Fabric looks so real and tactile you can feel the texture through the screen. "
-        "Not plastic. Not smooth. Not flat rendered. "
-        "Denim jeans also in extreme detail — every thread of denim weave visible. "
+        "Fabric looks real and tactile. Not plastic. Not smooth. Not flat. "
+        "Denim jeans also extreme detail — every denim thread visible. "
 
-        # Фон
         "Deep depth of field. f/8. Everything sharp. No bokeh. No blur. "
         "Background sharp and real. Subject and background are one unified photo. "
+        "Not cut out. Not composited. Not isolated. "
 
-        # Свет
         f"Lighting: {spec['light']}. "
         "Physically accurate. Same source lights subject and environment. "
-        "Shadows match scene. Light wraps naturally around figure and fabric. "
+        "Shadows match scene perfectly. Light wraps naturally around figure and fabric. "
         "No flash. No studio light. No artificial light. "
 
-        # Худи — строгие правила
         "ABSOLUTE STRICT HOODIE RULES: "
         "NO KANGAROO POCKET. NO FRONT POUCH OF ANY KIND. NO ZIPPER. NO DRAWSTRINGS. "
         "Clean flat front with nothing except the chest logo. "
-        "Logo rendered with MAXIMUM sharpness. "
+        "If reference has no pocket — final image must have no pocket. "
+        "Logo rendered with MAXIMUM sharpness and detail. "
         "Exact size, position, font, design from reference. "
-        "Logo is crisp, clear, readable. Not blurred. Not distorted. "
+        "Logo is crisp, clear, fully readable. Not blurred. Not distorted. Not resized. "
 
-        # Джинсы — обязательно широкие
         "MANDATORY: extremely wide-leg baggy black denim jeans. "
-        "Very wide silhouette at thighs, knees, calves. "
-        "Heavy denim with visible texture. "
+        "Very wide silhouette at thighs, knees, calves equally. "
+        "Heavy denim with visible texture and natural folds. "
         "Not slim. Not skinny. Not tapered. Not regular fit. "
-        "Clearly and unmistakably wide-leg baggy jeans. "
+        "Clearly and unmistakably baggy wide-leg jeans. "
+
+        "No passive pose. Both hands must be actively engaged. "
+        "Do not let both arms hang freely at sides. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
@@ -331,40 +330,40 @@ def build_back_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
-        # Камера
         "Ultra-realistic RAW 9:16 photograph. "
         "Real photo by a photographer standing on location. "
         "Sony A7R V, 35mm, f/8, ISO 400. "
-        "Camera at 1.6m height. Pointed straight. Parallel to ground. "
+        "Camera at 1.6m height. Pointed straight forward. Parallel to ground. "
         "STRICT: no high angle. No top-down. No aerial. No drone. No elevated. No tilt. "
 
-        # Расстояние — далеко
-        "Camera 20 to 25 meters from subject. Very far. "
-        "Full body head to feet visible. Feet on ground. "
+        "Camera 20 to 25 meters from subject. Very far away. "
+        "Full body head to feet visible. Feet flat on ground. "
         "Ground below feet visible — at least 20 percent of frame is ground below feet. "
         "Do NOT crop at ankles. Do NOT crop at shins. Do NOT crop at knees. "
-        "Subject is only 10-15 percent of frame. "
+        "Subject occupies only 10-15 percent of vertical frame height. "
         "Tiny but clearly readable person in vast environment. "
-        "Environment dominates the photo. "
+        "Environment dominates the entire photo. "
 
-        # Фон — всё резкое
         "EVERYTHING IN FOCUS. Deep depth of field f/8. "
-        "No bokeh. No blur. No shallow depth of field. "
-        "Foreground sharp. Subject sharp. Background sharp. All sharp. "
-        "Background is real location — fully detailed and rendered. "
+        "No bokeh. No blur anywhere. No shallow depth of field. "
+        "Foreground sharp. Subject sharp. Background sharp. Everything sharp. "
+        "Background is a real location — fully detailed and rendered. "
 
-        # Свет
         f"Lighting: {spec['light']}. "
-        "Physically accurate across entire image. Same light on subject and environment. "
-        "Shadows match. No flash. No artificial light. "
+        "Physically accurate across entire image. "
+        "Same light source on subject and environment. "
+        "Shadows match perfectly. No flash. No artificial light. "
 
-        # Джинсы — обязательно широкие
         "MANDATORY: extremely wide-leg baggy black denim jeans. "
-        "Wide silhouette visible even from 20 meters. "
-        "Wide at thighs, knees, calves. Not slim. Not skinny. Not tapered. "
+        "Wide silhouette clearly visible even from 20 meters distance. "
+        "Wide at thighs, knees and calves. Heavy denim. "
+        "Not slim. Not skinny. Not tapered. Clearly baggy. "
 
-        # Худи
-        "Black hoodie. No pocket. Hood up. Face hidden. Seen from behind. "
+        "Black hoodie. No pocket. Hood up. Face completely hidden. "
+        "Entire body seen from behind. No face visible at any angle. "
+
+        "No passive pose. Do not let both arms hang freely down at sides. "
+        "At least one hand must interact with the hood or be in jeans pocket. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
