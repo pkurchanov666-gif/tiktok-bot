@@ -9,188 +9,139 @@ SAVE_DIR = "generations"
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
-# ---------------- ФОНЫ СПЕРЕДИ ----------------
-
 FRONT_SCENES = [
     {
         "scene": "standing beside a wide light-grey concrete pillar in a clean modern parking structure, "
-                 "smooth concrete floor, minimal architecture around, calm empty space",
-        "light": "cool even overhead light falling from above, "
-                 "soft shadow to one side of the pillar, "
-                 "light hitting hoodie fabric at slight angle revealing full texture"
+                 "smooth concrete floor, minimal architecture, calm empty space",
+        "light": "soft cool overhead diffused light, no direct sun, no harsh shadows, "
+                 "gentle even illumination across fabric"
     },
     {
         "scene": "standing close to a tall glass wall of a modern office building, "
-                 "soft reflections in the glass, steel frame visible, "
-                 "clean pavement underfoot",
-        "light": "soft natural daylight reflected from glass surface, "
-                 "gentle side fill from open sky, "
-                 "even realistic light showing every fiber of the hoodie cotton"
+                 "soft reflections in glass, steel frame visible, clean pavement underfoot",
+        "light": "soft natural overcast daylight reflected from glass, "
+                 "no direct sun, gentle even side light"
     },
     {
-        "scene": "standing at the entrance ramp of a clean underground parking garage, "
-                 "smooth concrete walls on both sides, overhead lights above, "
-                 "architectural lines leading inward behind",
-        "light": "cool overhead parking light from directly above, "
-                 "soft bounce from concrete walls, "
-                 "clean downward light revealing hoodie weave and stitching detail"
+        "scene": "standing at the entrance of a clean underground parking garage, "
+                 "smooth concrete walls, overhead lights, architectural lines behind",
+        "light": "cool overhead parking light, soft bounce from concrete walls, "
+                 "no harsh contrast, even downward illumination"
     },
     {
-        "scene": "standing beside a modern glass and metal elevator portal in a clean building area, "
+        "scene": "standing beside a modern glass and metal elevator portal, "
                  "brushed steel frame, glass panels, smooth stone floor",
         "light": "soft even interior ambient light from above, "
-                 "subtle reflection from polished floor and metal surfaces, "
-                 "balanced light showing extreme fabric texture detail"
+                 "subtle reflection from polished surfaces, no direct source"
     },
     {
-        "scene": "standing close to a smooth dark grey stone wall in a modern urban setting, "
-                 "clean surface with subtle stone texture, no distractions, calm minimal background",
-        "light": "soft natural side light from open sky on the left, "
-                 "gentle shadow on the wall behind, "
-                 "light raking across hoodie surface showing every cotton fiber"
+        "scene": "standing close to a smooth dark grey stone wall, "
+                 "clean surface, subtle texture, calm minimal background",
+        "light": "soft overcast natural light from open sky, "
+                 "no direct sun, gentle diffused illumination"
     },
     {
         "scene": "standing beside clean metal railings of a modern pedestrian bridge, "
                  "concrete and steel railing close to body, bridge surface underfoot",
         "light": "soft overcast daylight from above, "
-                 "no harsh shadows, even diffused illumination, "
-                 "perfect light for maximum fabric texture visibility"
+                 "completely even diffused light, no sun, no shadows"
     },
     {
         "scene": "standing in a clean corner of a modern parking garage, "
-                 "concrete pillar on one side, smooth wall on the other, "
-                 "overhead light, clean floor, calm empty space",
-        "light": "cool overhead parking light falling straight down, "
-                 "soft shadow in the corner behind, "
-                 "sharp overhead light catching every weave and fold of the hoodie"
+                 "concrete pillar one side, smooth wall other side, clean floor",
+        "light": "cool overhead parking light, soft ambient bounce, "
+                 "no harsh contrast, consistent illumination"
     },
     {
-        "scene": "standing beside a matte black Lamborghini Urus parked on a clean quiet street, "
-                 "only part of the front fender, headlight and door visible close to the subject, "
-                 "car is secondary object in the composition",
-        "light": "soft natural daylight from the side, "
-                 "subtle reflection from the matte car surface, "
-                 "even realistic light revealing full hoodie texture and sharp logo"
+        "scene": "standing beside a matte black Lamborghini Urus on a clean quiet street, "
+                 "part of fender and door visible, car is secondary object",
+        "light": "soft overcast daylight from above, no direct sun, "
+                 "subtle matte reflection from car surface"
     },
     {
         "scene": "standing beside the open driver door of a matte black Lamborghini Urus, "
-                 "dark premium interior softly visible inside the car, "
-                 "only the door and part of the car body visible close to the subject, "
-                 "car remains natural and secondary in the frame",
-        "light": "soft ambient daylight from above and side, "
-                 "subtle warm tone from car interior, "
-                 "natural balanced light showing fabric detail and clear readable logo"
+                 "dark interior softly visible, door and part of body close to subject",
+        "light": "soft ambient overcast light from above, no direct sun, "
+                 "subtle warm tone from car interior"
     },
     {
-        "scene": "standing beside a smooth concrete wall in a modern open pedestrian passage, "
-                 "clean concrete surface close to the body, overhead architectural ceiling, "
-                 "calm minimal urban space around",
-        "light": "soft even light from above through the passage opening, "
-                 "gentle ambient bounce from concrete surfaces, "
-                 "diffused realistic light perfect for showing cotton texture in extreme detail"
+        "scene": "standing beside a smooth concrete wall in a modern pedestrian passage, "
+                 "concrete surface close to body, overhead ceiling, calm minimal space",
+        "light": "soft even diffused light through passage opening, "
+                 "gentle bounce from concrete, no direct source"
     }
 ]
-
-# ---------------- ФОНЫ СЗАДИ ----------------
 
 BACK_SCENES = [
     {
         "scene": "standing far away on a wide empty parking lot near a business center, "
-                 "clean asphalt with parking lines stretching far in all directions, "
-                 "overcast grey sky, person is tiny figure in vast empty space",
-        "light": "soft overcast daylight from grey sky above, "
-                 "no harsh shadows, even diffused light across entire wide scene"
+                 "clean asphalt with lines stretching far, overcast sky, "
+                 "person tiny in vast space",
+        "light": "soft overcast daylight from above, no sun, no shadows, even diffused light"
     },
     {
-        "scene": "standing far away on a wide clean sidewalk along a long dark concrete wall, "
-                 "morning sun casting long shadow on pavement, "
-                 "person small in long straight perspective",
-        "light": "natural morning side sunlight from the right, "
-                 "long realistic shadow to the left, "
-                 "clean directional light across entire scene"
+        "scene": "standing far away on a wide sidewalk along a long concrete wall, "
+                 "overcast morning, clean long perspective, person small",
+        "light": "soft overcast morning light, no direct sun, gentle even illumination"
     },
     {
-        "scene": "standing far away in a massive clean underground parking garage, "
-                 "concrete pillars creating deep perspective far ahead, "
-                 "overhead lights stretching into distance, "
-                 "person small deep in wide corridor",
-        "light": "cool overhead fluorescent lights even across entire garage, "
-                 "soft bounce from concrete floor and walls, "
-                 "clean consistent light far into distance"
+        "scene": "standing far away in a massive underground parking garage, "
+                 "concrete pillars deep perspective, overhead lights, person small in corridor",
+        "light": "cool overhead fluorescent lights, soft bounce from concrete, "
+                 "no contrast, clean consistent light"
     },
     {
-        "scene": "standing far away on an empty modern pedestrian bridge, "
-                 "clean railings on both sides, overcast sky, "
-                 "bridge stretching far ahead, person small on the wide bridge",
-        "light": "soft overcast diffused daylight from above, "
-                 "no harsh shadows, even light across entire bridge surface"
+        "scene": "standing far away on an empty pedestrian bridge, "
+                 "clean railings both sides, overcast sky, person small on wide bridge",
+        "light": "soft overcast diffused daylight, no sun, no shadows, even light"
     },
     {
-        "scene": "standing far away on a wide empty street in a financial district, "
-                 "glass and concrete office buildings far on both sides, "
-                 "clean pavement, no people, no cars, evening light, "
-                 "person tiny in wide quiet street",
-        "light": "warm late afternoon side light from the right, "
-                 "soft long shadows on pavement, "
-                 "natural realistic evening light across entire scene"
+        "scene": "standing far away on a wide empty street in financial district, "
+                 "glass and concrete buildings both sides, clean pavement, no people, "
+                 "person tiny in quiet street",
+        "light": "soft overcast evening light, no direct sun, gentle diffused illumination"
     },
     {
-        "scene": "standing far away in a wide clean courtyard between modern office buildings, "
-                 "buildings on both sides, open sky above, "
-                 "wide stone pavement all around, "
-                 "person small in the middle of open space",
-        "light": "soft natural daylight from open sky above, "
-                 "gentle ambient bounce from building facades, "
-                 "even clean realistic light"
+        "scene": "standing far away in a wide courtyard between modern office buildings, "
+                 "buildings both sides, wide stone pavement, person small in open space",
+        "light": "soft overcast daylight from open sky, gentle bounce from facades, "
+                 "no sun, even clean light"
     },
     {
-        "scene": "standing far away on a long straight clean empty city road at early morning, "
-                 "empty road stretching very far ahead, "
-                 "buildings far on both sides, cold morning atmosphere, "
-                 "person tiny far down the long road",
-        "light": "cool early morning ambient light from grey sky, "
-                 "soft cold tones, no harsh shadows, "
-                 "even diffused realistic light across full scene"
+        "scene": "standing far away on a long straight empty city road at early morning, "
+                 "road stretching very far, buildings far on sides, person tiny",
+        "light": "cool early morning overcast light, no sun, soft cold tones, even diffused light"
     },
     {
         "scene": "standing far away on an open rooftop parking level, "
-                 "clean concrete floor, low barriers at edges, "
-                 "grey city visible on horizon, overcast sky, "
-                 "person small on wide open rooftop",
-        "light": "soft overcast daylight from grey sky above, "
-                 "even diffused light, no harsh shadows, "
-                 "consistent realistic light across entire rooftop"
+                 "clean concrete floor, low barriers, grey city on horizon, person small",
+        "light": "soft overcast daylight from grey sky, no sun, no shadows, even diffused light"
     },
     {
-        "scene": "standing far away at the end of a wide modern covered walkway, "
-                 "concrete ceiling above, pillars on sides, "
-                 "walkway stretching far ahead, person small at the far end",
-        "light": "soft overhead light filtering through walkway opening, "
-                 "gentle bounce from concrete surfaces, "
-                 "even realistic light down entire walkway length"
+        "scene": "standing far away at end of a wide modern covered walkway, "
+                 "concrete ceiling, pillars on sides, walkway stretching far, person small",
+        "light": "soft overhead light through walkway opening, gentle concrete bounce, even light"
     }
 ]
 
-# ---------------- ПОЗЫ БЕЗ СКУКИ ----------------
-
 FRONT_POSES = [
-    "right hand gripping hood edge near temple pulling it tighter, left hand in jeans pocket",
-    "both hands adjusting hood from front pulling it forward over forehead",
-    "right hand pulling hood down low, left hand gripping hoodie hem at the side",
-    "right hand on hood near temple, left hand touching chest logo area lightly",
-    "left hand pulling hood edge forward, right hand hooked into jeans pocket",
-    "both hands holding both hood edges near the jawline, chin slightly down"
+    "right hand gripping hood edge near temple, left hand in front jeans pocket",
+    "both hands adjusting hood pulling it forward over forehead",
+    "right hand pulling hood down, left hand gripping hoodie hem at side",
+    "left hand pulling hood edge forward, right hand in front jeans pocket",
+    "both hands holding hood edges near jawline, chin slightly down",
+    "right hand on hood near temple, left hand resting on thigh"
 ]
 
 BACK_POSES = [
-    "standing facing away, right hand holding the back edge of the hood, left hand in jeans pocket",
-    "walking away, right hand pulling the hood slightly backward, left hand in jeans pocket",
-    "standing facing away, both hands adjusting the hood from behind",
-    "walking away slowly, left hand holding the back of the hood, right hand in jeans pocket",
-    "standing facing away, right hand on hood, left hand touching the side seam of the jeans",
-    "walking away, right hand gripping the hood edge, left hand touching waistband",
-    "standing facing away, left hand holding the hood from behind, right hand hooked in pocket",
-    "walking away slowly, both hands briefly adjusting the hood from behind"
+    "right hand holding back edge of hood, left hand in front jeans pocket",
+    "walking away, right hand pulling hood backward, left hand in front jeans pocket",
+    "both hands adjusting hood from behind",
+    "walking away, left hand holding back of hood, right hand in front jeans pocket",
+    "right hand gripping back of hood, left hand on hip",
+    "walking away, right hand gripping hood edge from behind, left hand on hip",
+    "left hand holding hood from behind, right hand on hip",
+    "walking away slowly, both hands adjusting hood from behind"
 ]
 
 CURRENT_FRONT_INDEX = 0
@@ -273,98 +224,82 @@ def get_unique_specs():
     return specs
 
 
-# ---------------- ПРОМПТ СПЕРЕДИ ----------------
+# ---------------- ПРОМПТЫ ----------------
 
 def build_front_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
         "Ultra-realistic RAW 9:16 photograph. "
-        "Real photo by a professional photographer on location. "
+        "Real photo taken on location by a professional photographer. "
         "Sony A7R V, 35mm, f/8, ISO 200. "
-        "Eye level. Straight-on. No tilt. No angle. "
-        "Camera 1.0 meter from subject. "
-        "Framing head to knees exactly. Subject fills 80-85 percent of frame. "
+        "Camera at eye level. Straight-on. No tilt. "
+        "Camera exactly 1.0 meter from subject. "
+        "Framing from head to knees. Subject fills 80-85 percent of frame. "
 
-        "EXTREME MACRO-LEVEL FABRIC DETAIL. "
-        "Every single cotton fiber of the hoodie is visible and sharp. "
-        "Every weave pattern, stitch line, micro wrinkle rendered in extreme clarity. "
-        "Light interacts physically with fabric: "
-        "micro shadows in every fold, highlights on raised fibers, natural cotton sheen. "
-        "Fabric looks real and tactile. Not plastic. Not smooth. Not flat. "
-        "Denim jeans also extreme detail — every denim thread visible. "
+        "EXTREME FABRIC DETAIL. Macro-level realism. "
+        "Every cotton fiber of the hoodie visible and sharp. "
+        "Every weave, stitch, micro wrinkle rendered with extreme clarity. "
+        "Light physically interacts with fabric: "
+        "micro shadows in folds, subtle highlights on raised fibers. "
+        "Fabric is real and tactile. Not smooth. Not plastic. Not flat. "
+        "Denim weave of jeans also fully visible and sharp. "
 
-        "Deep depth of field. f/8. Everything sharp. No bokeh. No blur. "
-        "Background sharp and real. Subject and background are one unified photo. "
-        "Not cut out. Not composited. Not isolated. "
+        "Deep depth of field. Everything sharp. No bokeh. No blur. "
+        "Background sharp and real. One unified photograph. "
 
         f"Lighting: {spec['light']}. "
-        "Physically accurate. Same source lights subject and environment. "
-        "Shadows match scene perfectly. Light wraps naturally around figure and fabric. "
-        "No flash. No studio light. No artificial light. "
+        "No direct sunlight. No harsh shadows. No strong contrast. "
+        "Soft natural diffused light only. No flash. No studio light. "
 
-        "ABSOLUTE STRICT HOODIE RULES: "
-        "NO KANGAROO POCKET. NO FRONT POUCH OF ANY KIND. NO ZIPPER. NO DRAWSTRINGS. "
-        "Clean flat front with nothing except the chest logo. "
-        "If reference has no pocket — final image must have no pocket. "
-        "Logo rendered with MAXIMUM sharpness and detail. "
-        "Exact size, position, font, design from reference. "
-        "Logo is crisp, clear, fully readable. Not blurred. Not distorted. Not resized. "
+        "HOODIE RULES — ABSOLUTE: "
+        "ZERO POCKET ON FRONT. NO KANGAROO POCKET. NO POUCH. NO ZIPPER. NO DRAWSTRINGS. "
+        "Completely flat clean front. Only chest logo. "
+        "Logo: maximum sharpness, exact size and position from reference. "
+        "Logo crisp and fully readable. Not blurred. Not distorted. "
 
-        "MANDATORY: extremely wide-leg baggy black denim jeans. "
-        "Very wide silhouette at thighs, knees, calves equally. "
-        "Heavy denim with visible texture and natural folds. "
-        "Not slim. Not skinny. Not tapered. Not regular fit. "
-        "Clearly and unmistakably baggy wide-leg jeans. "
+        "MANDATORY baggy wide-leg black denim jeans. "
+        "Very wide at thighs, knees, calves. Heavy denim texture visible. "
+        "Not slim. Not skinny. Not tapered. "
 
-        "No passive pose. Both hands must be actively engaged. "
-        "Do not let both arms hang freely at sides. "
+        "Hands actively engaged. Not hanging freely at sides. No hands in back pockets. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
     ) + uid
 
 
-# ---------------- ПРОМПТ СЗАДИ ----------------
-
 def build_back_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
         "Ultra-realistic RAW 9:16 photograph. "
-        "Real photo by a photographer standing on location. "
+        "Real photo taken on location. "
         "Sony A7R V, 35mm, f/8, ISO 400. "
-        "Camera at 1.6m height. Pointed straight forward. Parallel to ground. "
-        "STRICT: no high angle. No top-down. No aerial. No drone. No elevated. No tilt. "
+        "Camera at 1.6m height. Straight forward. Parallel to ground. "
+        "No high angle. No top-down. No drone. No tilt. "
 
-        "Camera 20 to 25 meters from subject. Very far away. "
-        "Full body head to feet visible. Feet flat on ground. "
-        "Ground below feet visible — at least 20 percent of frame is ground below feet. "
-        "Do NOT crop at ankles. Do NOT crop at shins. Do NOT crop at knees. "
-        "Subject occupies only 10-15 percent of vertical frame height. "
-        "Tiny but clearly readable person in vast environment. "
-        "Environment dominates the entire photo. "
+        "Camera 20 to 25 meters from subject. "
+        "Full body visible head to feet. Feet on ground. "
+        "At least 20 percent of frame is ground below feet. "
+        "Do not crop at ankles or shins. "
+        "Subject is 10-15 percent of frame height. "
+        "Person is small but readable in large environment. "
 
-        "EVERYTHING IN FOCUS. Deep depth of field f/8. "
-        "No bokeh. No blur anywhere. No shallow depth of field. "
-        "Foreground sharp. Subject sharp. Background sharp. Everything sharp. "
-        "Background is a real location — fully detailed and rendered. "
+        "EVERYTHING IN FOCUS. f/8. No blur. No bokeh. "
+        "Foreground, subject, background all sharp. "
 
         f"Lighting: {spec['light']}. "
-        "Physically accurate across entire image. "
-        "Same light source on subject and environment. "
-        "Shadows match perfectly. No flash. No artificial light. "
+        "No direct sunlight. No harsh shadows. Soft diffused light only. No flash. "
 
-        "MANDATORY: extremely wide-leg baggy black denim jeans. "
-        "Wide silhouette clearly visible even from 20 meters distance. "
-        "Wide at thighs, knees and calves. Heavy denim. "
-        "Not slim. Not skinny. Not tapered. Clearly baggy. "
+        "MANDATORY baggy wide-leg black denim jeans. "
+        "Wide silhouette visible from 20 meters. "
+        "Wide at thighs, knees, calves. Not slim. Not tapered. "
 
-        "Black hoodie. No pocket. Hood up. Face completely hidden. "
-        "Entire body seen from behind. No face visible at any angle. "
+        "Black hoodie. No pocket. Hood up. Face hidden. Seen from behind. "
 
-        "No passive pose. Do not let both arms hang freely down at sides. "
-        "At least one hand must interact with the hood or be in jeans pocket. "
+        "Hands not hanging freely. No hands in back pockets of jeans. "
+        "Hands on hood or in front pockets only. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
@@ -437,7 +372,6 @@ async def poll_job(job_id):
 
         data = response.json()
         url = extract_url(data)
-
         if url and "ibb.co" not in url:
             return url
 
@@ -447,7 +381,6 @@ async def poll_job(job_id):
 async def download_image(url, path):
     response = await asyncio.to_thread(requests.get, url, timeout=60)
     os.makedirs(SAVE_DIR, exist_ok=True)
-
     with open(path, "wb") as f:
         f.write(response.content)
 
@@ -462,7 +395,6 @@ async def generate_all_photos():
         prompt = build_front_prompt(spec) if spec["side"] == "front" else build_back_prompt(spec)
         job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
         job_ids.append(job_id)
-
         if i < len(specs) - 1:
             await asyncio.sleep(3)
 
@@ -482,7 +414,6 @@ async def regenerate_photo(index, current_specs):
     spec = get_next_spec(side)
 
     prompt = build_front_prompt(spec) if side == "front" else build_back_prompt(spec)
-
     job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
     url = await poll_job(job_id)
 
