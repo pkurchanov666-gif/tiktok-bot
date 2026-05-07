@@ -9,20 +9,16 @@ SAVE_DIR = "generations"
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
-# ---------------- СЦЕНЫ ----------------
-
 FRONT_SCENES = [
-    "Standing next to a premium parked car on an empty parking lot",
-    "Standing in a clean minimalist urban street, modern architecture behind",
-    "Standing in front of a luxury building entrance, glass doors behind"
+    "Standing next to a premium parked car in a realistic urban setting",
+    "Standing in a clean modern city street with architecture visible behind",
+    "Standing near the entrance of a luxury building with realistic urban background"
 ]
 
 BACK_SCENES = [
-    # Убрал лифт — модель рисует его крупно
-    "Wide open modern city street with stone pavement, shot from far distance",
-    "Large underground parking garage, wide space, concrete pillars",
-    "Contemporary business plaza, wide open area with fountain",
-    "Wide empty rooftop terrace of a skyscraper, city skyline behind"
+    "Modern city street with stone pavement and realistic urban depth",
+    "Underground parking garage with visible concrete pillars and open space",
+    "Contemporary business plaza with open architectural background"
 ]
 
 FRONT_POSES = [
@@ -66,26 +62,38 @@ def get_next_spec(side):
     }
 
 
-# ---------------- ПРОМПТЫ ----------------
+# ---------------- PROMPTS ----------------
 
 def build_front_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
-        "Ultra-realistic RAW 9:16 portrait photograph. "
-        "Sony A7R V, 35mm lens, f/11 aperture. "
-        "Camera placed exactly 0.7 meters from subject. "
-        "Framing from top of head to knees, nothing more. "
-        "Subject occupies 80 to 85 percent of vertical frame height. "
-        "Sharp background, no bokeh, no blur. "
+        "Ultra-realistic RAW 9:16 environmental fashion photograph. "
+        "Sony A7R V, 35mm lens, f/8 to f/11 aperture. "
+        "Camera at eye level, straight-on angle. "
+        "No high angle. No low angle. No tilt. "
+        "Camera distance approximately 1.2 to 1.8 meters from subject. "
+
+        "Framing from head to knees. "
+        "Subject occupies approximately 65 to 75 percent of the vertical frame height. "
+
+        "The person must feel naturally placed inside the environment. "
+        "Not isolated from background. Not floating. "
+        "Subject and background exist as one unified scene. "
+
+        "Deep depth of field. "
+        "Background is sharp and fully in focus. "
+        "No bokeh. No background blur. No shallow depth of field. "
+        "Not a studio portrait. Not a cutout look. "
+        "Photographed by a standing photographer on location. "
 
         "Hoodie copied exactly from reference image. "
-        "STRICT: absolutely no kangaroo pocket, no front pouch, no zipper, no drawstrings visible. "
-        "Front chest logo preserved exactly — same size, same position. "
+        "ABSOLUTE RULE: no kangaroo pocket. No front pouch. No zipper. No drawstrings visible. "
+        "Front chest logo preserved exactly — same size, same position, same design. "
 
         "Bottoms: loose straight wide-leg black denim jeans. "
         "Clearly baggy silhouette around thighs and calves. "
-        "Not slim fit. Not skinny jeans. Not tapered. "
+        "Not slim fit. Not skinny. Not tapered. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
@@ -96,29 +104,31 @@ def build_back_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
-        "Ultra-realistic RAW 9:16 environmental street photograph. "
-        "Sony A7R V, 24mm wide-angle lens, f/11 aperture. "
+        "Ultra-realistic RAW 9:16 environmental fashion photograph. "
+        "Sony A7R V, 35mm lens, f/8 to f/11 aperture. "
 
-        # Главное — расстояние и размер фигуры
-        "CRITICAL: camera is placed very far from the subject, minimum 15 to 20 meters away. "
-        "CRITICAL: the human figure must be very small — occupying only 15 to 20 percent "
-        "of the total vertical frame height. "
-        "CRITICAL: do not crop. Do not zoom in. Do not fill frame with the person. "
-        "The person is a small silhouette inside a large environment. "
+        "Photographed by a standing photographer at normal human eye level. "
+        "Camera height approximately 1.6 meters from ground. "
+        "Camera pointed straight forward, parallel to ground. "
+        "STRICT RULE: no high-angle shot. No top-down view. "
+        "No aerial view. No drone perspective. No elevated camera position. "
+        "No surveillance camera angle. No rooftop angle. No balcony angle. "
 
-        # Окружение важнее персонажа
-        "The environment, architecture and background occupy at least 80 percent of the frame. "
-        "Show the full width and depth of the location. "
-        "Large open space. Strong sense of depth and distance. "
+        "Camera distance approximately 6 to 8 meters from subject. "
+        "Full body visible from head to feet. "
+        "Subject occupies approximately 28 to 35 percent of the vertical frame height. "
+        "The person is clearly visible and readable. "
+        "The person naturally belongs to the scene and environment. "
 
-        # Персонаж
-        "Person: wearing a plain black hoodie with hood up, face completely hidden. "
-        "Loose wide black jeans. "
-        "Viewed entirely from behind. No face visible at any angle. "
+        "The surrounding environment is clearly visible and sharp. "
+        "Deep depth of field. Everything in focus. No blur. "
+        "No close-up. No portrait crop. No zoomed-in framing. "
+        "Natural street-level perspective. "
 
-        # Стиль
-        "Cinematic mood. Natural lighting. Sharp everywhere. No blur. "
-        "No portrait framing. No close-up. Wide establishing shot. "
+        "Subject: black hoodie without any pocket. "
+        "Loose straight wide black jeans. "
+        "Hood up. Face completely hidden. "
+        "Entire body seen from behind. No face visible at any angle. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
@@ -233,7 +243,7 @@ async def generate_all_photos():
         if i < len(specs) - 1:
             await asyncio.sleep(3)
 
-    # Поллим параллельно
+    # Поллим все джобы параллельно
     urls = await asyncio.gather(*[poll_job(job_id) for job_id in job_ids])
 
     paths = []
