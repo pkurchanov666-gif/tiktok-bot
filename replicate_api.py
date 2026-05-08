@@ -1,3 +1,4 @@
+
 import os
 import time
 import random
@@ -16,45 +17,47 @@ REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
 FRONT_SCENES = [
     {
-        "scene": "standing on a clean open-air parking level with dark asphalt and white parking lines, "
-                 "wide empty space around, low barriers in the distance, calm realistic setting",
-        "light": "soft overcast daylight, natural even illumination, no harsh shadows"
+        "scene": "leaning one shoulder lightly against a wide concrete pillar in a clean underground parking garage, "
+                 "smooth concrete floor, minimal empty space around, realistic parking setting",
+        "light": "soft overhead parking light, even realistic illumination, no harsh shadows"
     },
     {
-        "scene": "standing beside a matte black Lamborghini Urus parked naturally, "
-                 "only part of the front fender, wheel arch and door visible close to the subject, "
-                 "car remains secondary in the composition",
+        "scene": "leaning lightly with the upper back and one shoulder against a clean concrete pillar "
+                 "in an underground parking garage corner, concrete wall nearby, smooth floor",
+        "light": "cool overhead parking light, soft bounce from concrete walls, natural even light"
+    },
+    {
+        "scene": "standing very close beside a matte black Lamborghini Urus, "
+                 "body naturally near the front fender and door area, "
+                 "only part of the car visible close to the subject, car remains secondary",
         "light": "soft natural daylight, subtle reflection from matte car body, even realistic light"
     },
     {
-        "scene": "standing beside the open driver door of a matte black Lamborghini Urus, "
-                 "dark car interior softly visible, only the door and part of the body close to the subject",
+        "scene": "standing very close beside the open driver door of a matte black Lamborghini Urus, "
+                 "dark car interior softly visible, body naturally near the open door, "
+                 "only the door and part of the car body close to the subject",
         "light": "soft ambient daylight, subtle interior shadow, balanced natural illumination"
     },
     {
-        "scene": "standing beside clean metal railings of a modern pedestrian bridge walkway, "
+        "scene": "leaning lightly with one shoulder against clean metal railings "
+                 "of a modern pedestrian bridge walkway, "
                  "open sky around, smooth bridge surface underfoot, simple minimal surroundings",
         "light": "soft diffused daylight, no harsh contrast, natural even light"
     },
     {
-        "scene": "standing beside a smooth dark matte wall in a quiet modern urban setting, "
-                 "clean surface, minimal surroundings, calm aesthetic atmosphere",
+        "scene": "leaning lightly with the shoulder and upper back against a smooth dark matte wall "
+                 "in a quiet modern urban setting, clean surface, minimal surroundings, calm aesthetic atmosphere",
         "light": "soft diffused natural light, smooth even illumination across wall and subject"
     },
     {
-        "scene": "standing beside a dark car body parked in a quiet open parking area, "
-                 "subtle reflections on the paint, wide empty asphalt around, realistic minimal setting",
-        "light": "soft daylight with gentle reflections from the car surface, natural balanced light"
-    },
-    {
-        "scene": "standing near the side railing of a quiet riverside pedestrian walkway, "
-                 "metal railing beside the body, open air, calm water in the distance, minimal surroundings",
-        "light": "soft diffused daylight, clean natural light, no harsh shadows"
-    },
-    {
-        "scene": "standing beside a smooth dark stone wall near an open parking area, "
+        "scene": "leaning lightly with one shoulder against a smooth dark stone wall near an open parking area, "
                  "clean surface with subtle texture, dark asphalt underfoot, minimal background",
         "light": "soft natural diffused light, even illumination with gentle shadow transition"
+    },
+    {
+        "scene": "leaning lightly against the concrete side wall near an underground parking entrance ramp, "
+                 "clean architectural lines, smooth floor, realistic urban parking setting",
+        "light": "soft overhead and ambient parking light, no direct sun, even natural illumination"
     }
 ]
 
@@ -85,7 +88,8 @@ BACK_SCENES = [
         "scene": "standing far away with back to camera beside a parked Ferrari in a clean open parking setting, "
                  "only part of the rear quarter, wheel and body of the car visible, "
                  "car remains secondary, person small in the frame",
-        "light": "soft natural overcast daylight, no direct sun, gentle even illumination across subject, car and ground"
+        "light": "soft natural overcast daylight, no direct sun, "
+                 "gentle even illumination across subject, car and ground"
     },
     {
         "scene": "standing far away in a wide empty asphalt courtyard area, "
@@ -109,7 +113,8 @@ BACK_SCENES = [
     },
     {
         "scene": "standing far away on a quiet riverside pedestrian walkway, "
-                 "metal railing along the side, open air and water in the distance, person small in a calm open setting",
+                 "metal railing along the side, open air and water in the distance, "
+                 "person small in a calm open setting",
         "light": "soft natural daylight, balanced even illumination, no direct harsh sun"
     }
 ]
@@ -117,27 +122,60 @@ BACK_SCENES = [
 # ---------------- ПОЗЫ ----------------
 
 FRONT_POSES = [
-    "right fingertips resting lightly on the hood fabric near the temple, left hand in front jeans pocket, weight on right leg",
-    "both hands resting lightly on both sides of the hood from the front, chin slightly down, elbows relaxed",
-    "left fingertips resting lightly on the hood fabric near the cheek, right hand in front jeans pocket, body turned slightly left",
-    "both hands resting lightly near the hood opening without pulling the fabric, shoulders relaxed",
-    "right hand resting lightly on the hood fabric near the temple, left hand resting flat on upper thigh, relaxed stance",
-    "right hand resting behind the head on the nape, left hand in front jeans pocket, relaxed stance",
-    "left hand resting behind the head on the nape, right hand in front jeans pocket, body turned slightly left",
-    "right hand resting behind the head on the nape, left hand resting on upper thigh, chin slightly down"
+    "leaning naturally, right fingertips resting lightly on the hood fabric near the temple, "
+    "left hand in front jeans pocket",
+
+    "leaning naturally, both hands resting lightly on both sides of the hood from the front, "
+    "chin slightly down, elbows relaxed",
+
+    "leaning naturally, left fingertips resting lightly on the hood fabric near the cheek, "
+    "right hand in front jeans pocket, body turned slightly left",
+
+    "leaning naturally, both hands resting lightly near the hood opening without pulling the fabric, "
+    "shoulders relaxed",
+
+    "leaning naturally, right hand resting lightly on the hood fabric near the temple, "
+    "left hand resting flat on upper thigh",
+
+    "leaning naturally, right hand resting behind the head on the nape, "
+    "left hand in front jeans pocket",
+
+    "leaning naturally, left hand resting behind the head on the nape, "
+    "right hand in front jeans pocket, body turned slightly left",
+
+    "leaning naturally, right hand resting behind the head on the nape, "
+    "left hand resting on upper thigh, chin slightly down"
 ]
 
 BACK_POSES = [
-    "standing facing away, right hand resting lightly on the back of the hood, left arm relaxed along outer thigh",
-    "standing facing away, left hand resting lightly on the back of the hood, right arm relaxed along outer thigh",
-    "standing facing away, both hands resting lightly on the hood from behind, elbows slightly outward",
-    "walking away, right hand resting lightly on the back of the hood, left arm moving naturally with stride",
-    "walking away, left hand resting lightly on the back of the hood, right arm moving naturally with stride",
+    "standing facing away, right hand resting lightly on the back of the hood, "
+    "left arm relaxed along outer thigh",
+
+    "standing facing away, left hand resting lightly on the back of the hood, "
+    "right arm relaxed along outer thigh",
+
+    "standing facing away, both hands resting lightly on the hood from behind, "
+    "elbows slightly outward",
+
+    "walking away, right hand resting lightly on the back of the hood, "
+    "left arm moving naturally with stride",
+
+    "walking away, left hand resting lightly on the back of the hood, "
+    "right arm moving naturally with stride",
+
     "walking away, both hands lightly touching the hood from behind, head slightly lowered",
-    "standing facing away, right hand resting behind the head on the nape, left arm relaxed along outer thigh",
-    "standing facing away, left hand resting behind the head on the nape, right arm relaxed along outer thigh",
-    "walking away, right hand resting behind the head on the nape, left arm moving naturally with stride",
-    "walking away, left hand resting behind the head on the nape, right arm moving naturally with stride"
+
+    "standing facing away, right hand resting behind the head on the nape, "
+    "left arm relaxed along outer thigh",
+
+    "standing facing away, left hand resting behind the head on the nape, "
+    "right arm relaxed along outer thigh",
+
+    "walking away, right hand resting behind the head on the nape, "
+    "left arm moving naturally with stride",
+
+    "walking away, left hand resting behind the head on the nape, "
+    "right arm moving naturally with stride"
 ]
 
 
@@ -193,15 +231,21 @@ def build_front_prompt(spec):
         "STRICT FRONT VIEW CLOSE SHOT ONLY. "
         "This image is only for a front-facing close fashion shot. "
         "Never use back-view composition. Never use far-distance back-view scene logic. "
-        "Never use wide rear-view environments such as distant bridge walkway, staircase ascent, "
-        "large long-shot parking panorama, wide courtyard or any scene intended for a rear environmental shot. "
 
         "Real photo taken on location by a professional photographer. "
-        "Sony A7R V, 35mm, f/8, ISO 200. "
+        "Sony A7R V, 35mm lens, f/8, ISO 200. "
         "Camera at eye level. Straight-on. No tilt. "
         "Camera exactly 1.0 meter from subject. "
-        "Framing from head to knees. Subject fills 80-85 percent of frame. "
+        "Framing from head to knees. Subject fills 80 to 85 percent of frame. "
         "Subject is facing the camera. "
+
+        "The subject must physically interact with the environment object described in the scene. "
+        "If the scene contains a wall or pillar, the shoulder or upper back must visibly lean against it. "
+        "If the scene contains a car, the body must stand naturally very close to the car door or fender. "
+        "If the scene contains railings, the body must lean lightly against them. "
+        "Visible physical contact with the environment is required. "
+        "The subject must feel anchored in the scene, not floating, not cut out, not composited. "
+        "The background surface must be clearly visible behind and beside the subject. "
 
         "The hood may be worn up or may rest naturally behind the head. "
         "If a hand interacts with the hood, the fingers must visibly touch the fabric. "
@@ -210,21 +254,25 @@ def build_front_prompt(spec):
         "Do not pull the hood. Do not stretch the hood. "
         "No visible fabric tension caused by the hand. "
 
-        "EXTREME FABRIC DETAIL. Macro-level realism. "
-        "Photograph the hoodie fabric almost like a macro fashion shot. "
+        "EXTREME MACRO-LEVEL FABRIC DETAIL. "
+        "Photograph the hoodie fabric like a macro fashion editorial shot. "
         "Every cotton fiber visible and sharp. "
-        "Every weave, stitch, micro wrinkle rendered with extreme clarity. "
-        "Light physically interacts with fabric: micro shadows in folds, subtle highlights on raised fibers. "
-        "Fabric is real and tactile. Not smooth. Not plastic. Not flat. "
-        "Denim weave of the jeans also fully visible and sharp. "
+        "Every weave, stitch, seam and micro wrinkle rendered with extreme clarity. "
+        "Light physically interacts with the fabric surface: "
+        "micro shadows in folds, subtle highlights on raised fibers, realistic cotton texture. "
+        "The fabric must feel tactile, real, premium, natural. "
+        "Not smooth. Not plastic. Not flat. "
+        "Black denim jeans must also show realistic denim texture, visible weave, folds and thickness. "
 
         "Deep depth of field. Everything sharp. No bokeh. No blur. "
         "Background sharp and real. One unified photograph. "
-        "Not cut out. Not composited. Not isolated. "
+        "The environment must look like a real photograph, not CGI, not a backdrop. "
 
         f"Lighting: {spec['light']}. "
         "No direct sunlight. No harsh shadows. No strong contrast. "
-        "Soft natural diffused light only. No flash. No studio light. "
+        "Soft natural diffused light only. "
+        "Light must behave realistically across the surface the subject leans against, "
+        "hoodie fabric and jeans. No flash. No studio light. "
 
         "ABSOLUTE STRICT HOODIE RULES: "
         "THE HOODIE HAS NO FRONT POCKET. "
@@ -232,7 +280,7 @@ def build_front_prompt(spec):
         "NO ZIPPER. NO DRAWSTRINGS. "
         "Completely flat clean front. Only the chest logo. "
         "Logo must be maximum sharpness, exact size and exact position from reference. "
-        "Logo must be crisp and fully readable. Not blurred. Not distorted. "
+        "Logo must be crisp, clear and fully readable. Not blurred. Not distorted. "
 
         "MANDATORY black wide-leg baggy denim jeans. "
         "The jeans must be black. "
@@ -337,7 +385,7 @@ def submit_job(prompt, image_url):
     except Exception:
         raise Exception(f"Polza вернула не JSON: {response.text}")
 
-    logger.info(f"[POLZA] submit response: {data}")
+    logger.info(f"[POLZA] submit: {data}")
 
     job_id = data.get("id") or data.get("task_id")
     if not job_id:
@@ -368,7 +416,6 @@ def extract_url(obj, depth=0):
                 found = extract_url(obj[key], depth + 1)
                 if found:
                     return found
-
         for value in obj.values():
             found = extract_url(value, depth + 1)
             if found:
@@ -399,7 +446,7 @@ async def poll_job(job_id):
             try:
                 data = response.json()
             except Exception:
-                logger.warning(f"[POLZA] non-JSON response: {response.text[:300]}")
+                logger.warning(f"[POLZA] non-JSON: {response.text[:300]}")
                 continue
 
             last_data = data
@@ -414,21 +461,20 @@ async def poll_job(job_id):
 
             url = extract_url(data)
             if url:
-                logger.info(f"[POLZA] got url: {url}")
+                logger.info(f"[POLZA] url: {url}")
                 return url
 
         except Exception as e:
             if "failed" in str(e).lower():
                 raise
-            logger.warning(f"[POLZA] poll error for job {job_id}: {e}")
+            logger.warning(f"[POLZA] poll error job={job_id}: {e}")
 
-    raise Exception(f"Generation timeout after {max_wait}s. Last response: {last_data}")
+    raise Exception(f"Timeout {max_wait}s. Last: {last_data}")
 
 
 async def download_image(url, path):
     response = await asyncio.to_thread(requests.get, url, timeout=60)
     os.makedirs(SAVE_DIR, exist_ok=True)
-
     with open(path, "wb") as f:
         f.write(response.content)
 
