@@ -75,119 +75,125 @@ FRONT_SCENES = [
     }
 ]
 
-# ---------------- BACK SCENES ----------------
+# ---------------- BACK SCENES (ТОЛЬКО ЭЛИТНЫЕ ЖИЛЫЕ КОМПЛЕКСЫ) ----------------
 
 BACK_SCENES = [
     {
-        "scene": "walking through underground parking garage, "
-                 "person small in frame, rows of premium cars visible far ahead with sharp details, "
-                 "polished concrete floor with clear texture and line markings, LED lights illuminate entire scene",
-        "light": "soft ambient LED lighting, sharp and detailed illumination across entire parking garage"
+        "scene": "walking through premium residential complex courtyard, "
+                 "person small in frame, modern luxury apartment buildings with sharp architectural details, "
+                 "geometric landscaping with manicured gardens clearly visible, premium pavement with texture, "
+                 "water fountain or sculpture with sharp reflection details",
+        "light": "soft natural daylight, sharp detailed light across entire residential courtyard"
     },
     {
-        "scene": "standing in courtyard of modern apartment complex, "
-                 "person small in frame, contemporary glass and steel buildings with sharp architectural details, "
-                 "geometric landscaping clearly visible with defined shapes, clean pavement with texture",
-        "light": "soft natural daylight, sharp balanced light across all courtyard elements"
+        "scene": "standing in exclusive gated community driveway, "
+                 "person small in frame, contemporary minimalist houses visible with sharp material details, "
+                 "manicured gardens on both sides with defined plant shapes, premium paving with clear texture, "
+                 "security gate visible in distance",
+        "light": "soft natural daylight, sharp detailed illumination across entire community"
     },
     {
-        "scene": "walking on wide plaza in front of business center, "
-                 "person small in frame, glass office towers far ahead with sharp reflections and window details, "
-                 "granite pavement with visible texture and lines, modern furniture clearly defined",
-        "light": "soft diffused daylight, sharp detailed light across entire plaza and buildings"
+        "scene": "walking through elevated plaza of luxury residential tower, "
+                 "person small in frame, modern high-rise residential buildings with sharp window details, "
+                 "landscaped plaza with defined trees and plants, polished stone flooring with clear texture, "
+                 "architectural railings with sharp reflections",
+        "light": "soft diffused daylight, sharp detailed light across plaza and buildings"
     },
     {
-        "scene": "standing on elevated driveway near luxury residential building, "
-                 "person small in frame, modern high-rise facade visible far ahead with sharp architectural details, "
-                 "clean pavement stretches with clear texture, elegant landscaping with defined plants",
-        "light": "soft natural daylight, sharp even illumination across pavement and building"
+        "scene": "standing in courtyard of premium apartment complex, "
+                 "person small in frame, glass and steel residential buildings with sharp architectural details, "
+                 "geometric landscaping with defined hedges and modern plants, clean pavement with visible lines, "
+                 "contemporary sculpture or water feature with sharp edges",
+        "light": "soft natural daylight, sharp balanced light across residential courtyard"
     },
     {
-        "scene": "walking up wide modern stone staircase in premium district, "
-                 "person small climbing, clean stone steps ahead with sharp texture and edges clearly defined, "
-                 "steel railings with sharp reflections, high-end storefronts visible with detailed window displays",
-        "light": "soft even daylight, sharp detailed light across stone steps and storefront elements"
+        "scene": "walking through private residential park of luxury complex, "
+                 "person small in frame, modern apartment towers visible with sharp facade details, "
+                 "manicured park with defined trees, paths and landscaping, premium ground paving with texture, "
+                 "benches and street furniture clearly visible",
+        "light": "soft natural daylight, sharp detailed illumination across entire residential park"
     },
     {
-        "scene": "standing on wide pedestrian street in city center, "
-                 "person small in frame, modern office buildings far ahead with sharp architectural lines and details, "
-                 "luxury retail storefronts with clearly visible window displays and signage, "
-                 "premium parked cars along street with sharp paint and detail definition",
-        "light": "soft overcast daylight, sharp detailed light across entire street scene"
+        "scene": "standing in entrance courtyard of exclusive residential development, "
+                 "person small in frame, contemporary luxury buildings with sharp architectural lines, "
+                 "elegant landscaping with defined shapes and materials, premium ground surface with clear texture, "
+                 "modern entrance design with sharp details",
+        "light": "soft natural daylight, sharp detailed light across courtyard and buildings"
     },
     {
-        "scene": "walking through private driveway of gated community, "
-                 "person small in frame, manicured gardens on sides with sharp detail and defined landscaping, "
-                 "modern minimalist houses visible ahead with sharp architectural features and materials, "
-                 "premium pavement with visible texture and detail",
-        "light": "soft natural daylight, sharp clear illumination across entire community scene"
+        "scene": "walking through central plaza of gated residential community, "
+                 "person small in frame, modern minimalist residential buildings visible with sharp details, "
+                 "geometric landscaping with defined plants and hardscaping, clean premium paving, "
+                 "contemporary urban furniture clearly visible",
+        "light": "soft diffused daylight, sharp detailed illumination across entire plaza"
     },
     {
-        "scene": "standing in courtyard of modern office campus, "
-                 "person small in frame, glass buildings far ahead with sharp window details and reflections, "
-                 "water feature visible with sharp ripples and reflection details, clean walkways with defined edge lines, "
-                 "professional landscaping with clearly defined shapes and textures",
-        "light": "soft diffused daylight, sharp balanced light across all campus elements"
+        "scene": "standing in courtyard of ultra-modern luxury apartment tower, "
+                 "person small in frame, contemporary glass and steel buildings with sharp window and facade details, "
+                 "elevated landscape design with defined sections and materials, premium stone paving with texture, "
+                 "architectural elements with sharp reflections and definition",
+        "light": "soft natural daylight, sharp detailed light across entire complex"
     }
 ]
 
-# ---------------- ПОЗЫ ----------------
+# ---------------- ПОЗЫ (без руки к шводу) ----------------
 
 FRONT_POSES = [
-    "leaning naturally, right fingertips resting lightly on the hood fabric near the temple, "
-    "left hand resting loosely on upper thigh",
+    "leaning naturally, right hand resting on upper thigh, "
+    "left hand resting on lower back",
 
-    "leaning naturally, both hands resting lightly on both sides of the hood from the front, "
+    "leaning naturally, both hands resting on thighs, "
     "chin slightly down, elbows relaxed",
 
-    "leaning naturally, left fingertips resting lightly on the hood fabric near the cheek, "
-    "right arm relaxed along outer thigh",
+    "leaning naturally, left hand resting on upper thigh, "
+    "right hand resting on lower back",
 
-    "leaning naturally, both hands resting lightly near the hood opening without pulling the fabric, "
-    "shoulders relaxed",
+    "leaning naturally, both hands resting on thighs, "
+    "shoulders relaxed and confident",
 
-    "leaning naturally, right hand resting lightly on the hood fabric near the temple, "
-    "left hand resting flat on upper thigh",
+    "leaning naturally, right hand resting on hip, "
+    "left hand resting on upper thigh",
 
-    "leaning naturally, right hand resting on the back of the head, "
-    "left arm relaxed along outer thigh",
+    "leaning naturally, right hand in relaxed position along outer thigh, "
+    "left hand resting on hip",
 
-    "leaning naturally, left hand resting on the back of the head, "
-    "right arm relaxed along outer thigh",
+    "leaning naturally, left hand in relaxed position along outer thigh, "
+    "right hand resting on hip",
 
-    "leaning naturally, right hand resting on the back of the head, "
+    "leaning naturally, right hand resting on hip, "
     "left hand resting on upper thigh, chin slightly down"
 ]
 
 BACK_POSES = [
-    "standing facing away, right hand resting lightly on the back of the hood, "
-    "left arm relaxed along outer thigh",
+    "standing facing away, both hands resting at sides naturally, "
+    "arms relaxed",
 
-    "standing facing away, left hand resting lightly on the back of the hood, "
-    "right arm relaxed along outer thigh",
+    "standing facing away, right hand resting on outer thigh, "
+    "left arm relaxed at side",
 
-    "standing facing away, both hands resting lightly on the hood from behind, "
-    "elbows slightly outward",
+    "standing facing away, left hand resting on outer thigh, "
+    "right arm relaxed at side",
 
-    "walking away, right hand resting lightly on the back of the hood, "
-    "left arm moving naturally with stride",
+    "walking away, both arms moving naturally with stride, "
+    "shoulders relaxed",
 
-    "walking away, left hand resting lightly on the back of the hood, "
-    "right arm moving naturally with stride",
+    "walking away, right arm swinging naturally with stride, "
+    "left arm at side",
 
-    "walking away, both hands lightly touching the hood from behind, head slightly lowered",
+    "walking away, left arm swinging naturally with stride, "
+    "right arm at side",
 
-    "standing facing away, right hand resting on the back of the head above the neck, "
-    "left arm relaxed along outer thigh",
+    "standing facing away, both hands resting on outer thighs, "
+    "posture confident and relaxed",
 
-    "standing facing away, left hand resting on the back of the head above the neck, "
-    "right arm relaxed along outer thigh",
+    "standing facing away, hands at sides naturally, "
+    "shoulders back slightly",
 
-    "walking away, right hand resting on the back of the head above the neck, "
-    "left arm moving naturally with stride",
+    "walking away, both arms in natural movement with stride, "
+    "head facing forward",
 
-    "walking away, left hand resting on the back of the head above the neck, "
-    "right arm moving naturally with stride"
+    "walking away with slight turn, arms moving naturally, "
+    "relaxed confident posture"
 ]
 
 
@@ -256,8 +262,9 @@ def build_front_prompt(spec):
         "Chest logo sharp, exact from reference. "
         "Black wide-leg denim, heavy texture visible. "
 
-        "Hands active, visible in frame, not in pockets. "
-        "If touching hood: fingers visible on fabric. "
+        "Hands visible, not touching hood or face. "
+        "Hands rest naturally on thighs or at sides. "
+        "Natural confident posture. "
 
         "Background sharp and detailed. Not blurred. "
         "Architecture, pavement, car details all clear. "
@@ -277,7 +284,7 @@ def build_back_prompt(spec):
 
     return (
         "Ultra-realistic 9:16 photograph. "
-        "Environmental back view shot. "
+        "Environmental back view shot in luxury residential complex. "
         "Sony A7R V, 35mm, f/4, ISO 400. "
         "Camera at 1.6m height, straight forward, parallel to ground. "
 
@@ -293,32 +300,32 @@ def build_back_prompt(spec):
         "No blur, no bokeh, no soft areas. Unified sharp photograph. "
 
         "BACKGROUND RENDERING - EXTREME DETAIL: "
-        "Every architectural element must be sharp and detailed: "
-        "- Building facades: sharp wall texture, window details, materials clearly visible "
-        "- Pavement/ground: texture visible, lines sharp, surface definition clear "
-        "- Cars and vehicles: sharp paint definition, chrome details, window reflections "
-        "- Landscaping: plants defined, edges sharp, color rich and natural "
-        "- Urban furniture: railings, benches, lights all clearly defined "
-        "- Sky and elements: clouds, light, atmospheric detail all sharp "
+        "Every element must be sharp and detailed: "
+        "- Building facades: sharp wall texture, materials clearly visible "
+        "- Landscaping: manicured plants, hedges, gardens with sharp details "
+        "- Pavement: texture visible, lines sharp, premium surface clear "
+        "- Water features: fountains, pools with sharp reflection details "
+        "- Architectural elements: railings, columns, edges all sharp "
+        "- Sky and light: natural atmospheric detail all sharp "
 
-        "Subject stands or walks naturally in location. "
-        "Authentically part of the scene, not floating. "
+        "Subject stands or walks naturally in exclusive residential setting. "
+        "Authentically part of the luxury community scene. "
 
-        "Black hoodie, hood up, face hidden, back view only. "
-        "Hands light contact on hood or back of head above neck. "
+        "Black hoodie, hood down, back view only. "
+        "Hands relaxed at sides or resting naturally on thighs. "
         "Black wide-leg denim, wide silhouette visible from distance. "
 
         f"Lighting: {spec['light']}. "
         "Soft natural light, even across entire scene, no harsh shadows. "
-        "Light illuminates every detail - buildings, pavement, plants all equally lit. "
+        "Light illuminates every detail - buildings, landscaping, pavement all equally lit. "
 
-        "Only pedestrian zones - streets, plazas, stairs, promenades, parks. "
-        "Never on traffic lanes. "
+        "Setting: Premium gated residential community, luxury apartment complex, "
+        "exclusive development with contemporary minimalist architecture. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
 
-        "This is professional environmental photography with maximum detail rendering. "
+        "This is professional environmental photography in exclusive residential setting. "
         "Background is primary visual element - render with extreme clarity and definition. "
     ) + uid
 
@@ -505,7 +512,7 @@ async def regenerate_photo(index, current_specs):
         "scene": scene_data["scene"],
         "light": scene_data["light"],
         "pose": pose,
-        "seed": old_spec["seed"],  # ← ТОТЖЕ SEED как в оригинале
+        "seed": old_spec["seed"],
         "ref": ref
     }
 
