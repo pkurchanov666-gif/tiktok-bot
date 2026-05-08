@@ -3,6 +3,9 @@ import time
 import random
 import requests
 import asyncio
+import logging
+
+logger = logging.getLogger(__name__)
 
 SAVE_DIR = "generations"
 
@@ -13,24 +16,9 @@ REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
 FRONT_SCENES = [
     {
-        "scene": "standing beside a wide concrete pillar in a clean underground parking garage, "
-                 "smooth concrete floor, minimal empty space around, calm realistic setting",
-        "light": "soft overhead parking light, even realistic illumination, no harsh shadows"
-    },
-    {
-        "scene": "standing in a clean corner of an underground parking garage, "
-                 "concrete wall on one side, pillar on the other, empty floor around",
-        "light": "cool overhead parking light, soft bounce from concrete walls, natural even light"
-    },
-    {
-        "scene": "standing near the concrete side wall of an underground parking entrance ramp, "
-                 "clean architectural lines, smooth floor, minimal realistic urban setting",
-        "light": "soft overhead and ambient parking light, no direct sun, even natural illumination"
-    },
-    {
-        "scene": "standing on an open-air parking level with clean concrete floor and low barriers, "
-                 "minimal open space around, simple realistic urban setting",
-        "light": "soft overcast daylight, no direct sunlight, even natural light"
+        "scene": "standing on a clean open-air parking level with dark asphalt and white parking lines, "
+                 "wide empty space around, low barriers in the distance, calm realistic setting",
+        "light": "soft overcast daylight, natural even illumination, no harsh shadows"
     },
     {
         "scene": "standing beside a matte black Lamborghini Urus parked naturally, "
@@ -44,24 +32,29 @@ FRONT_SCENES = [
         "light": "soft ambient daylight, subtle interior shadow, balanced natural illumination"
     },
     {
-        "scene": "standing close to a smooth dark concrete wall in a modern urban setting, "
-                 "calm minimal background, no distractions",
-        "light": "soft diffused daylight, gentle shadow transition, natural realistic light"
+        "scene": "standing beside clean metal railings of a modern pedestrian bridge walkway, "
+                 "open sky around, smooth bridge surface underfoot, simple minimal surroundings",
+        "light": "soft diffused daylight, no harsh contrast, natural even light"
     },
     {
-        "scene": "standing close to a smooth dark stone wall, "
-                 "clean surface with subtle texture, minimal surroundings, quiet aesthetic setting",
-        "light": "soft diffused natural light, even illumination across the wall and subject"
+        "scene": "standing beside a smooth dark matte wall in a quiet modern urban setting, "
+                 "clean surface, minimal surroundings, calm aesthetic atmosphere",
+        "light": "soft diffused natural light, smooth even illumination across wall and subject"
     },
     {
-        "scene": "standing in a modern open concrete passage with a clean wall close to the body, "
-                 "architectural ceiling above, minimal realistic urban space",
-        "light": "soft ambient light filtering from above, gentle bounce from concrete surfaces"
+        "scene": "standing beside a dark car body parked in a quiet open parking area, "
+                 "subtle reflections on the paint, wide empty asphalt around, realistic minimal setting",
+        "light": "soft daylight with gentle reflections from the car surface, natural balanced light"
     },
     {
-        "scene": "standing on an open rooftop parking level beside a low concrete barrier, "
-                 "clean concrete floor, calm open space around, minimal realistic setting",
-        "light": "soft overcast daylight, no direct sun, natural even illumination"
+        "scene": "standing near the side railing of a quiet riverside pedestrian walkway, "
+                 "metal railing beside the body, open air, calm water in the distance, minimal surroundings",
+        "light": "soft diffused daylight, clean natural light, no harsh shadows"
+    },
+    {
+        "scene": "standing beside a smooth dark stone wall near an open parking area, "
+                 "clean surface with subtle texture, dark asphalt underfoot, minimal background",
+        "light": "soft natural diffused light, even illumination with gentle shadow transition"
     }
 ]
 
@@ -69,30 +62,24 @@ FRONT_SCENES = [
 
 BACK_SCENES = [
     {
-        "scene": "standing far away in a massive clean underground parking garage, "
-                 "concrete pillars creating deep perspective, empty floor, person small in wide corridor",
-        "light": "soft even overhead parking light, gentle bounce from concrete surfaces, realistic neutral illumination"
-    },
-    {
         "scene": "standing far away on a wide empty open-air parking lot, "
-                 "clean asphalt stretching far in all directions, person tiny in open space",
+                 "clean dark asphalt stretching far in all directions, person tiny in open space",
         "light": "soft natural overcast daylight, no harsh shadows, even realistic light"
     },
     {
         "scene": "standing far away on an open rooftop parking level, "
-                 "clean concrete floor, low barriers, wide empty space around, person small in frame",
-        "light": "soft natural overcast daylight, calm even illumination across entire scene"
+                 "dark asphalt surface, low barriers, wide empty space around, person small in frame",
+        "light": "soft natural daylight, calm even illumination across entire scene"
     },
     {
         "scene": "standing far away on an empty modern pedestrian bridge walkway, "
-                 "clean railings on both sides, pedestrian surface only, bridge stretching far ahead, "
-                 "person small in wide frame",
+                 "clean metal railings on both sides, open sky around, person small in wide frame",
         "light": "soft diffused daylight, no direct sun, no harsh shadows, natural even light"
     },
     {
         "scene": "standing far away in a clean open-air multi-level parking structure, "
-                 "long concrete ramps, repeated horizontal lines, empty parking lanes, person small in deep perspective",
-        "light": "soft neutral daylight, gentle concrete reflections, even realistic illumination"
+                 "long open ramps, repeated horizontal lines, empty parking lanes, person small in deep perspective",
+        "light": "soft neutral daylight, gentle reflections, even realistic illumination"
     },
     {
         "scene": "standing far away with back to camera beside a parked Ferrari in a clean open parking setting, "
@@ -101,25 +88,29 @@ BACK_SCENES = [
         "light": "soft natural overcast daylight, no direct sun, gentle even illumination across subject, car and ground"
     },
     {
-        "scene": "standing far away in a wide empty concrete courtyard, "
-                 "minimal surroundings, large clean ground plane, person small in open space",
+        "scene": "standing far away in a wide empty asphalt courtyard area, "
+                 "minimal surroundings, large dark ground plane, person small in open space",
         "light": "soft diffused daylight, even realistic illumination"
     },
     {
-        "scene": "standing far away in a wide modern covered walkway with concrete ceiling and pillars, "
+        "scene": "standing far away in a wide covered walkway with simple columns and open sides, "
                  "long perspective depth, person small at the far end",
-        "light": "soft overhead ambient light, gentle bounce from concrete surfaces, no harsh contrast"
+        "light": "soft overhead ambient light, gentle bounce from surrounding surfaces, no harsh contrast"
     },
     {
-        "scene": "standing far away beside a long clean retaining wall in an open parking area, "
-                 "wide asphalt surface, minimal concrete surroundings, person small in a quiet realistic setting",
+        "scene": "standing far away beside a long dark retaining wall in an open parking area, "
+                 "wide asphalt surface, minimal surroundings, person small in a quiet realistic setting",
         "light": "soft overcast daylight, smooth even light across wall and ground, no direct sun"
     },
     {
-        "scene": "walking upward on a wide clean concrete staircase in a modern urban setting, "
-                 "seen fully from behind, strong architectural lines, person small in the frame, "
-                 "stairs rising upward with calm minimal surroundings",
-        "light": "soft diffused daylight, even realistic illumination across staircase, no harsh shadows, no direct sunlight"
+        "scene": "walking upward on a wide clean staircase in an open urban setting, "
+                 "seen fully from behind, strong lines, person small in frame, stairs rising upward calmly",
+        "light": "soft diffused daylight, even realistic illumination across staircase, no harsh shadows"
+    },
+    {
+        "scene": "standing far away on a quiet riverside pedestrian walkway, "
+                 "metal railing along the side, open air and water in the distance, person small in a calm open setting",
+        "light": "soft natural daylight, balanced even illumination, no direct harsh sun"
     }
 ]
 
@@ -247,9 +238,7 @@ def build_front_prompt(spec):
         "Hands actively engaged. Not hanging freely at sides. "
         "No hands in back pockets. No hands in hoodie pocket. "
 
-        "Use only this exact close front-view scene: "
-        f"{spec['scene']}. "
-
+        f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
     ) + uid
 
@@ -309,9 +298,7 @@ def build_back_prompt(spec):
         "Use only pedestrian surfaces, parking surfaces, staircase, courtyard, covered walkway, "
         "or bridge walkway. "
 
-        "Use only this exact back-view environment: "
-        f"{spec['scene']}. "
-
+        f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
     ) + uid
 
@@ -340,55 +327,97 @@ def submit_job(prompt, image_url):
         timeout=30
     )
 
-    data = response.json()
-    job_id = data.get("id") or data.get("task_id")
+    try:
+        data = response.json()
+    except Exception:
+        raise Exception(f"Polza вернула не JSON: {response.text}")
 
+    logger.info(f"[POLZA] submit response: {data}")
+
+    job_id = data.get("id") or data.get("task_id")
     if not job_id:
-        raise Exception(f"Polza error: {data}")
+        raise Exception(f"Polza submit error: {data}")
 
     return job_id
 
 
-def extract_url(obj):
-    if isinstance(obj, str) and obj.startswith("http"):
-        return obj
+def extract_url(obj, depth=0):
+    if depth > 10:
+        return None
+
+    if isinstance(obj, str):
+        if obj.startswith("http") and "ibb.co" not in obj:
+            return obj
+        return None
+
     if isinstance(obj, list):
         for item in obj:
-            found = extract_url(item)
+            found = extract_url(item, depth + 1)
             if found:
                 return found
+
     if isinstance(obj, dict):
+        priority_keys = ["output", "result", "url", "image", "images", "file", "src", "data"]
+        for key in priority_keys:
+            if key in obj:
+                found = extract_url(obj[key], depth + 1)
+                if found:
+                    return found
+
         for value in obj.values():
-            found = extract_url(value)
+            found = extract_url(value, depth + 1)
             if found:
                 return found
+
     return None
 
 
 async def poll_job(job_id):
     polza_key = os.getenv("POLZA_API_KEY")
-    max_wait = 600
+    max_wait = 900
     interval = 5
     waited = 0
+    last_data = None
 
     while waited < max_wait:
         await asyncio.sleep(interval)
         waited += interval
 
-        response = await asyncio.to_thread(
-            requests.get,
-            f"https://polza.ai/api/v1/media/{job_id}",
-            headers={"Authorization": f"Bearer {polza_key}"},
-            timeout=30
-        )
+        try:
+            response = await asyncio.to_thread(
+                requests.get,
+                f"https://polza.ai/api/v1/media/{job_id}",
+                headers={"Authorization": f"Bearer {polza_key}"},
+                timeout=30
+            )
 
-        data = response.json()
-        url = extract_url(data)
+            try:
+                data = response.json()
+            except Exception:
+                logger.warning(f"[POLZA] non-JSON response: {response.text[:300]}")
+                continue
 
-        if url and "ibb.co" not in url:
-            return url
+            last_data = data
+            status = str(data.get("status", "")).lower()
 
-    raise Exception("Generation timeout")
+            logger.info(
+                f"[POLZA] job={job_id} waited={waited}s status={status} keys={list(data.keys())}"
+            )
+
+            if status in {"failed", "error", "canceled", "cancelled"}:
+                raise Exception(f"Polza job failed: {data}")
+
+            url = extract_url(data)
+            if url:
+                logger.info(f"[POLZA] got url: {url}")
+                return url
+
+        except Exception as e:
+            if "failed" in str(e).lower():
+                raise
+            logger.warning(f"[POLZA] poll error for job {job_id}: {e}")
+
+    raise Exception(f"Generation timeout after {max_wait}s. Last response: {last_data}")
 
 
 async def download_image(url, path):
@@ -429,7 +458,6 @@ async def regenerate_photo(index, current_specs):
     spec = get_next_spec(side)
 
     prompt = build_front_prompt(spec) if side == "front" else build_back_prompt(spec)
-
     job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
     url = await poll_job(job_id)
 
