@@ -140,42 +140,47 @@ BACK_POSES = [
     "walking away, left hand resting behind the head on the nape, right arm moving naturally with stride"
 ]
 
-CURRENT_FRONT_INDEX = 0
-CURRENT_BACK_INDEX = 0
-
 
 # ---------------- SPEC ----------------
 
-def get_next_spec(side):
-    global CURRENT_FRONT_INDEX, CURRENT_BACK_INDEX
-
-    if side == "front":
-        scene_data = random.choice(FRONT_SCENES)
-        pose = FRONT_POSES[CURRENT_FRONT_INDEX % len(FRONT_POSES)]
-        CURRENT_FRONT_INDEX += 1
-        ref = REF_FRONT
-    else:
-        scene_data = random.choice(BACK_SCENES)
-        pose = BACK_POSES[CURRENT_BACK_INDEX % len(BACK_POSES)]
-        CURRENT_BACK_INDEX += 1
-        ref = REF_BACK
-
-    return {
-        "side": side,
-        "scene": scene_data["scene"],
-        "light": scene_data["light"],
-        "pose": pose,
-        "seed": random.randint(100000, 999999),
-        "ref": ref
-    }
-
-
 def get_unique_specs():
-    return [
-        get_next_spec("back"),
-        get_next_spec("front"),
-        get_next_spec("back")
-    ]
+    specs = []
+    used_scenes = set()
+    used_poses = set()
+    sides = ["back", "front", "back"]
+
+    for side in sides:
+        if side == "front":
+            scenes = FRONT_SCENES
+            poses = FRONT_POSES
+            ref = REF_FRONT
+        else:
+            scenes = BACK_SCENES
+            poses = BACK_POSES
+            ref = REF_BACK
+
+        available_scenes = [s for s in scenes if s["scene"][:50] not in used_scenes]
+        if not available_scenes:
+            available_scenes = scenes
+        scene_data = random.choice(available_scenes)
+        used_scenes.add(scene_data["scene"][:50])
+
+        available_poses = [p for p in poses if p not in used_poses]
+        if not available_poses:
+            available_poses = poses
+        pose = random.choice(available_poses)
+        used_poses.add(pose)
+
+        specs.append({
+            "side": side,
+            "scene": scene_data["scene"],
+            "light": scene_data["light"],
+            "pose": pose,
+            "seed": random.randint(100000, 999999),
+            "ref": ref
+        })
+
+    return specs
 
 
 # ---------------- FRONT PROMPT ----------------
@@ -455,7 +460,36 @@ async def generate_all_photos():
 
 async def regenerate_photo(index, current_specs):
     side = current_specs[index]["side"]
-    spec = get_next_spec(side)
+    old_scene = current_specs[index].get("scene", "")[:50]
+    old_pose = current_specs[index].get("pose", "")
+
+    if side == "front":
+        scenes = FRONT_SCENES
+        poses = FRONT_POSES
+        ref = REF_FRONT
+    else:
+        scenes = BACK_SCENES
+        poses = BACK_POSES
+        ref = REF_BACK
+
+    available_scenes = [s for s in scenes if s["scene"][:50] != old_scene]
+    if not available_scenes:
+        available_scenes = scenes
+    scene_data = random.choice(available_scenes)
+
+    available_poses = [p for p in poses if p != old_pose]
+    if not available_poses:
+        available_poses = poses
+    pose = random.choice(available_poses)
+
+    spec = {
+        "side": side,
+        "scene": scene_data["scene"],
+        "light": scene_data["light"],
+        "pose": pose,
+        "seed": random.randint(100000, 999999),
+        "ref": ref
+    }
 
     prompt = build_front_prompt(spec) if side == "front" else build_back_prompt(spec)
     job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
