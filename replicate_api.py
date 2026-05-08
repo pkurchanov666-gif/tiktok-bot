@@ -126,21 +126,21 @@ BACK_SCENES = [
 # ---------------- ПОЗЫ ----------------
 
 FRONT_POSES = [
-    "right hand gripping the hood edge near temple, left hand in front jeans pocket, weight on right leg",
-    "both hands adjusting the hood from the front, chin slightly down, elbows slightly outward",
-    "right hand pulling the hood lower over the forehead, left hand gripping the side hem of the hoodie",
-    "left hand pulling the hood edge slightly forward, right hand in front jeans pocket, body turned slightly left",
-    "both hands holding both hood edges near the jawline, shoulders slightly raised",
-    "right hand on hood near temple, left hand resting flat on upper thigh, relaxed stance"
+    "right hand lightly holding the hood edge near temple, left hand in front jeans pocket, weight on right leg",
+    "both hands lightly holding the hood edges from the front, chin slightly down, elbows relaxed",
+    "right hand lightly touching the hood edge near forehead, left hand resting on upper thigh",
+    "left hand lightly holding the hood edge near cheek, right hand in front jeans pocket, body turned slightly left",
+    "both hands lightly holding both hood edges near the jawline, shoulders relaxed",
+    "right hand lightly touching the hood near temple, left hand resting flat on upper thigh, relaxed stance"
 ]
 
 BACK_POSES = [
-    "standing facing away, right hand holding the back edge of the hood, left arm relaxed along outer thigh",
-    "standing facing away, left hand holding the back edge of the hood, right arm relaxed along outer thigh",
-    "standing facing away, both hands holding the hood from behind, elbows slightly outward",
-    "walking away, right hand holding the back edge of the hood, left arm moving naturally with stride",
-    "walking away, left hand holding the back edge of the hood, right arm moving naturally with stride",
-    "walking away, both hands briefly adjusting the hood from behind, head slightly lowered",
+    "standing facing away, right hand lightly holding the back edge of the hood, left arm relaxed along outer thigh",
+    "standing facing away, left hand lightly holding the back edge of the hood, right arm relaxed along outer thigh",
+    "standing facing away, both hands lightly holding the hood from behind, elbows slightly outward",
+    "walking away, right hand lightly holding the back edge of the hood, left arm moving naturally with stride",
+    "walking away, left hand lightly holding the back edge of the hood, right arm moving naturally with stride",
+    "walking away, both hands lightly touching the hood from behind, head slightly lowered",
     "standing facing away, right hand resting behind the head on the nape, left arm relaxed along outer thigh",
     "standing facing away, left hand resting behind the head on the nape, right arm relaxed along outer thigh",
     "walking away, right hand resting behind the head on the nape, left arm moving naturally with stride",
@@ -237,8 +237,8 @@ def build_front_prompt(spec):
         "STRICT FRONT VIEW CLOSE SHOT ONLY. "
         "This image is only for a front-facing close fashion shot. "
         "Never use back-view composition. Never use far-distance back-view scene logic. "
-        "Never use wide back-view environments such as distant bridge walkway, large long-shot parking panorama, "
-        "staircase ascent, wide courtyard, or any scene intended for a rear view. "
+        "Never use wide rear-view environments such as distant bridge walkway, staircase ascent, "
+        "large long-shot parking panorama, wide courtyard or any scene intended for a rear environmental shot. "
 
         "Real photo taken on location by a professional photographer. "
         "Sony A7R V, 35mm, f/8, ISO 200. "
@@ -253,7 +253,7 @@ def build_front_prompt(spec):
         "Every weave, stitch, micro wrinkle rendered with extreme clarity. "
         "Light physically interacts with fabric: micro shadows in folds, subtle highlights on raised fibers. "
         "Fabric is real and tactile. Not smooth. Not plastic. Not flat. "
-        "Denim weave of jeans also fully visible and sharp. "
+        "Denim weave of the jeans also fully visible and sharp. "
 
         "Deep depth of field. Everything sharp. No bokeh. No blur. "
         "Background sharp and real. One unified photograph. "
@@ -263,14 +263,21 @@ def build_front_prompt(spec):
         "No direct sunlight. No harsh shadows. No strong contrast. "
         "Soft natural diffused light only. No flash. No studio light. "
 
-        "HOODIE RULES — ABSOLUTE: "
-        "ZERO POCKET ON FRONT. NO KANGAROO POCKET. NO POUCH. NO ZIPPER. NO DRAWSTRINGS. "
-        "Completely flat clean front. Only chest logo. "
-        "Logo: maximum sharpness, exact size and position from reference. "
-        "Logo crisp and fully readable. Not blurred. Not distorted. "
+        "ABSOLUTE STRICT HOODIE RULES: "
+        "THE HOODIE HAS NO FRONT POCKET. "
+        "NO KANGAROO POCKET. NO FRONT POUCH. NO POCKET OF ANY KIND ON THE FRONT. "
+        "NO ZIPPER. NO DRAWSTRINGS. "
+        "Completely flat clean front. Only the chest logo. "
+        "Logo must be maximum sharpness, exact size and exact position from reference. "
+        "Logo must be crisp and fully readable. Not blurred. Not distorted. "
 
-        "MANDATORY baggy wide-leg black denim jeans. "
-        "Very wide at thighs, knees, calves. Heavy denim texture visible. "
+        "If hands touch the hood, they only lightly hold or lightly touch the hood edge. "
+        "Do not pull the hood. Do not stretch the hood. Do not drag the hood downward. "
+
+        "MANDATORY black wide-leg baggy denim jeans. "
+        "The jeans must be black. "
+        "Very wide at thighs, knees and calves. "
+        "Heavy black denim texture visible. "
         "Not slim. Not skinny. Not tapered. "
 
         "Hands actively engaged. Not hanging freely at sides. "
@@ -294,8 +301,8 @@ def build_back_prompt(spec):
         "This image is only for a rear-view environmental shot. "
         "The subject is seen fully from behind. "
         "Never use close front-view scene logic. "
-        "Never use close-up wall portrait composition, close car-door portrait setup, close vehicle-side fashion shot, "
-        "or any scene intended for a front-facing close image. "
+        "Never use close-up wall portrait composition, close car-door portrait setup, "
+        "close vehicle-side fashion shot, or any scene intended for a front-facing close image. "
 
         "Real photo taken on location. "
         "Sony A7R V, 35mm, f/8, ISO 400. "
@@ -316,19 +323,25 @@ def build_back_prompt(spec):
         f"Lighting: {spec['light']}. "
         "No direct sunlight. No harsh shadows. Soft diffused light only. No flash. "
 
-        "MANDATORY baggy wide-leg black denim jeans. "
-        "Wide silhouette visible from 20 meters. "
-        "Wide at thighs, knees, calves. Not slim. Not tapered. "
+        "MANDATORY black wide-leg baggy denim jeans. "
+        "The jeans must be black. "
+        "Wide silhouette visible from long distance. "
+        "Wide at thighs, knees and calves. "
+        "Heavy black denim. Not slim. Not skinny. Not tapered. "
 
         "Black hoodie. No pocket. Hood up. Face hidden. Seen from behind only. "
 
+        "If hands interact with the hood, they only lightly hold or lightly touch it. "
+        "Do not pull the hood. Do not stretch the hood. "
+
         "No passive pose. "
         "No hands in back pockets of jeans. "
-        "Hands must interact with the hood or rest behind the head on the nape only. "
+        "Hands must interact with the hood lightly or rest behind the head on the nape only. "
         "If walking, one arm may move naturally with stride. "
 
         "Never place the subject on a car traffic lane or roadway. "
-        "Use only pedestrian surfaces, parking surfaces, staircase, courtyard, covered walkway, or bridge walkway. "
+        "Use only pedestrian surfaces, parking surfaces, staircase, courtyard, covered walkway, "
+        "or bridge walkway. "
 
         "Use only this exact back-view environment: "
         f"{spec['scene']}. "
