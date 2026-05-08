@@ -9,139 +9,144 @@ SAVE_DIR = "generations"
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
+# ---------------- ФОНЫ СПЕРЕДИ ----------------
+
 FRONT_SCENES = [
     {
-        "scene": "standing beside a wide light-grey concrete pillar in a clean modern parking structure, "
-                 "smooth concrete floor, minimal architecture, calm empty space",
-        "light": "soft cool overhead diffused light, no direct sun, no harsh shadows, "
-                 "gentle even illumination across fabric"
+        "scene": "standing beside a wide concrete pillar in a clean underground parking garage, "
+                 "smooth concrete floor, minimal empty space around, calm realistic setting",
+        "light": "soft overhead parking light, even realistic illumination, no harsh shadows"
     },
     {
-        "scene": "standing close to a tall glass wall of a modern office building, "
-                 "soft reflections in glass, steel frame visible, clean pavement underfoot",
-        "light": "soft natural overcast daylight reflected from glass, "
-                 "no direct sun, gentle even side light"
+        "scene": "standing in a clean corner of an underground parking garage, "
+                 "concrete wall on one side, pillar on the other, empty floor around",
+        "light": "cool overhead parking light, soft bounce from concrete walls, natural even light"
     },
     {
-        "scene": "standing at the entrance of a clean underground parking garage, "
-                 "smooth concrete walls, overhead lights, architectural lines behind",
-        "light": "cool overhead parking light, soft bounce from concrete walls, "
-                 "no harsh contrast, even downward illumination"
+        "scene": "standing on an open-air parking level with clean concrete floor and low barriers, "
+                 "minimal open space around, simple realistic urban setting",
+        "light": "soft overcast daylight, no direct sunlight, even natural light"
     },
     {
-        "scene": "standing beside a modern glass and metal elevator portal, "
-                 "brushed steel frame, glass panels, smooth stone floor",
-        "light": "soft even interior ambient light from above, "
-                 "subtle reflection from polished surfaces, no direct source"
-    },
-    {
-        "scene": "standing close to a smooth dark grey stone wall, "
-                 "clean surface, subtle texture, calm minimal background",
-        "light": "soft overcast natural light from open sky, "
-                 "no direct sun, gentle diffused illumination"
-    },
-    {
-        "scene": "standing beside clean metal railings of a modern pedestrian bridge, "
-                 "concrete and steel railing close to body, bridge surface underfoot",
-        "light": "soft overcast daylight from above, "
-                 "completely even diffused light, no sun, no shadows"
-    },
-    {
-        "scene": "standing in a clean corner of a modern parking garage, "
-                 "concrete pillar one side, smooth wall other side, clean floor",
-        "light": "cool overhead parking light, soft ambient bounce, "
-                 "no harsh contrast, consistent illumination"
-    },
-    {
-        "scene": "standing beside a matte black Lamborghini Urus on a clean quiet street, "
-                 "part of fender and door visible, car is secondary object",
-        "light": "soft overcast daylight from above, no direct sun, "
-                 "subtle matte reflection from car surface"
+        "scene": "standing beside a matte black Lamborghini Urus parked naturally, "
+                 "only part of the front fender, wheel arch and door visible close to the subject, "
+                 "car remains secondary in the composition",
+        "light": "soft natural daylight, subtle reflection from matte car body, even realistic light"
     },
     {
         "scene": "standing beside the open driver door of a matte black Lamborghini Urus, "
-                 "dark interior softly visible, door and part of body close to subject",
-        "light": "soft ambient overcast light from above, no direct sun, "
-                 "subtle warm tone from car interior"
+                 "dark car interior softly visible, only the door and part of the body close to the subject",
+        "light": "soft ambient daylight, subtle interior shadow, balanced natural illumination"
     },
     {
-        "scene": "standing beside a smooth concrete wall in a modern pedestrian passage, "
-                 "concrete surface close to body, overhead ceiling, calm minimal space",
-        "light": "soft even diffused light through passage opening, "
-                 "gentle bounce from concrete, no direct source"
+        "scene": "standing beside clean metal railings of a modern pedestrian bridge, "
+                 "concrete bridge surface underfoot, simple minimal surroundings",
+        "light": "soft overcast daylight, no harsh contrast, natural even light"
+    },
+    {
+        "scene": "standing close to a smooth dark concrete wall in a modern urban setting, "
+                 "calm minimal background, no distractions",
+        "light": "soft diffused daylight, gentle shadow transition, natural realistic light"
+    },
+    {
+        "scene": "standing close to a smooth dark stone wall, "
+                 "clean surface with subtle texture, minimal surroundings, quiet aesthetic setting",
+        "light": "soft diffused natural light, even illumination across the wall and subject"
+    },
+    {
+        "scene": "standing in a modern open concrete passage with a clean wall close to the body, "
+                 "architectural ceiling above, minimal realistic urban space",
+        "light": "soft ambient light filtering from above, gentle bounce from concrete surfaces"
+    },
+    {
+        "scene": "standing on an open rooftop parking level, "
+                 "clean concrete floor, low barriers, calm open space around",
+        "light": "soft overcast daylight, no direct sun, natural even illumination"
     }
 ]
+
+# ---------------- ФОНЫ СЗАДИ ----------------
 
 BACK_SCENES = [
     {
-        "scene": "standing far away on a wide empty parking lot near a business center, "
-                 "clean asphalt with lines stretching far, overcast sky, "
-                 "person tiny in vast space",
-        "light": "soft overcast daylight from above, no sun, no shadows, even diffused light"
+        "scene": "standing far away in a massive clean underground parking garage, "
+                 "concrete pillars creating deep perspective, empty floor, person small in wide corridor",
+        "light": "soft even overhead parking light, gentle bounce from concrete surfaces, realistic neutral illumination"
     },
     {
-        "scene": "standing far away on a wide sidewalk along a long concrete wall, "
-                 "overcast morning, clean long perspective, person small",
-        "light": "soft overcast morning light, no direct sun, gentle even illumination"
-    },
-    {
-        "scene": "standing far away in a massive underground parking garage, "
-                 "concrete pillars deep perspective, overhead lights, person small in corridor",
-        "light": "cool overhead fluorescent lights, soft bounce from concrete, "
-                 "no contrast, clean consistent light"
-    },
-    {
-        "scene": "standing far away on an empty pedestrian bridge, "
-                 "clean railings both sides, overcast sky, person small on wide bridge",
-        "light": "soft overcast diffused daylight, no sun, no shadows, even light"
-    },
-    {
-        "scene": "standing far away on a wide empty street in financial district, "
-                 "glass and concrete buildings both sides, clean pavement, no people, "
-                 "person tiny in quiet street",
-        "light": "soft overcast evening light, no direct sun, gentle diffused illumination"
-    },
-    {
-        "scene": "standing far away in a wide courtyard between modern office buildings, "
-                 "buildings both sides, wide stone pavement, person small in open space",
-        "light": "soft overcast daylight from open sky, gentle bounce from facades, "
-                 "no sun, even clean light"
-    },
-    {
-        "scene": "standing far away on a long straight empty city road at early morning, "
-                 "road stretching very far, buildings far on sides, person tiny",
-        "light": "cool early morning overcast light, no sun, soft cold tones, even diffused light"
+        "scene": "standing far away on a wide empty open-air parking lot, "
+                 "clean asphalt stretching far in all directions, person tiny in open space",
+        "light": "soft natural overcast daylight, no harsh shadows, even realistic light"
     },
     {
         "scene": "standing far away on an open rooftop parking level, "
-                 "clean concrete floor, low barriers, grey city on horizon, person small",
-        "light": "soft overcast daylight from grey sky, no sun, no shadows, even diffused light"
+                 "clean concrete floor, low barriers, wide empty space around, person small in frame",
+        "light": "soft natural overcast daylight, calm even illumination across entire scene"
     },
     {
-        "scene": "standing far away at end of a wide modern covered walkway, "
-                 "concrete ceiling, pillars on sides, walkway stretching far, person small",
-        "light": "soft overhead light through walkway opening, gentle concrete bounce, even light"
+        "scene": "standing far away on an empty modern pedestrian bridge, "
+                 "clean railings on both sides, bridge stretching far ahead, person small in wide frame",
+        "light": "soft diffused daylight, no direct sun, no harsh shadows, natural even light"
+    },
+    {
+        "scene": "standing far away in a clean open-air multi-level parking structure, "
+                 "long concrete ramps, repeated horizontal lines, empty parking lanes, "
+                 "person small in deep perspective",
+        "light": "soft neutral daylight, gentle concrete reflections, even realistic illumination"
+    },
+    {
+        "scene": "standing far away with back to camera beside a parked Ferrari in a clean open urban setting, "
+                 "only part of the rear quarter, wheel and body of the car visible, "
+                 "car remains secondary, person small in the frame",
+        "light": "soft natural overcast daylight, no direct sun, "
+                 "gentle even illumination across subject, car and ground"
+    },
+    {
+        "scene": "standing far away on a long straight empty road, "
+                 "simple realistic urban surroundings, wide open space, person tiny in frame",
+        "light": "soft overcast daylight, cool natural tones, no direct sunlight"
+    },
+    {
+        "scene": "standing far away in a wide empty concrete courtyard, "
+                 "minimal surroundings, large clean ground plane, person small in open space",
+        "light": "soft diffused daylight, even realistic illumination"
+    },
+    {
+        "scene": "standing far away on a wide empty access road leading into a parking complex, "
+                 "clean asphalt, low concrete edges, long straight perspective, person small in the distance",
+        "light": "soft neutral daylight, even natural illumination, no harsh contrast"
+    },
+    {
+        "scene": "walking upward on a wide clean concrete staircase in a modern urban setting, "
+                 "seen fully from behind, strong architectural lines, person small in the frame, "
+                 "stairs rising upward with calm minimal surroundings",
+        "light": "soft diffused daylight, even realistic illumination across staircase, "
+                 "no harsh shadows, no direct sunlight"
     }
 ]
 
+# ---------------- ПОЗЫ ----------------
+
 FRONT_POSES = [
-    "right hand gripping hood edge near temple, left hand in front jeans pocket",
-    "both hands adjusting hood pulling it forward over forehead",
-    "right hand pulling hood down, left hand gripping hoodie hem at side",
-    "left hand pulling hood edge forward, right hand in front jeans pocket",
-    "both hands holding hood edges near jawline, chin slightly down",
-    "right hand on hood near temple, left hand resting on thigh"
+    "right hand gripping the hood edge near temple, left hand in front jeans pocket, weight on right leg",
+    "both hands adjusting the hood from the front, chin slightly down, elbows slightly outward",
+    "right hand pulling the hood lower over the forehead, left hand gripping the side hem of the hoodie",
+    "left hand pulling the hood edge slightly forward, right hand in front jeans pocket, body turned slightly left",
+    "both hands holding both hood edges near the jawline, shoulders slightly raised",
+    "right hand on hood near temple, left hand resting flat on upper thigh, relaxed stance"
 ]
 
 BACK_POSES = [
-    "right hand holding back edge of hood, left hand in front jeans pocket",
-    "walking away, right hand pulling hood backward, left hand in front jeans pocket",
-    "both hands adjusting hood from behind",
-    "walking away, left hand holding back of hood, right hand in front jeans pocket",
-    "right hand gripping back of hood, left hand on hip",
-    "walking away, right hand gripping hood edge from behind, left hand on hip",
-    "left hand holding hood from behind, right hand on hip",
-    "walking away slowly, both hands adjusting hood from behind"
+    "standing facing away, right hand holding the back edge of the hood, left arm relaxed along outer thigh",
+    "standing facing away, left hand holding the back edge of the hood, right arm relaxed along outer thigh",
+    "standing facing away, both hands holding the hood from behind, elbows slightly outward",
+    "walking away, right hand holding the back edge of the hood, left arm moving naturally with stride",
+    "walking away, left hand holding the back edge of the hood, right arm moving naturally with stride",
+    "walking away, both hands briefly adjusting the hood from behind, head slightly lowered",
+    "standing facing away, right hand resting behind the head on the nape, left arm relaxed along outer thigh",
+    "standing facing away, left hand resting behind the head on the nape, right arm relaxed along outer thigh",
+    "walking away, right hand resting behind the head on the nape, left arm moving naturally with stride",
+    "walking away, left hand resting behind the head on the nape, right arm moving naturally with stride"
 ]
 
 CURRENT_FRONT_INDEX = 0
@@ -224,7 +229,7 @@ def get_unique_specs():
     return specs
 
 
-# ---------------- ПРОМПТЫ ----------------
+# ---------------- ПРОМПТ СПЕРЕДИ ----------------
 
 def build_front_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
@@ -247,6 +252,7 @@ def build_front_prompt(spec):
 
         "Deep depth of field. Everything sharp. No bokeh. No blur. "
         "Background sharp and real. One unified photograph. "
+        "Not cut out. Not composited. Not isolated. "
 
         f"Lighting: {spec['light']}. "
         "No direct sunlight. No harsh shadows. No strong contrast. "
@@ -262,12 +268,15 @@ def build_front_prompt(spec):
         "Very wide at thighs, knees, calves. Heavy denim texture visible. "
         "Not slim. Not skinny. Not tapered. "
 
-        "Hands actively engaged. Not hanging freely at sides. No hands in back pockets. "
+        "Hands actively engaged. Not hanging freely at sides. "
+        "No hands in back pockets. No hands in hoodie pocket. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
     ) + uid
 
+
+# ---------------- ПРОМПТ СЗАДИ ----------------
 
 def build_back_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
@@ -298,8 +307,10 @@ def build_back_prompt(spec):
 
         "Black hoodie. No pocket. Hood up. Face hidden. Seen from behind. "
 
-        "Hands not hanging freely. No hands in back pockets of jeans. "
-        "Hands on hood or in front pockets only. "
+        "No passive pose. "
+        "No hands in back pockets of jeans. "
+        "Hands must interact with the hood or rest behind the head on the nape only. "
+        "If walking, one arm may move naturally with stride. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
