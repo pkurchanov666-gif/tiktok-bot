@@ -75,68 +75,70 @@ FRONT_SCENES = [
     }
 ]
 
-# ---------------- BACK SCENES (ТОЛЬКО ЭЛИТНЫЕ ЖИЛЫЕ КОМПЛЕКСЫ) ----------------
+# ---------------- BACK SCENES (СОВРЕМЕННЫЕ ЖИЛЫЕ КОМПЛЕКСЫ - БЕЗ ОЗЕЛЕНЕНИЯ) ----------------
 
 BACK_SCENES = [
     {
-        "scene": "walking through premium residential complex courtyard, "
-                 "person small in frame, modern luxury apartment buildings with sharp architectural details, "
-                 "geometric landscaping with manicured gardens clearly visible, premium pavement with texture, "
-                 "water fountain or sculpture with sharp reflection details",
-        "light": "soft natural daylight, sharp detailed light across entire residential courtyard"
+        "scene": "walking through modern residential complex courtyard, "
+                 "person small in frame, contemporary apartment buildings with sharp architectural details, "
+                 "clean minimalist courtyard with polished stone pavement, modern metal railings, "
+                 "contemporary design with no vegetation, sharp details everywhere",
+        "light": "soft natural daylight, sharp detailed light across entire courtyard"
     },
     {
-        "scene": "standing in exclusive gated community driveway, "
-                 "person small in frame, contemporary minimalist houses visible with sharp material details, "
-                 "manicured gardens on both sides with defined plant shapes, premium paving with clear texture, "
-                 "security gate visible in distance",
-        "light": "soft natural daylight, sharp detailed illumination across entire community"
+        "scene": "standing in residential complex entrance area, "
+                 "person small in frame, modern apartment tower with sharp glass and metal facades, "
+                 "clean granite or marble pavement with visible lines, minimalist architecture, "
+                 "entrance canopy with sharp reflections, contemporary design",
+        "light": "soft natural daylight, sharp detailed illumination across entrance"
     },
     {
-        "scene": "walking through elevated plaza of luxury residential tower, "
-                 "person small in frame, modern high-rise residential buildings with sharp window details, "
-                 "landscaped plaza with defined trees and plants, polished stone flooring with clear texture, "
-                 "architectural railings with sharp reflections",
-        "light": "soft diffused daylight, sharp detailed light across plaza and buildings"
+        "scene": "walking through plaza of modern residential building, "
+                 "person small in frame, contemporary apartment tower with sharp window grid pattern, "
+                 "polished stone plaza with clear texture and lines, steel and glass architectural elements, "
+                 "modern street furniture with sharp edges, no plants or vegetation",
+        "light": "soft diffused daylight, sharp detailed light across plaza and building"
     },
     {
-        "scene": "standing in courtyard of premium apartment complex, "
-                 "person small in frame, glass and steel residential buildings with sharp architectural details, "
-                 "geometric landscaping with defined hedges and modern plants, clean pavement with visible lines, "
-                 "contemporary sculpture or water feature with sharp edges",
-        "light": "soft natural daylight, sharp balanced light across residential courtyard"
+        "scene": "standing in courtyard of modern apartment complex, "
+                 "person small in frame, contemporary residential building with sharp wall panels, "
+                 "clean minimalist courtyard design with polished concrete or stone, "
+                 "metal railings and modern details with sharp reflections, "
+                 "contemporary minimalist aesthetic",
+        "light": "soft natural daylight, sharp balanced light across courtyard"
     },
     {
-        "scene": "walking through private residential park of luxury complex, "
-                 "person small in frame, modern apartment towers visible with sharp facade details, "
-                 "manicured park with defined trees, paths and landscaping, premium ground paving with texture, "
-                 "benches and street furniture clearly visible",
-        "light": "soft natural daylight, sharp detailed illumination across entire residential park"
+        "scene": "walking through central plaza of residential community, "
+                 "person small in frame, modern apartment buildings visible with sharp architectural details, "
+                 "polished stone pavement with visible texture and lines, contemporary design, "
+                 "metal railings and street furniture clearly visible, minimalist aesthetic",
+        "light": "soft diffused daylight, sharp detailed illumination across plaza"
     },
     {
-        "scene": "standing in entrance courtyard of exclusive residential development, "
-                 "person small in frame, contemporary luxury buildings with sharp architectural lines, "
-                 "elegant landscaping with defined shapes and materials, premium ground surface with clear texture, "
-                 "modern entrance design with sharp details",
-        "light": "soft natural daylight, sharp detailed light across courtyard and buildings"
+        "scene": "standing in open courtyard of modern residential tower, "
+                 "person small in frame, contemporary building with sharp glass and metal facade details, "
+                 "clean minimalist courtyard with polished pavement, "
+                 "architectural railings with sharp reflections and definition, "
+                 "modern steel and glass elements sharp and detailed",
+        "light": "soft natural daylight, sharp detailed light across complex"
     },
     {
-        "scene": "walking through central plaza of gated residential community, "
-                 "person small in frame, modern minimalist residential buildings visible with sharp details, "
-                 "geometric landscaping with defined plants and hardscaping, clean premium paving, "
-                 "contemporary urban furniture clearly visible",
-        "light": "soft diffused daylight, sharp detailed illumination across entire plaza"
+        "scene": "walking through passage between modern residential buildings, "
+                 "person small in frame, contemporary towers with sharp glass window patterns, "
+                 "clean pavement stretches with visible texture and lines, metal railings and details sharp, "
+                 "modern minimalist architecture with sharp reflections, no vegetation",
+        "light": "soft diffused daylight, sharp detailed illumination across passage"
     },
     {
-        "scene": "standing in courtyard of ultra-modern luxury apartment tower, "
-                 "person small in frame, contemporary glass and steel buildings with sharp window and facade details, "
-                 "elevated landscape design with defined sections and materials, premium stone paving with texture, "
-                 "architectural elements with sharp reflections and definition",
-        "light": "soft natural daylight, sharp detailed light across entire complex"
+        "scene": "standing in pedestrian zone of modern residential development, "
+                 "person small in frame, contemporary buildings with sharp facade and window details, "
+                 "polished stone or concrete pavement with clear texture, modern street design, "
+                 "architectural elements and railings with sharp reflections, contemporary aesthetic",
+        "light": "soft natural daylight, sharp detailed light across entire zone"
     }
 ]
 
-# ---------------- ПОЗЫ (без руки к шводу) ----------------
+# ---------------- ПОЗЫ ----------------
 
 FRONT_POSES = [
     "leaning naturally, right hand resting on upper thigh, "
@@ -245,11 +247,25 @@ def build_front_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
-        "Ultra-realistic 9:16 photograph. "
-        "Professional fashion shot, front view. "
+        "Ultra-realistic 9:16 professional fashion photograph. "
+        "Front facing shot. "
         "Sony A7R V, 35mm lens, f/4, ISO 200. "
         "Camera at eye level, 1.5 meters from subject. "
         "Framing from head to knees. Subject 70-75 percent of frame. "
+
+        "CRITICAL - CHEST LOGO RENDERING: "
+        "Chest logo must be EXTREMELY SHARP and PERFECTLY CLEAR. "
+        "Logo is the focal point of the hoodie. "
+        "Logo rendering: maximum sharpness, exact size and position from reference image. "
+        "Logo must be crisp, clear, fully readable with no blur or distortion. "
+        "Logo color and details must match reference image exactly. "
+        "Light reflects perfectly on logo, enhancing visibility and definition. "
+        "Logo edges are sharp and well-defined. "
+
+        "HOODIE SPECIFICATIONS: "
+        "Premium black hoodie, completely flat clean front. "
+        "No front pocket, no kangaroo pouch, no zipper. "
+        "Only the chest logo visible on front. "
 
         "Sharp focus throughout - subject and background equally sharp. "
         "No blur, no bokeh. One unified photograph. "
@@ -258,8 +274,6 @@ def build_front_prompt(spec):
         "Visible contact with surface: wall, car, or railing. "
         "Not floating. Part of the location. "
 
-        "Premium black hoodie, no front pocket, no zipper. "
-        "Chest logo sharp, exact from reference. "
         "Black wide-leg denim, heavy texture visible. "
 
         "Hands visible, not touching hood or face. "
@@ -271,6 +285,7 @@ def build_front_prompt(spec):
 
         f"Lighting: {spec['light']}. "
         "Soft natural light, no harsh shadows, no flash. "
+        "Light enhances logo visibility and detail. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
@@ -283,8 +298,8 @@ def build_back_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
-        "Ultra-realistic 9:16 photograph. "
-        "Environmental back view shot in luxury residential complex. "
+        "Ultra-realistic 9:16 professional photograph. "
+        "Back view shot in modern residential complex. "
         "Sony A7R V, 35mm, f/4, ISO 400. "
         "Camera at 1.6m height, straight forward, parallel to ground. "
 
@@ -294,39 +309,36 @@ def build_back_prompt(spec):
         "Subject 8-12 percent of frame height - small but clear. "
         "Environment dominates, subject is focal point. "
 
-        "CRITICAL - MAXIMUM BACKGROUND DETAIL AND SHARPNESS: "
+        "SHARP FOCUS THROUGHOUT: "
         "Sharp focus everywhere - foreground, subject, background all equally sharp. "
         "f/4 depth of field ensures everything is in perfect focus. "
         "No blur, no bokeh, no soft areas. Unified sharp photograph. "
 
-        "BACKGROUND RENDERING - EXTREME DETAIL: "
+        "BACKGROUND DETAIL: "
         "Every element must be sharp and detailed: "
-        "- Building facades: sharp wall texture, materials clearly visible "
-        "- Landscaping: manicured plants, hedges, gardens with sharp details "
-        "- Pavement: texture visible, lines sharp, premium surface clear "
-        "- Water features: fountains, pools with sharp reflection details "
-        "- Architectural elements: railings, columns, edges all sharp "
-        "- Sky and light: natural atmospheric detail all sharp "
+        "- Building facades: sharp wall panels, glass windows with clear reflections "
+        "- Pavement: texture visible, lines sharp, polished stone or concrete surface "
+        "- Architectural elements: metal railings, columns, edges all sharp and defined "
+        "- Street design: modern minimalist aesthetic with sharp details "
+        "- Sky: natural atmospheric detail sharp "
 
-        "Subject stands or walks naturally in exclusive residential setting. "
-        "Authentically part of the luxury community scene. "
-
-        "Black hoodie, hood down, back view only. "
-        "Hands relaxed at sides or resting naturally on thighs. "
-        "Black wide-leg denim, wide silhouette visible from distance. "
+        "Subject: black hoodie, hood down, back view. "
+        "Black wide-leg denim with visible texture. "
+        "Hands relaxed at sides or on thighs. "
 
         f"Lighting: {spec['light']}. "
         "Soft natural light, even across entire scene, no harsh shadows. "
-        "Light illuminates every detail - buildings, landscaping, pavement all equally lit. "
+        "Light illuminates every detail equally. "
 
-        "Setting: Premium gated residential community, luxury apartment complex, "
-        "exclusive development with contemporary minimalist architecture. "
+        "Setting: Modern residential complex. "
+        "Contemporary minimalist architecture. "
+        "Clean aesthetic, no vegetation or greenery. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
 
-        "This is professional environmental photography in exclusive residential setting. "
-        "Background is primary visual element - render with extreme clarity and definition. "
+        "Professional environmental photography. "
+        "Background rendered with extreme clarity and definition. "
     ) + uid
 
 
@@ -398,9 +410,9 @@ def extract_url(obj, depth=0):
     return None
 
 
-async def poll_job(job_id):
+async def poll_job(job_id, retry_count=0, max_retries=3):
     polza_key = os.getenv("POLZA_API_KEY")
-    max_wait = 900
+    max_wait = 1200
     interval = 5
     waited = 0
     last_data = None
@@ -431,6 +443,14 @@ async def poll_job(job_id):
             )
 
             if status in {"failed", "error", "canceled", "cancelled"}:
+                error_msg = str(data.get("error", {}))
+                logger.error(f"[POLZA] Job failed: {error_msg}")
+                
+                if "BAD_GATEWAY" in error_msg and retry_count < max_retries:
+                    logger.info(f"[POLZA] Retrying job (attempt {retry_count + 1}/{max_retries})")
+                    await asyncio.sleep(10)
+                    return None
+                
                 raise Exception(f"Polza job failed: {data}")
 
             url = extract_url(data)
@@ -458,21 +478,47 @@ async def download_image(url, path):
 async def generate_all_photos():
     specs = get_unique_specs()
     job_ids = []
+    max_job_retries = 3
 
     for i, spec in enumerate(specs):
         prompt = build_front_prompt(spec) if spec["side"] == "front" else build_back_prompt(spec)
-        job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
+        
+        job_id = None
+        for attempt in range(max_job_retries):
+            try:
+                job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
+                if job_id:
+                    break
+            except Exception as e:
+                logger.warning(f"[SUBMIT] Attempt {attempt + 1} failed: {e}")
+                if attempt < max_job_retries - 1:
+                    await asyncio.sleep(5)
+        
+        if not job_id:
+            logger.error(f"[SUBMIT] Failed to submit job for spec {i} after {max_job_retries} attempts")
+            continue
+        
         job_ids.append(job_id)
         if i < len(specs) - 1:
-            await asyncio.sleep(3)
+            await asyncio.sleep(5)
 
-    urls = await asyncio.gather(*[poll_job(job_id) for job_id in job_ids])
+    urls = await asyncio.gather(*[poll_job(job_id) for job_id in job_ids], return_exceptions=True)
 
     paths = []
     for index, url in enumerate(urls):
+        if isinstance(url, Exception):
+            logger.error(f"[DOWNLOAD] Failed to get URL for index {index}: {url}")
+            continue
+        if not url:
+            logger.warning(f"[DOWNLOAD] No URL for index {index}")
+            continue
+        
         path = os.path.join(SAVE_DIR, f"ai_{int(time.time() * 1000)}_{index}.png")
-        await download_image(url, path)
-        paths.append(path)
+        try:
+            await download_image(url, path)
+            paths.append(path)
+        except Exception as e:
+            logger.error(f"[DOWNLOAD] Failed to download image {index}: {e}")
 
     return paths, specs, list(urls)
 
@@ -506,7 +552,6 @@ async def regenerate_photo(index, current_specs):
         available_poses = poses
     pose = random.choice(available_poses)
 
-    # ВАЖНО: используем ТОТ ЖЕ seed для консистентности персонажа
     spec = {
         "side": side,
         "scene": scene_data["scene"],
@@ -516,7 +561,6 @@ async def regenerate_photo(index, current_specs):
         "ref": ref
     }
 
-    # Используем обычный промпт, но с новой сценой/позой
     if side == "front":
         prompt = build_front_prompt(spec)
     else:
@@ -530,7 +574,6 @@ async def regenerate_photo(index, current_specs):
     path = os.path.join(SAVE_DIR, f"ai_{int(time.time() * 1000)}_regen_{index}.png")
     await download_image(url, path)
 
-    # Обновляем spec в списке
     current_specs[index] = spec
     
     return path, spec, url
