@@ -80,51 +80,54 @@ FRONT_SCENES = [
 BACK_SCENES = [
     {
         "scene": "walking through underground parking garage, "
-                 "person small in frame, rows of car tails far in background, "
-                 "polished floor stretches ahead, LED lights above",
-        "light": "soft ambient LED lighting, even illumination"
+                 "person small in frame, rows of premium cars visible far ahead with sharp details, "
+                 "polished concrete floor with clear texture and line markings, LED lights illuminate entire scene",
+        "light": "soft ambient LED lighting, sharp and detailed illumination across entire parking garage"
     },
     {
         "scene": "standing in courtyard of modern apartment complex, "
-                 "person small in frame, contemporary architecture surrounds, "
-                 "geometric landscaping visible, far away view",
-        "light": "soft natural daylight, balanced light across courtyard"
+                 "person small in frame, contemporary glass and steel buildings with sharp architectural details, "
+                 "geometric landscaping clearly visible with defined shapes, clean pavement with texture",
+        "light": "soft natural daylight, sharp balanced light across all courtyard elements"
     },
     {
         "scene": "walking on wide plaza in front of business center, "
-                 "person small in frame, glass towers far ahead, "
-                 "granite pavement stretches, modern furniture scattered",
-        "light": "soft diffused daylight, clean modern light"
+                 "person small in frame, glass office towers far ahead with sharp reflections and window details, "
+                 "granite pavement with visible texture and lines, modern furniture clearly defined",
+        "light": "soft diffused daylight, sharp detailed light across entire plaza and buildings"
     },
     {
-        "scene": "standing on elevated driveway of hotel entrance, "
-                 "person small in frame, valet parking zone stretches ahead, "
-                 "hotel facade visible in distance",
-        "light": "soft natural daylight with warm hotel lighting"
+        "scene": "standing on elevated driveway near luxury residential building, "
+                 "person small in frame, modern high-rise facade visible far ahead with sharp architectural details, "
+                 "clean pavement stretches with clear texture, elegant landscaping with defined plants",
+        "light": "soft natural daylight, sharp even illumination across pavement and building"
     },
     {
-        "scene": "walking up wide modern stone staircase, "
-                 "person small climbing, clean steps ahead, steel railings on sides, "
-                 "store windows visible far above, shoppers tiny in distance",
-        "light": "soft even daylight, reflections from storefronts"
+        "scene": "walking up wide modern stone staircase in premium district, "
+                 "person small climbing, clean stone steps ahead with sharp texture and edges clearly defined, "
+                 "steel railings with sharp reflections, high-end storefronts visible with detailed window displays",
+        "light": "soft even daylight, sharp detailed light across stone steps and storefront elements"
     },
     {
         "scene": "standing on wide pedestrian street in city center, "
-                 "person small in frame, modern office buildings far ahead, "
-                 "shops visible in distance, cars parked along street sides",
-        "light": "soft overcast daylight, even light across entire street"
+                 "person small in frame, modern office buildings far ahead with sharp architectural lines and details, "
+                 "luxury retail storefronts with clearly visible window displays and signage, "
+                 "premium parked cars along street with sharp paint and detail definition",
+        "light": "soft overcast daylight, sharp detailed light across entire street scene"
     },
     {
         "scene": "walking through private driveway of gated community, "
-                 "person small in frame, manicured gardens on sides, "
-                 "modern minimalist houses visible in distance, premium pavement",
-        "light": "soft natural daylight, clean even illumination"
+                 "person small in frame, manicured gardens on sides with sharp detail and defined landscaping, "
+                 "modern minimalist houses visible ahead with sharp architectural features and materials, "
+                 "premium pavement with visible texture and detail",
+        "light": "soft natural daylight, sharp clear illumination across entire community scene"
     },
     {
         "scene": "standing in courtyard of modern office campus, "
-                 "person small in frame, glass buildings far ahead, "
-                 "water feature visible, professionals walking in far distance",
-        "light": "soft diffused daylight, balanced campus lighting"
+                 "person small in frame, glass buildings far ahead with sharp window details and reflections, "
+                 "water feature visible with sharp ripples and reflection details, clean walkways with defined edge lines, "
+                 "professional landscaping with clearly defined shapes and textures",
+        "light": "soft diffused daylight, sharp balanced light across all campus elements"
     }
 ]
 
@@ -276,7 +279,7 @@ def build_back_prompt(spec):
         "Ultra-realistic 9:16 photograph. "
         "Environmental back view shot. "
         "Sony A7R V, 35mm, f/4, ISO 400. "
-        "Camera at 1.6m height, straight forward. "
+        "Camera at 1.6m height, straight forward, parallel to ground. "
 
         "Camera 25-30 meters from subject. "
         "Full body visible, feet on ground. "
@@ -284,8 +287,19 @@ def build_back_prompt(spec):
         "Subject 8-12 percent of frame height - small but clear. "
         "Environment dominates, subject is focal point. "
 
-        "Sharp focus everywhere - foreground, subject, background all sharp. "
-        "No blur, no bokeh. Unified photograph. "
+        "CRITICAL - MAXIMUM BACKGROUND DETAIL AND SHARPNESS: "
+        "Sharp focus everywhere - foreground, subject, background all equally sharp. "
+        "f/4 depth of field ensures everything is in perfect focus. "
+        "No blur, no bokeh, no soft areas. Unified sharp photograph. "
+
+        "BACKGROUND RENDERING - EXTREME DETAIL: "
+        "Every architectural element must be sharp and detailed: "
+        "- Building facades: sharp wall texture, window details, materials clearly visible "
+        "- Pavement/ground: texture visible, lines sharp, surface definition clear "
+        "- Cars and vehicles: sharp paint definition, chrome details, window reflections "
+        "- Landscaping: plants defined, edges sharp, color rich and natural "
+        "- Urban furniture: railings, benches, lights all clearly defined "
+        "- Sky and elements: clouds, light, atmospheric detail all sharp "
 
         "Subject stands or walks naturally in location. "
         "Authentically part of the scene, not floating. "
@@ -294,17 +308,18 @@ def build_back_prompt(spec):
         "Hands light contact on hood or back of head above neck. "
         "Black wide-leg denim, wide silhouette visible from distance. "
 
-        "Background sharp and detailed - buildings, pavement, "
-        "architecture all clear and visible. "
-
         f"Lighting: {spec['light']}. "
         "Soft natural light, even across entire scene, no harsh shadows. "
+        "Light illuminates every detail - buildings, pavement, plants all equally lit. "
 
-        "Only pedestrian zones - streets, plazas, stairs, promenades. "
+        "Only pedestrian zones - streets, plazas, stairs, promenades, parks. "
         "Never on traffic lanes. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
+
+        "This is professional environmental photography with maximum detail rendering. "
+        "Background is primary visual element - render with extreme clarity and definition. "
     ) + uid
 
 
@@ -456,9 +471,12 @@ async def generate_all_photos():
 
 
 async def regenerate_photo(index, current_specs):
-    side = current_specs[index]["side"]
-    old_scene = current_specs[index].get("scene", "")[:50]
-    old_pose = current_specs[index].get("pose", "")
+    """Регенерирует фото с тем же персонажем, но другой сценой/позой"""
+    
+    old_spec = current_specs[index]
+    side = old_spec["side"]
+    old_scene = old_spec.get("scene", "")[:50]
+    old_pose = old_spec.get("pose", "")
 
     if side == "front":
         scenes = FRONT_SCENES
@@ -469,30 +487,43 @@ async def regenerate_photo(index, current_specs):
         poses = BACK_POSES
         ref = REF_BACK
 
+    # Выбираем другую сцену
     available_scenes = [s for s in scenes if s["scene"][:50] != old_scene]
     if not available_scenes:
         available_scenes = scenes
     scene_data = random.choice(available_scenes)
 
+    # Выбираем другую позу
     available_poses = [p for p in poses if p != old_pose]
     if not available_poses:
         available_poses = poses
     pose = random.choice(available_poses)
 
+    # ВАЖНО: используем ТОТ ЖЕ seed для консистентности персонажа
     spec = {
         "side": side,
         "scene": scene_data["scene"],
         "light": scene_data["light"],
         "pose": pose,
-        "seed": random.randint(100000, 999999),
+        "seed": old_spec["seed"],  # ← ТОТЖЕ SEED как в оригинале
         "ref": ref
     }
 
-    prompt = build_front_prompt(spec) if side == "front" else build_back_prompt(spec)
+    # Используем обычный промпт, но с новой сценой/позой
+    if side == "front":
+        prompt = build_front_prompt(spec)
+    else:
+        prompt = build_back_prompt(spec)
+    
+    logger.info(f"[REGEN] index={index}, seed={spec['seed']}, new_scene={scene_data['scene'][:40]}, new_pose={pose[:40]}")
+    
     job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
     url = await poll_job(job_id)
 
-    path = os.path.join(SAVE_DIR, f"ai_{int(time.time() * 1000)}_regen.png")
+    path = os.path.join(SAVE_DIR, f"ai_{int(time.time() * 1000)}_regen_{index}.png")
     await download_image(url, path)
 
+    # Обновляем spec в списке
+    current_specs[index] = spec
+    
     return path, spec, url
