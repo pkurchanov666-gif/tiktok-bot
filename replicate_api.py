@@ -1,4 +1,3 @@
-
 import os
 import time
 import random
@@ -17,47 +16,58 @@ REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
 FRONT_SCENES = [
     {
-        "scene": "leaning one shoulder lightly against a wide concrete pillar in a clean underground parking garage, "
-                 "smooth concrete floor, minimal empty space around, realistic parking setting",
-        "light": "soft overhead parking light, even realistic illumination, no harsh shadows"
+        "scene": "leaning lightly with one shoulder against a clean dark pillar in an upscale underground parking garage, "
+                 "polished concrete floor, premium parked cars softly visible deeper in the background, "
+                 "quiet expensive atmosphere, realistic premium urban setting",
+        "light": "soft overhead parking light, subtle reflections on the polished floor, "
+                 "natural realistic illumination with no harsh shadows"
     },
     {
-        "scene": "leaning lightly with the upper back and one shoulder against a clean concrete pillar "
-                 "in an underground parking garage corner, concrete wall nearby, smooth floor",
-        "light": "cool overhead parking light, soft bounce from concrete walls, natural even light"
+        "scene": "standing very close beside a matte black Lamborghini Urus parked naturally on a refined city street, "
+                 "premium architecture around, clean pavement, expensive urban setting, car remains secondary",
+        "light": "soft natural daylight, subtle reflections from the matte car surface, balanced realistic illumination"
     },
     {
-        "scene": "standing very close beside a matte black Lamborghini Urus, "
-                 "body naturally near the front fender and door area, "
-                 "only part of the car visible close to the subject, car remains secondary",
-        "light": "soft natural daylight, subtle reflection from matte car body, even realistic light"
+        "scene": "standing close to a dark iron gate on a refined residential street, "
+                 "elegant facades nearby, premium parked cars along the curb, "
+                 "clean stone paving and calm upscale neighborhood atmosphere",
+        "light": "soft natural daylight, balanced even illumination, realistic premium residential light"
     },
     {
-        "scene": "standing very close beside the open driver door of a matte black Lamborghini Urus, "
-                 "dark car interior softly visible, body naturally near the open door, "
-                 "only the door and part of the car body close to the subject",
-        "light": "soft ambient daylight, subtle interior shadow, balanced natural illumination"
+        "scene": "leaning lightly with one shoulder against the railing of an elegant pedestrian bridge, "
+                 "refined bridge design, calm city backdrop, premium urban atmosphere",
+        "light": "soft diffused daylight, clean natural illumination, no harsh contrast"
     },
     {
-        "scene": "leaning lightly with one shoulder against clean metal railings "
-                 "of a modern pedestrian bridge walkway, "
-                 "open sky around, smooth bridge surface underfoot, simple minimal surroundings",
-        "light": "soft diffused daylight, no harsh contrast, natural even light"
+        "scene": "standing near a quiet riverside promenade in an upscale district, "
+                 "clean railing, elegant stone walkway, refined residential buildings nearby, calm premium atmosphere",
+        "light": "soft natural daylight, balanced even light, realistic atmosphere"
     },
     {
-        "scene": "leaning lightly with the shoulder and upper back against a smooth dark matte wall "
-                 "in a quiet modern urban setting, clean surface, minimal surroundings, calm aesthetic atmosphere",
-        "light": "soft diffused natural light, smooth even illumination across wall and subject"
+        "scene": "leaning lightly against a clean stone column near the entrance of a refined urban block, "
+                 "premium paving, elegant city architecture around, realistic upscale environment",
+        "light": "soft natural daylight, even illumination across fabric and stone textures"
     },
     {
-        "scene": "leaning lightly with one shoulder against a smooth dark stone wall near an open parking area, "
-                 "clean surface with subtle texture, dark asphalt underfoot, minimal background",
-        "light": "soft natural diffused light, even illumination with gentle shadow transition"
+        "scene": "standing beside a dark premium coupe parked naturally in an elegant city quarter, "
+                 "clean pavement, refined facades nearby, understated expensive atmosphere, car remains secondary",
+        "light": "soft natural daylight, subtle reflection from the car body, realistic balanced illumination"
     },
     {
-        "scene": "leaning lightly against the concrete side wall near an underground parking entrance ramp, "
-                 "clean architectural lines, smooth floor, realistic urban parking setting",
-        "light": "soft overhead and ambient parking light, no direct sun, even natural illumination"
+        "scene": "leaning lightly against a dark garage-style facade in an upscale townhouse quarter, "
+                 "clean paving underfoot, elegant residential architecture nearby, "
+                 "quiet expensive neighborhood atmosphere",
+        "light": "soft diffused natural light, gentle shadow transition, realistic calm urban illumination"
+    },
+    {
+        "scene": "standing near a refined stone staircase in an upscale urban quarter, "
+                 "clean wide steps, elegant materials, premium residential surroundings, calm success aesthetic",
+        "light": "soft natural daylight, even illumination across stone, fabric and face"
+    },
+    {
+        "scene": "standing beside a low dark railing along a refined city promenade, "
+                 "clean stone paving, elegant district around, subtle premium urban details, calm realistic atmosphere",
+        "light": "soft natural daylight, balanced even illumination, no harsh shadows"
     }
 ]
 
@@ -65,57 +75,44 @@ FRONT_SCENES = [
 
 BACK_SCENES = [
     {
-        "scene": "standing far away on a wide empty open-air parking lot, "
-                 "clean dark asphalt stretching far in all directions, person tiny in open space",
-        "light": "soft natural overcast daylight, no harsh shadows, even realistic light"
+        "scene": "standing far away on a refined street in an upscale city quarter, "
+                 "elegant residential facades, premium parked cars along the street, clean pavement, person small in frame",
+        "light": "soft natural daylight, balanced realistic illumination, no harsh shadows"
     },
     {
-        "scene": "standing far away on an open rooftop parking level, "
-                 "dark asphalt surface, low barriers, wide empty space around, person small in frame",
-        "light": "soft natural daylight, calm even illumination across entire scene"
+        "scene": "standing far away on an elegant pedestrian bridge, "
+                 "refined bridge railings, calm premium city atmosphere, person small in a graceful architectural setting",
+        "light": "soft diffused daylight, natural even light, realistic bridge atmosphere"
     },
     {
-        "scene": "standing far away on an empty modern pedestrian bridge walkway, "
-                 "clean metal railings on both sides, open sky around, person small in wide frame",
-        "light": "soft diffused daylight, no direct sun, no harsh shadows, natural even light"
+        "scene": "standing far away on a quiet riverside promenade in an upscale district, "
+                 "clean railing, elegant stone walkway, premium buildings nearby, person small in frame",
+        "light": "soft natural daylight, balanced even illumination, calm realistic atmosphere"
     },
     {
-        "scene": "standing far away in a clean open-air multi-level parking structure, "
-                 "long open ramps, repeated horizontal lines, empty parking lanes, person small in deep perspective",
-        "light": "soft neutral daylight, gentle reflections, even realistic illumination"
+        "scene": "standing far away in a refined urban quarter with premium architecture and parked luxury cars, "
+                 "clean pavement, elegant facades, person small in a realistic success-oriented setting",
+        "light": "soft natural daylight, realistic even light, no harsh contrast"
     },
     {
-        "scene": "standing far away with back to camera beside a parked Ferrari in a clean open parking setting, "
-                 "only part of the rear quarter, wheel and body of the car visible, "
-                 "car remains secondary, person small in the frame",
-        "light": "soft natural overcast daylight, no direct sun, "
-                 "gentle even illumination across subject, car and ground"
+        "scene": "standing far away beside a parked Ferrari in a refined city setting, "
+                 "only part of the car visible, elegant architecture around, person small in frame, car remains secondary",
+        "light": "soft natural daylight, gentle even illumination across subject, car and street"
     },
     {
-        "scene": "standing far away in a wide empty asphalt courtyard area, "
-                 "minimal surroundings, large dark ground plane, person small in open space",
-        "light": "soft diffused daylight, even realistic illumination"
+        "scene": "walking upward on a wide elegant stone staircase in an upscale urban setting, "
+                 "clean lines, premium materials, architectural depth, person small in frame",
+        "light": "soft diffused daylight, even realistic illumination across staircase and subject"
     },
     {
-        "scene": "standing far away in a wide covered walkway with simple columns and open sides, "
-                 "long perspective depth, person small at the far end",
-        "light": "soft overhead ambient light, gentle bounce from surrounding surfaces, no harsh contrast"
+        "scene": "standing far away in a covered walkway within a refined premium district, "
+                 "clean columns, elegant materials, long perspective depth, person small in frame",
+        "light": "soft ambient daylight, gentle bounce from surrounding surfaces, realistic upscale atmosphere"
     },
     {
-        "scene": "standing far away beside a long dark retaining wall in an open parking area, "
-                 "wide asphalt surface, minimal surroundings, person small in a quiet realistic setting",
-        "light": "soft overcast daylight, smooth even light across wall and ground, no direct sun"
-    },
-    {
-        "scene": "walking upward on a wide clean staircase in an open urban setting, "
-                 "seen fully from behind, strong lines, person small in frame, stairs rising upward calmly",
-        "light": "soft diffused daylight, even realistic illumination across staircase, no harsh shadows"
-    },
-    {
-        "scene": "standing far away on a quiet riverside pedestrian walkway, "
-                 "metal railing along the side, open air and water in the distance, "
-                 "person small in a calm open setting",
-        "light": "soft natural daylight, balanced even illumination, no direct harsh sun"
+        "scene": "standing far away near the entrance approach of a premium residential quarter, "
+                 "elegant paving, parked premium vehicles, refined urban details, person small in frame",
+        "light": "soft natural daylight, smooth even light, realistic premium neighborhood atmosphere"
     }
 ]
 
@@ -123,13 +120,13 @@ BACK_SCENES = [
 
 FRONT_POSES = [
     "leaning naturally, right fingertips resting lightly on the hood fabric near the temple, "
-    "left hand in front jeans pocket",
+    "left hand resting loosely on upper thigh",
 
     "leaning naturally, both hands resting lightly on both sides of the hood from the front, "
     "chin slightly down, elbows relaxed",
 
     "leaning naturally, left fingertips resting lightly on the hood fabric near the cheek, "
-    "right hand in front jeans pocket, body turned slightly left",
+    "right arm relaxed along outer thigh",
 
     "leaning naturally, both hands resting lightly near the hood opening without pulling the fabric, "
     "shoulders relaxed",
@@ -137,13 +134,13 @@ FRONT_POSES = [
     "leaning naturally, right hand resting lightly on the hood fabric near the temple, "
     "left hand resting flat on upper thigh",
 
-    "leaning naturally, right hand resting behind the head on the nape, "
-    "left hand in front jeans pocket",
+    "leaning naturally, right hand resting on the back of the head, "
+    "left arm relaxed along outer thigh",
 
-    "leaning naturally, left hand resting behind the head on the nape, "
-    "right hand in front jeans pocket, body turned slightly left",
+    "leaning naturally, left hand resting on the back of the head, "
+    "right arm relaxed along outer thigh",
 
-    "leaning naturally, right hand resting behind the head on the nape, "
+    "leaning naturally, right hand resting on the back of the head, "
     "left hand resting on upper thigh, chin slightly down"
 ]
 
@@ -165,16 +162,16 @@ BACK_POSES = [
 
     "walking away, both hands lightly touching the hood from behind, head slightly lowered",
 
-    "standing facing away, right hand resting behind the head on the nape, "
+    "standing facing away, right hand resting on the back of the head above the neck, "
     "left arm relaxed along outer thigh",
 
-    "standing facing away, left hand resting behind the head on the nape, "
+    "standing facing away, left hand resting on the back of the head above the neck, "
     "right arm relaxed along outer thigh",
 
-    "walking away, right hand resting behind the head on the nape, "
+    "walking away, right hand resting on the back of the head above the neck, "
     "left arm moving naturally with stride",
 
-    "walking away, left hand resting behind the head on the nape, "
+    "walking away, left hand resting on the back of the head above the neck, "
     "right arm moving naturally with stride"
 ]
 
@@ -240,16 +237,15 @@ def build_front_prompt(spec):
         "Subject is facing the camera. "
 
         "The subject must physically interact with the environment object described in the scene. "
-        "If the scene contains a wall or pillar, the shoulder or upper back must visibly lean against it. "
+        "If the scene contains a wall, pillar or facade, the shoulder or upper back must visibly lean against it. "
         "If the scene contains a car, the body must stand naturally very close to the car door or fender. "
         "If the scene contains railings, the body must lean lightly against them. "
         "Visible physical contact with the environment is required. "
         "The subject must feel anchored in the scene, not floating, not cut out, not composited. "
-        "The background surface must be clearly visible behind and beside the subject. "
 
         "The hood may be worn up or may rest naturally behind the head. "
         "If a hand interacts with the hood, the fingers must visibly touch the fabric. "
-        "If the hood is down, the hand must rest naturally on the nape or behind the head. "
+        "If the hood is down, the hand must rest naturally on the back of the head, not on the neck. "
         "No floating hand near the head. No hand touching air. "
         "Do not pull the hood. Do not stretch the hood. "
         "No visible fabric tension caused by the hand. "
@@ -307,8 +303,8 @@ def build_back_prompt(spec):
         "This image is only for a rear-view environmental shot. "
         "The subject is seen fully from behind. "
         "Never use close front-view scene logic. "
-        "Never use close-up wall portrait composition, close car-door portrait setup, "
-        "close vehicle-side fashion shot, or any scene intended for a front-facing close image. "
+        "Never use close-up wall portrait, close car-door portrait, "
+        "or any scene intended for a front-facing close image. "
 
         "Real photo taken on location. "
         "Sony A7R V, 35mm, f/8, ISO 400. "
@@ -338,17 +334,17 @@ def build_back_prompt(spec):
         "Black hoodie. No pocket. Hood up. Face hidden. Seen from behind only. "
 
         "If hands interact with the hood, they only rest lightly on the fabric surface. "
-        "They do not grip the edge. They do not pull the hood. They do not stretch the hood. "
-        "The hood keeps its natural relaxed shape and position. "
+        "They do not grip the edge. They do not pull the hood. "
+        "The hood keeps its natural relaxed shape. "
         "No visible fabric tension caused by the hands. "
 
         "No passive pose. "
         "No hands in back pockets of jeans. "
-        "Hands must rest lightly on the hood or rest behind the head on the nape only. "
+        "Hands must rest lightly on the hood or rest on the back of the head above the neck only. "
         "If walking, one arm may move naturally with stride. "
 
         "Never place the subject on a car traffic lane or roadway. "
-        "Use only pedestrian surfaces, parking surfaces, staircase, courtyard, covered walkway, "
+        "Use only pedestrian surfaces, parking surfaces, staircase, promenade, covered walkway, "
         "or bridge walkway. "
 
         f"Scene: {spec['scene']}. "
@@ -489,7 +485,6 @@ async def generate_all_photos():
         prompt = build_front_prompt(spec) if spec["side"] == "front" else build_back_prompt(spec)
         job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
         job_ids.append(job_id)
-
         if i < len(specs) - 1:
             await asyncio.sleep(3)
 
