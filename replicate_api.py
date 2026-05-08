@@ -9,7 +9,7 @@ SAVE_DIR = "generations"
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
-# ---------------- FRONT SCENES: ТОЛЬКО ДЛЯ ФОТО СПЕРЕДИ ----------------
+# ---------------- FRONT SCENES ----------------
 
 FRONT_SCENES = [
     {
@@ -65,7 +65,7 @@ FRONT_SCENES = [
     }
 ]
 
-# ---------------- BACK SCENES: ТОЛЬКО ДЛЯ ФОТО СЗАДИ ----------------
+# ---------------- BACK SCENES ----------------
 
 BACK_SCENES = [
     {
@@ -126,20 +126,22 @@ BACK_SCENES = [
 # ---------------- ПОЗЫ ----------------
 
 FRONT_POSES = [
-    "right hand lightly holding the hood edge near temple, left hand in front jeans pocket, weight on right leg",
-    "both hands lightly holding the hood edges from the front, chin slightly down, elbows relaxed",
-    "right hand lightly touching the hood edge near forehead, left hand resting on upper thigh",
-    "left hand lightly holding the hood edge near cheek, right hand in front jeans pocket, body turned slightly left",
-    "both hands lightly holding both hood edges near the jawline, shoulders relaxed",
-    "right hand lightly touching the hood near temple, left hand resting flat on upper thigh, relaxed stance"
+    "right fingertips resting lightly on the hood fabric near the temple, left hand in front jeans pocket, weight on right leg",
+    "both hands resting lightly on both sides of the hood from the front, chin slightly down, elbows relaxed",
+    "left fingertips resting lightly on the hood fabric near the cheek, right hand in front jeans pocket, body turned slightly left",
+    "both hands resting lightly near the hood opening without pulling the fabric, shoulders relaxed",
+    "right hand resting lightly on the hood fabric near the temple, left hand resting flat on upper thigh, relaxed stance",
+    "right hand resting behind the head on the nape, left hand in front jeans pocket, relaxed stance",
+    "left hand resting behind the head on the nape, right hand in front jeans pocket, body turned slightly left",
+    "right hand resting behind the head on the nape, left hand resting on upper thigh, chin slightly down"
 ]
 
 BACK_POSES = [
-    "standing facing away, right hand lightly holding the back edge of the hood, left arm relaxed along outer thigh",
-    "standing facing away, left hand lightly holding the back edge of the hood, right arm relaxed along outer thigh",
-    "standing facing away, both hands lightly holding the hood from behind, elbows slightly outward",
-    "walking away, right hand lightly holding the back edge of the hood, left arm moving naturally with stride",
-    "walking away, left hand lightly holding the back edge of the hood, right arm moving naturally with stride",
+    "standing facing away, right hand resting lightly on the back of the hood, left arm relaxed along outer thigh",
+    "standing facing away, left hand resting lightly on the back of the hood, right arm relaxed along outer thigh",
+    "standing facing away, both hands resting lightly on the hood from behind, elbows slightly outward",
+    "walking away, right hand resting lightly on the back of the hood, left arm moving naturally with stride",
+    "walking away, left hand resting lightly on the back of the hood, right arm moving naturally with stride",
     "walking away, both hands lightly touching the hood from behind, head slightly lowered",
     "standing facing away, right hand resting behind the head on the nape, left arm relaxed along outer thigh",
     "standing facing away, left hand resting behind the head on the nape, right arm relaxed along outer thigh",
@@ -178,53 +180,11 @@ def get_next_spec(side):
 
 
 def get_unique_specs():
-    global CURRENT_FRONT_INDEX, CURRENT_BACK_INDEX
-
-    used = set()
-    specs = []
-    sides = ["back", "front", "back"]
-
-    for side in sides:
-        chosen = None
-
-        for _ in range(30):
-            if side == "front":
-                scene_data = random.choice(FRONT_SCENES)
-                pose = FRONT_POSES[CURRENT_FRONT_INDEX % len(FRONT_POSES)]
-                CURRENT_FRONT_INDEX += 1
-                ref = REF_FRONT
-            else:
-                scene_data = random.choice(BACK_SCENES)
-                pose = BACK_POSES[CURRENT_BACK_INDEX % len(BACK_POSES)]
-                CURRENT_BACK_INDEX += 1
-                ref = REF_BACK
-
-            key = scene_data["scene"][:50]
-            if key not in used:
-                used.add(key)
-                chosen = {
-                    "side": side,
-                    "scene": scene_data["scene"],
-                    "light": scene_data["light"],
-                    "pose": pose,
-                    "seed": random.randint(100000, 999999),
-                    "ref": ref
-                }
-                break
-
-        if chosen is None:
-            chosen = {
-                "side": side,
-                "scene": scene_data["scene"],
-                "light": scene_data["light"],
-                "pose": pose,
-                "seed": random.randint(100000, 999999),
-                "ref": ref
-            }
-
-        specs.append(chosen)
-
-    return specs
+    return [
+        get_next_spec("back"),
+        get_next_spec("front"),
+        get_next_spec("back")
+    ]
 
 
 # ---------------- FRONT PROMPT ----------------
@@ -246,6 +206,13 @@ def build_front_prompt(spec):
         "Camera exactly 1.0 meter from subject. "
         "Framing from head to knees. Subject fills 80-85 percent of frame. "
         "Subject is facing the camera. "
+
+        "The hood may be worn up or may rest naturally behind the head. "
+        "If a hand interacts with the hood, the fingers must visibly touch the fabric. "
+        "If the hood is down, the hand must rest naturally on the nape or behind the head. "
+        "No floating hand near the head. No hand touching air. "
+        "Do not pull the hood. Do not stretch the hood. "
+        "No visible fabric tension caused by the hand. "
 
         "EXTREME FABRIC DETAIL. Macro-level realism. "
         "Photograph the hoodie fabric almost like a macro fashion shot. "
@@ -270,9 +237,6 @@ def build_front_prompt(spec):
         "Completely flat clean front. Only the chest logo. "
         "Logo must be maximum sharpness, exact size and exact position from reference. "
         "Logo must be crisp and fully readable. Not blurred. Not distorted. "
-
-        "If hands touch the hood, they only lightly hold or lightly touch the hood edge. "
-        "Do not pull the hood. Do not stretch the hood. Do not drag the hood downward. "
 
         "MANDATORY black wide-leg baggy denim jeans. "
         "The jeans must be black. "
@@ -331,12 +295,14 @@ def build_back_prompt(spec):
 
         "Black hoodie. No pocket. Hood up. Face hidden. Seen from behind only. "
 
-        "If hands interact with the hood, they only lightly hold or lightly touch it. "
-        "Do not pull the hood. Do not stretch the hood. "
+        "If hands interact with the hood, they only rest lightly on the fabric surface. "
+        "They do not grip the edge. They do not pull the hood. They do not stretch the hood. "
+        "The hood keeps its natural relaxed shape and position. "
+        "No visible fabric tension caused by the hands. "
 
         "No passive pose. "
         "No hands in back pockets of jeans. "
-        "Hands must interact with the hood lightly or rest behind the head on the nape only. "
+        "Hands must rest lightly on the hood or rest behind the head on the nape only. "
         "If walking, one arm may move naturally with stride. "
 
         "Never place the subject on a car traffic lane or roadway. "
