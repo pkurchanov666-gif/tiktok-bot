@@ -16,58 +16,62 @@ REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
 FRONT_SCENES = [
     {
-        "scene": "leaning against a matte black Porsche 911 parked in a premium underground garage, "
-                 "polished epoxy floor with reflections, soft LED ceiling lights, "
-                 "other luxury cars blurred in background, expensive modern parking",
-        "light": "soft ambient LED garage lighting, even illumination across subject and environment, no harsh shadows"
+        "scene": "leaning against a dark Porsche parked in a clean underground garage, "
+                 "car door and fender very close to body, polished concrete floor, "
+                 "soft LED lights, other cars blurred far away",
+        "light": "soft ambient garage lighting, even illumination, no harsh shadows"
     },
     {
-        "scene": "standing very close beside a white Lamborghini Urus on a business district street, "
-                 "modern glass office buildings nearby, clean granite pavement, premium valet zone",
-        "light": "soft natural daylight, subtle reflections from car surface, balanced professional light"
+        "scene": "standing with body very close to a black Lamborghini Urus, "
+                 "almost touching the car, only part of hood visible in frame, "
+                 "modern business street behind, clean granite pavement",
+        "light": "soft natural daylight, balanced light"
     },
     {
-        "scene": "leaning shoulder against a dark glass facade of a modern luxury apartment building, "
-                 "contemporary architecture with steel and glass, minimalist design, "
-                 "expensive lobby entrance nearby",
-        "light": "soft diffused daylight, gentle reflections from glass, clean modern light across subject and facade"
+        "scene": "leaning against a dark glass building facade, "
+                 "body pressed close to glass, contemporary architecture right behind",
+        "light": "soft diffused daylight, gentle reflections from glass"
     },
     {
-        "scene": "standing beside a black Mercedes-AMG GT parked near a premium office building entrance, "
-                 "glass doors with polished marble columns, modern corporate architecture",
-        "light": "soft natural daylight, subtle reflections from building and car, balanced light"
+        "scene": "standing body-close to a black Mercedes-AMG GT, "
+                 "car door very near, only small part of car visible, "
+                 "marble columns and modern entrance barely visible",
+        "light": "soft natural daylight, balanced illumination"
     },
     {
-        "scene": "leaning against the railing of a luxury apartment building rooftop terrace, "
-                 "city skyline view in background, modern glass railing, premium setting",
-        "light": "soft golden hour light, warm natural illumination, gentle city glow"
+        "scene": "leaning close against modern glass railing, "
+                 "railing tight against body, city view far behind",
+        "light": "soft golden hour light, warm natural glow"
     },
     {
-        "scene": "standing beside a black Audi A8 parked on a street in an elite residential neighborhood, "
-                 "leaning lightly against the car door, elegant modern house facade behind, "
-                 "manicured bushes and clean asphalt street, quiet premium atmosphere",
-        "light": "soft natural daylight, even illumination across car, subject and street"
+        "scene": "standing body-close to a black Audi A8 parked on quiet street, "
+                 "almost touching car door, only part of door and fender in frame, "
+                 "elegant house facade and plants blurred behind",
+        "light": "soft natural daylight, even light across subject and car surface"
     },
     {
-        "scene": "leaning against a dark stone wall in the courtyard of a modern luxury residential complex, "
-                 "contemporary minimalist architecture, geometric landscaping, premium pavement",
-        "light": "soft natural daylight, clean even light across stone wall, fabric and surroundings"
+        "scene": "leaning tight against dark stone wall in modern residential courtyard, "
+                 "wall close behind, body pressed against it, "
+                 "minimalist architecture partially visible",
+        "light": "soft natural daylight, clean even light"
     },
     {
-        "scene": "standing near the entrance of a premium business center or fitness club, "
-                 "black granite facade, glass doors with steel handles, modern clean design",
-        "light": "soft diffused daylight, gentle reflections from polished stone and glass"
+        "scene": "standing very close to black granite entrance of modern business center, "
+                 "body near glass door, only part of door and handles visible, "
+                 "interior barely seen through glass",
+        "light": "soft diffused daylight, gentle reflections from granite and glass"
     },
     {
-        "scene": "leaning with one shoulder against a Rolls-Royce Cullinan in a private luxury garage, "
-                 "matte black or dark blue premium SUV, spotless epoxy floor, ambient soft lighting",
-        "light": "soft indirect LED lighting, subtle highlights on vehicle and subject, premium garage illumination"
+        "scene": "leaning tight against a black luxury SUV in private garage, "
+                 "body very close to car surface, only part of SUV in frame, "
+                 "epoxy floor close beneath feet, soft ambient lighting",
+        "light": "soft indirect LED lighting, subtle highlights on car and fabric"
     },
     {
-        "scene": "standing on a clean parking rooftop of a modern business center, "
-                 "white parking lines on concrete, McLaren 720S or Ferrari F8 parked nearby, "
-                 "clean urban environment, open sky above",
-        "light": "soft natural daylight, slight overcast for even lighting across entire rooftop"
+        "scene": "standing on rooftop parking right next to a parked car, "
+                 "body very close to vehicle, only small portion visible, "
+                 "concrete and white parking lines at feet, open sky above",
+        "light": "soft natural daylight, even overcast lighting"
     }
 ]
 
@@ -75,52 +79,52 @@ FRONT_SCENES = [
 
 BACK_SCENES = [
     {
-        "scene": "walking away through an underground parking garage of a luxury residential complex, "
-                 "rows of premium cars on both sides, polished floor, LED ceiling lights, "
-                 "person small in frame, expensive parking atmosphere",
-        "light": "soft ambient LED garage lighting, even illumination across parking level and subject"
+        "scene": "walking through underground parking garage, "
+                 "person small in frame, rows of car tails far in background, "
+                 "polished floor stretches ahead, LED lights above",
+        "light": "soft ambient LED lighting, even illumination"
     },
     {
-        "scene": "standing far away in the courtyard of a modern luxury apartment complex, "
-                 "contemporary glass and steel architecture, geometric landscaping, "
-                 "modern sculpture or fountain, premium paving, person small in elegant setting",
-        "light": "soft natural daylight, balanced even light across entire courtyard and subject"
+        "scene": "standing in courtyard of modern apartment complex, "
+                 "person small in frame, contemporary architecture surrounds, "
+                 "geometric landscaping visible, far away view",
+        "light": "soft natural daylight, balanced light across courtyard"
     },
     {
-        "scene": "walking away on a wide plaza in front of a modern business center, "
-                 "glass office towers, polished granite pavement, modern urban furniture, "
-                 "expensive cars nearby, person small in corporate success environment",
-        "light": "soft diffused daylight, clean modern city lighting, even illumination across plaza"
+        "scene": "walking on wide plaza in front of business center, "
+                 "person small in frame, glass towers far ahead, "
+                 "granite pavement stretches, modern furniture scattered",
+        "light": "soft diffused daylight, clean modern light"
     },
     {
-        "scene": "standing far away on the elevated driveway of a five-star hotel entrance, "
-                 "valet parking zone with luxury cars, hotel facade with glass and stone, "
-                 "elegant landscaping, person small in upscale hospitality setting",
-        "light": "soft natural daylight with warm hotel entrance lighting, balanced illumination"
+        "scene": "standing on elevated driveway of hotel entrance, "
+                 "person small in frame, valet parking zone stretches ahead, "
+                 "hotel facade visible in distance",
+        "light": "soft natural daylight with warm hotel lighting"
     },
     {
-        "scene": "walking up a wide modern stone staircase in a premium shopping district, "
-                 "clean steps, steel and glass railings, luxury brand store windows visible, "
-                 "affluent shoppers in background, person small climbing stairs",
-        "light": "soft even daylight, gentle reflections from storefronts, clean upscale retail light"
+        "scene": "walking up wide modern stone staircase, "
+                 "person small climbing, clean steps ahead, steel railings on sides, "
+                 "store windows visible far above, shoppers tiny in distance",
+        "light": "soft even daylight, reflections from storefronts"
     },
     {
-        "scene": "standing far away on a wide pedestrian shopping street in the city center, "
-                 "modern office buildings and luxury shops in front, expensive cars parked on sides, "
-                 "clean asphalt pavement, businesspeople walking in background, person small in frame",
-        "light": "soft overcast daylight, even illumination across street, buildings and subject"
+        "scene": "standing on wide pedestrian street in city center, "
+                 "person small in frame, modern office buildings far ahead, "
+                 "shops visible in distance, cars parked along street sides",
+        "light": "soft overcast daylight, even light across entire street"
     },
     {
-        "scene": "walking away through the private driveway of a gated residential community, "
-                 "security booth far behind, manicured gardens, modern minimalist houses, "
-                 "premium pavement, person small in exclusive neighborhood",
-        "light": "soft natural daylight, clean even illumination, elite gated community atmosphere"
+        "scene": "walking through private driveway of gated community, "
+                 "person small in frame, manicured gardens on sides, "
+                 "modern minimalist houses visible in distance, premium pavement",
+        "light": "soft natural daylight, clean even illumination"
     },
     {
-        "scene": "standing far away in a modern corporate campus courtyard, "
-                 "glass office buildings, water feature or contemporary sculpture, clean walkways, "
-                 "young professionals in background, person small in ambitious work environment",
-        "light": "soft diffused daylight, balanced modern campus lighting across entire frame"
+        "scene": "standing in courtyard of modern office campus, "
+                 "person small in frame, glass buildings far ahead, "
+                 "water feature visible, professionals walking in far distance",
+        "light": "soft diffused daylight, balanced campus lighting"
     }
 ]
 
@@ -226,156 +230,81 @@ def get_unique_specs():
     return specs
 
 
-# ---------------- FRONT PROMPT (УЛУЧШЕННЫЙ) ----------------
+# ---------------- FRONT PROMPT ----------------
 
 def build_front_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
-        "Ultra-realistic RAW 9:16 professional fashion photograph. "
-        "FRONT FACING EDITORIAL SHOT. "
-        "Sony A7R V, 35mm lens, f/5.6, ISO 200. "
-        "Camera at eye level, 1.2 meters from subject. "
-        "Framing from head to mid-thigh. Subject occupies 60-70 percent of frame. "
-        "Subject centered and facing camera directly. "
+        "Ultra-realistic 9:16 photograph. "
+        "Professional fashion shot, front view. "
+        "Sony A7R V, 35mm lens, f/4, ISO 200. "
+        "Camera at eye level, 1.5 meters from subject. "
+        "Framing from head to knees. Subject 70-75 percent of frame. "
 
-        "CRITICAL - SHARP FOCUS THROUGHOUT: "
-        "Everything in sharp focus. f/5.6 depth of field. "
-        "Subject, immediate surroundings, and background ALL equally sharp and detailed. "
-        "No blur. No bokeh. No selective focus. "
-        "The photograph is ONE unified sharp image. "
-        "Background is NOT soft - it is part of the scene and equally detailed. "
+        "Sharp focus throughout - subject and background equally sharp. "
+        "No blur, no bokeh. One unified photograph. "
 
-        "SUBJECT INTEGRATION: "
-        "Subject must be physically integrated into the environment. "
-        "Visible physical contact required: "
-        "- If leaning on wall/pillar: shoulder and upper back clearly touching surface "
-        "- If beside car: body very close, car door/fender clearly visible and sharp "
-        "- If near railing: hand or body touching metal/glass, contact point sharp "
-        "Subject is NOT floating. NOT composited. Authentically part of location. "
+        "Subject leans or stands against environment naturally. "
+        "Visible contact with surface: wall, car, or railing. "
+        "Not floating. Part of the location. "
 
-        "HOODIE AND CLOTHING: "
-        "Photograph with professional fashion editorial clarity. "
-        "Cotton fibers visible and sharp. Weave texture, stitching clearly defined. "
-        "Light interacts realistically with fabric: micro-shadows in folds, "
-        "subtle highlights on raised areas. Fabric feels tactile, premium, natural. "
-        "NOT plastic. NOT smooth. Real premium cotton. "
+        "Premium black hoodie, no front pocket, no zipper. "
+        "Chest logo sharp, exact from reference. "
+        "Black wide-leg denim, heavy texture visible. "
 
-        "HOODIE SPECIFICATIONS - MANDATORY: "
-        "No front pocket. No kangaroo pouch. No zipper. Completely flat clean front. "
-        "Only chest logo visible - maximum sharpness, exact size and position from reference. "
-        "Logo crisp, clear, fully readable. Not blurred. Not distorted. "
+        "Hands active, visible in frame, not in pockets. "
+        "If touching hood: fingers visible on fabric. "
 
-        "JEANS - MANDATORY: "
-        "Black wide-leg baggy denim. Very wide at thighs, knees, calves. "
-        "Black denim texture fully visible. Heavy fabric, clear weave, realistic thickness. "
-        "Not slim. Not skinny. Not tapered. "
+        "Background sharp and detailed. Not blurred. "
+        "Architecture, pavement, car details all clear. "
 
-        "BACKGROUND DETAIL - CRITICAL: "
-        "Background is SHARP and DETAILED. Not soft. Not blurred. "
-        "Every architectural element sharp: stone texture, car paint, glass reflections, "
-        "pavement lines, building facades all clearly visible and detailed. "
-        "Background colors rich and natural. Not washed out. Not faded. "
-        "Lighting is consistent across subject and background. "
+        f"Lighting: {spec['light']}. "
+        "Soft natural light, no harsh shadows, no flash. "
 
-        "LIGHTING: "
-        f"{spec['light']}. "
-        "No direct sunlight. No harsh shadows. Soft diffused natural light. "
-        "Light bathes both subject and surroundings evenly. "
-        "No flash. No studio lights. Realistic outdoor/indoor natural lighting. "
-        "Shadows are soft with gradual transitions. "
-
-        "HANDS AND POSE: "
-        "Hands must be actively engaged. Visible in frame. Not hanging at sides. "
-        "If touching hood fabric: fingers clearly visible pressing/resting on fabric. "
-        "If on head: hand clearly visible, fingers defined. "
-        "No hands in pockets. "
-
-        f"SCENE: {spec['scene']}. "
-        f"POSE: {spec['pose']}. "
-
-        "This is premium fashion editorial photography. "
-        "Professional quality. Sharp. Detailed. Integrated. Realistic. "
-        "Subject and environment equally sharp and real. "
+        f"Scene: {spec['scene']}. "
+        f"Pose: {spec['pose']}. "
     ) + uid
 
 
-# ---------------- BACK PROMPT (УЛУЧШЕННЫЙ) ----------------
+# ---------------- BACK PROMPT ----------------
 
 def build_back_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
-        "Ultra-realistic RAW 9:16 professional environmental photograph. "
-        "BACK VIEW LONG SHOT. "
-        "Sony A7R V, 35mm, f/5.6, ISO 400. "
-        "Camera at 1.6m height, straight forward, parallel to ground. "
-        "No high angle. No top-down. No drone. No tilt. "
+        "Ultra-realistic 9:16 photograph. "
+        "Environmental back view shot. "
+        "Sony A7R V, 35mm, f/4, ISO 400. "
+        "Camera at 1.6m height, straight forward. "
 
-        "COMPOSITION: "
-        "Camera 18-22 meters from subject. "
-        "Full body visible head to feet. Feet clearly on ground. "
-        "At least 25 percent of frame is ground/pavement below feet. "
-        "Subject is 12-18 percent of frame height. "
-        "Person is clearly visible but small in large environmental scene. "
-        "Environment dominates but subject is clear focal point. "
+        "Camera 25-30 meters from subject. "
+        "Full body visible, feet on ground. "
+        "Ground visible 30 percent of frame below feet. "
+        "Subject 8-12 percent of frame height - small but clear. "
+        "Environment dominates, subject is focal point. "
 
-        "SHARP FOCUS - CRITICAL: "
-        "Everything in sharp focus. f/5.6 depth of field. "
-        "Foreground, subject, background ALL equally sharp and detailed. "
-        "No blur. No bokeh. No selective focus. "
-        "Every detail crisp: pavement texture, building facades, car details, "
-        "architectural elements, landscaping - all sharp and detailed. "
-        "This is ONE unified photograph. Not composite. Not layered. "
+        "Sharp focus everywhere - foreground, subject, background all sharp. "
+        "No blur, no bokeh. Unified photograph. "
 
-        "SUBJECT INTEGRATION: "
-        "Subject authentically part of the environment. "
-        "Not floating. Not cut out. Walking or standing naturally in location. "
-        "If walking: natural stride, body position realistic for movement. "
-        "If standing: weight distributed naturally on ground. "
+        "Subject stands or walks naturally in location. "
+        "Authentically part of the scene, not floating. "
 
-        "HOODIE AND JEANS: "
-        "Black hoodie, hood UP, face completely hidden. Seen from behind only. "
-        "If hands touch hood: light contact only, no pulling, no tension. "
-        "Hands rest naturally on fabric or back of head above neck. "
-        "Black wide-leg baggy denim visible from distance. "
-        "Wide silhouette clear. Denim texture visible even from distance. "
-        "Not slim. Not tapered. Heavy black fabric. "
+        "Black hoodie, hood up, face hidden, back view only. "
+        "Hands light contact on hood or back of head above neck. "
+        "Black wide-leg denim, wide silhouette visible from distance. "
 
-        "BACKGROUND DETAIL - CRITICAL: "
-        "Background is SHARP and DETAILED. Not soft. Not blurred. "
-        "Architectural elements: sharp building lines, texture details, clearly visible. "
-        "Pavement/ground: texture visible, lines sharp, realistic surface. "
-        "Vehicles parked nearby: details sharp, paint/finish clear. "
-        "Urban furniture, landscaping, signage: all sharp and detailed. "
-        "Colors natural and rich. Not washed out. "
+        "Background sharp and detailed - buildings, pavement, "
+        "architecture all clear and visible. "
 
-        "LIGHTING: "
-        f"{spec['light']}. "
-        "No direct harsh sunlight. No heavy shadows. Soft diffused light. "
-        "Light falls evenly across entire frame: subject, ground, buildings equally lit. "
-        "Shadows are soft with gradual transitions. "
-        "No flash. No studio setup. Natural outdoor/architectural lighting. "
-        "Light is consistent and realistic. "
+        f"Lighting: {spec['light']}. "
+        "Soft natural light, even across entire scene, no harsh shadows. "
 
-        "SCENE RULES: "
-        "Only pedestrian zones: streets, plazas, parking lots, staircases, "
-        "promenades, covered walkways, bridges. "
-        "Never on car traffic lanes or dangerous areas. "
-        "Scene must be accessible and realistic for a person to be in. "
+        "Only pedestrian zones - streets, plazas, stairs, promenades. "
+        "Never on traffic lanes. "
 
-        "HANDS AND POSE: "
-        "Hands must be visible and active. "
-        "If resting on hood: visible contact with fabric. "
-        "If at back of head: clearly visible above neck, defined fingers. "
-        "If walking: one arm may move naturally with stride. "
-
-        f"SCENE: {spec['scene']}. "
-        f"POSE: {spec['pose']}. "
-
-        "This is premium environmental fashion photography. "
-        "Sharp. Detailed. Integrated. Professional. Realistic. "
-        "Subject and environment equally sharp and real. "
+        f"Scene: {spec['scene']}. "
+        f"Pose: {spec['pose']}. "
     ) + uid
 
 
