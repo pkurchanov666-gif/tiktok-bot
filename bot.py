@@ -462,11 +462,13 @@ async def buffer_connect_handler(update: Update, context: ContextTypes.DEFAULT_T
     await context.bot.send_message(
         chat_id=user_id,
         text=(
-            "🔗 Отправь Buffer Access Token одним сообщением.\n\n"
-            "Как получить токен:\n"
-            "1. Зайди в Buffer\n"
-            "2. Открой настройки / developer app\n"
-            "3. Скопируй Access Token"
+            "🔗 Отправь свой Buffer API ключ одним сообщением.\n\n"
+            "Как получить:\n"
+            "1. Зайди на buffer.com\n"
+            "2. Settings → Apps & Extras\n"
+            "3. Manage Apps → Create an App\n"
+            "4. Скопируй API Key\n\n"
+            "Просто вставь его сюда одним сообщением."
         )
     )
 
@@ -481,14 +483,14 @@ async def buffer_token_message_handler(update: Update, context: ContextTypes.DEF
     if not storage.get("awaiting_buffer_token"):
         return
 
-    token = update.message.text.strip()
+    api_key = update.message.text.strip()
     storage["awaiting_buffer_token"] = False
     save_user_data()
 
-    await update.message.reply_text("⏳ Проверяю Buffer токен...")
+    await update.message.reply_text("⏳ Проверяю Buffer API ключ...")
 
     try:
-        profiles = await get_profiles(token)
+        profiles = await get_profiles(api_key)
 
         if not profiles:
             await update.message.reply_text(
@@ -502,7 +504,7 @@ async def buffer_token_message_handler(update: Update, context: ContextTypes.DEF
         profile_name = profile.get("formatted_username") or profile_id
         profile_service = profile.get("service", "unknown")
 
-        storage["buffer_api_key"] = token
+        storage["buffer_api_key"] = api_key
         storage["buffer_profile_id"] = profile_id
         storage["buffer_profile_name"] = profile_name
         storage["buffer_service"] = profile_service
@@ -514,14 +516,14 @@ async def buffer_token_message_handler(update: Update, context: ContextTypes.DEF
             reply_markup = build_start_keyboard(user_id)
 
         await update.message.reply_text(
-            f"✅ Buffer привязан\n"
+            f"✅ Buffer привязан!\n"
             f"Профиль: {profile_name}\n"
             f"Сервис: {profile_service}",
             reply_markup=reply_markup
         )
 
     except Exception as e:
-        await update.message.reply_text(f"❌ Ошибка привязки Buffer: {e}")
+        await update.message.reply_text(f"❌ Не удалось привязать Buffer: {e}")
 
 
 # ---------------- BUFFER SEND ----------------
@@ -591,7 +593,7 @@ async def buffer_send_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
 
             await context.bot.send_message(
                 chat_id=user_id,
-                text="❌ Токен Buffer недействителен. Привяжи заново."
+                text="❌ API ключ Buffer недействителен. Привяжи заново."
             )
             return
 
