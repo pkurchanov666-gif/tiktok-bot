@@ -9,7 +9,7 @@ SAVE_DIR = "generations"
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
-# ---------------- ФОНЫ СПЕРЕДИ ----------------
+# ---------------- FRONT SCENES: ТОЛЬКО ДЛЯ ФОТО СПЕРЕДИ ----------------
 
 FRONT_SCENES = [
     {
@@ -21,6 +21,11 @@ FRONT_SCENES = [
         "scene": "standing in a clean corner of an underground parking garage, "
                  "concrete wall on one side, pillar on the other, empty floor around",
         "light": "cool overhead parking light, soft bounce from concrete walls, natural even light"
+    },
+    {
+        "scene": "standing near the concrete side wall of an underground parking entrance ramp, "
+                 "clean architectural lines, smooth floor, minimal realistic urban setting",
+        "light": "soft overhead and ambient parking light, no direct sun, even natural illumination"
     },
     {
         "scene": "standing on an open-air parking level with clean concrete floor and low barriers, "
@@ -39,11 +44,6 @@ FRONT_SCENES = [
         "light": "soft ambient daylight, subtle interior shadow, balanced natural illumination"
     },
     {
-        "scene": "standing beside clean metal railings of a modern pedestrian bridge, "
-                 "concrete bridge surface underfoot, simple minimal surroundings",
-        "light": "soft overcast daylight, no harsh contrast, natural even light"
-    },
-    {
         "scene": "standing close to a smooth dark concrete wall in a modern urban setting, "
                  "calm minimal background, no distractions",
         "light": "soft diffused daylight, gentle shadow transition, natural realistic light"
@@ -59,13 +59,13 @@ FRONT_SCENES = [
         "light": "soft ambient light filtering from above, gentle bounce from concrete surfaces"
     },
     {
-        "scene": "standing on an open rooftop parking level, "
-                 "clean concrete floor, low barriers, calm open space around",
+        "scene": "standing on an open rooftop parking level beside a low concrete barrier, "
+                 "clean concrete floor, calm open space around, minimal realistic setting",
         "light": "soft overcast daylight, no direct sun, natural even illumination"
     }
 ]
 
-# ---------------- ФОНЫ СЗАДИ ----------------
+# ---------------- BACK SCENES: ТОЛЬКО ДЛЯ ФОТО СЗАДИ ----------------
 
 BACK_SCENES = [
     {
@@ -84,27 +84,21 @@ BACK_SCENES = [
         "light": "soft natural overcast daylight, calm even illumination across entire scene"
     },
     {
-        "scene": "standing far away on an empty modern pedestrian bridge, "
-                 "clean railings on both sides, bridge stretching far ahead, person small in wide frame",
+        "scene": "standing far away on an empty modern pedestrian bridge walkway, "
+                 "clean railings on both sides, pedestrian surface only, bridge stretching far ahead, "
+                 "person small in wide frame",
         "light": "soft diffused daylight, no direct sun, no harsh shadows, natural even light"
     },
     {
         "scene": "standing far away in a clean open-air multi-level parking structure, "
-                 "long concrete ramps, repeated horizontal lines, empty parking lanes, "
-                 "person small in deep perspective",
+                 "long concrete ramps, repeated horizontal lines, empty parking lanes, person small in deep perspective",
         "light": "soft neutral daylight, gentle concrete reflections, even realistic illumination"
     },
     {
-        "scene": "standing far away with back to camera beside a parked Ferrari in a clean open urban setting, "
+        "scene": "standing far away with back to camera beside a parked Ferrari in a clean open parking setting, "
                  "only part of the rear quarter, wheel and body of the car visible, "
                  "car remains secondary, person small in the frame",
-        "light": "soft natural overcast daylight, no direct sun, "
-                 "gentle even illumination across subject, car and ground"
-    },
-    {
-        "scene": "standing far away on a long straight empty road, "
-                 "simple realistic urban surroundings, wide open space, person tiny in frame",
-        "light": "soft overcast daylight, cool natural tones, no direct sunlight"
+        "light": "soft natural overcast daylight, no direct sun, gentle even illumination across subject, car and ground"
     },
     {
         "scene": "standing far away in a wide empty concrete courtyard, "
@@ -112,16 +106,20 @@ BACK_SCENES = [
         "light": "soft diffused daylight, even realistic illumination"
     },
     {
-        "scene": "standing far away on a wide empty access road leading into a parking complex, "
-                 "clean asphalt, low concrete edges, long straight perspective, person small in the distance",
-        "light": "soft neutral daylight, even natural illumination, no harsh contrast"
+        "scene": "standing far away in a wide modern covered walkway with concrete ceiling and pillars, "
+                 "long perspective depth, person small at the far end",
+        "light": "soft overhead ambient light, gentle bounce from concrete surfaces, no harsh contrast"
+    },
+    {
+        "scene": "standing far away beside a long clean retaining wall in an open parking area, "
+                 "wide asphalt surface, minimal concrete surroundings, person small in a quiet realistic setting",
+        "light": "soft overcast daylight, smooth even light across wall and ground, no direct sun"
     },
     {
         "scene": "walking upward on a wide clean concrete staircase in a modern urban setting, "
                  "seen fully from behind, strong architectural lines, person small in the frame, "
                  "stairs rising upward with calm minimal surroundings",
-        "light": "soft diffused daylight, even realistic illumination across staircase, "
-                 "no harsh shadows, no direct sunlight"
+        "light": "soft diffused daylight, even realistic illumination across staircase, no harsh shadows, no direct sunlight"
     }
 ]
 
@@ -201,7 +199,7 @@ def get_unique_specs():
                 CURRENT_BACK_INDEX += 1
                 ref = REF_BACK
 
-            key = scene_data["scene"][:40]
+            key = scene_data["scene"][:50]
             if key not in used:
                 used.add(key)
                 chosen = {
@@ -229,24 +227,31 @@ def get_unique_specs():
     return specs
 
 
-# ---------------- ПРОМПТ СПЕРЕДИ ----------------
+# ---------------- FRONT PROMPT ----------------
 
 def build_front_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
         "Ultra-realistic RAW 9:16 photograph. "
+        "STRICT FRONT VIEW CLOSE SHOT ONLY. "
+        "This image is only for a front-facing close fashion shot. "
+        "Never use back-view composition. Never use far-distance back-view scene logic. "
+        "Never use wide back-view environments such as distant bridge walkway, large long-shot parking panorama, "
+        "staircase ascent, wide courtyard, or any scene intended for a rear view. "
+
         "Real photo taken on location by a professional photographer. "
         "Sony A7R V, 35mm, f/8, ISO 200. "
         "Camera at eye level. Straight-on. No tilt. "
         "Camera exactly 1.0 meter from subject. "
         "Framing from head to knees. Subject fills 80-85 percent of frame. "
+        "Subject is facing the camera. "
 
         "EXTREME FABRIC DETAIL. Macro-level realism. "
-        "Every cotton fiber of the hoodie visible and sharp. "
+        "Photograph the hoodie fabric almost like a macro fashion shot. "
+        "Every cotton fiber visible and sharp. "
         "Every weave, stitch, micro wrinkle rendered with extreme clarity. "
-        "Light physically interacts with fabric: "
-        "micro shadows in folds, subtle highlights on raised fibers. "
+        "Light physically interacts with fabric: micro shadows in folds, subtle highlights on raised fibers. "
         "Fabric is real and tactile. Not smooth. Not plastic. Not flat. "
         "Denim weave of jeans also fully visible and sharp. "
 
@@ -271,18 +276,27 @@ def build_front_prompt(spec):
         "Hands actively engaged. Not hanging freely at sides. "
         "No hands in back pockets. No hands in hoodie pocket. "
 
-        f"Scene: {spec['scene']}. "
+        "Use only this exact close front-view scene: "
+        f"{spec['scene']}. "
+
         f"Pose: {spec['pose']}. "
     ) + uid
 
 
-# ---------------- ПРОМПТ СЗАДИ ----------------
+# ---------------- BACK PROMPT ----------------
 
 def build_back_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
         "Ultra-realistic RAW 9:16 photograph. "
+        "STRICT BACK VIEW LONG SHOT ONLY. "
+        "This image is only for a rear-view environmental shot. "
+        "The subject is seen fully from behind. "
+        "Never use close front-view scene logic. "
+        "Never use close-up wall portrait composition, close car-door portrait setup, close vehicle-side fashion shot, "
+        "or any scene intended for a front-facing close image. "
+
         "Real photo taken on location. "
         "Sony A7R V, 35mm, f/8, ISO 400. "
         "Camera at 1.6m height. Straight forward. Parallel to ground. "
@@ -293,7 +307,8 @@ def build_back_prompt(spec):
         "At least 20 percent of frame is ground below feet. "
         "Do not crop at ankles or shins. "
         "Subject is 10-15 percent of frame height. "
-        "Person is small but readable in large environment. "
+        "Person is small but clearly readable in a large environment. "
+        "Environment dominates the frame. "
 
         "EVERYTHING IN FOCUS. f/8. No blur. No bokeh. "
         "Foreground, subject, background all sharp. "
@@ -305,14 +320,19 @@ def build_back_prompt(spec):
         "Wide silhouette visible from 20 meters. "
         "Wide at thighs, knees, calves. Not slim. Not tapered. "
 
-        "Black hoodie. No pocket. Hood up. Face hidden. Seen from behind. "
+        "Black hoodie. No pocket. Hood up. Face hidden. Seen from behind only. "
 
         "No passive pose. "
         "No hands in back pockets of jeans. "
         "Hands must interact with the hood or rest behind the head on the nape only. "
         "If walking, one arm may move naturally with stride. "
 
-        f"Scene: {spec['scene']}. "
+        "Never place the subject on a car traffic lane or roadway. "
+        "Use only pedestrian surfaces, parking surfaces, staircase, courtyard, covered walkway, or bridge walkway. "
+
+        "Use only this exact back-view environment: "
+        f"{spec['scene']}. "
+
         f"Pose: {spec['pose']}. "
     ) + uid
 
@@ -343,8 +363,10 @@ def submit_job(prompt, image_url):
 
     data = response.json()
     job_id = data.get("id") or data.get("task_id")
+
     if not job_id:
         raise Exception(f"Polza error: {data}")
+
     return job_id
 
 
@@ -383,6 +405,7 @@ async def poll_job(job_id):
 
         data = response.json()
         url = extract_url(data)
+
         if url and "ibb.co" not in url:
             return url
 
@@ -392,6 +415,7 @@ async def poll_job(job_id):
 async def download_image(url, path):
     response = await asyncio.to_thread(requests.get, url, timeout=60)
     os.makedirs(SAVE_DIR, exist_ok=True)
+
     with open(path, "wb") as f:
         f.write(response.content)
 
@@ -406,6 +430,7 @@ async def generate_all_photos():
         prompt = build_front_prompt(spec) if spec["side"] == "front" else build_back_prompt(spec)
         job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
         job_ids.append(job_id)
+
         if i < len(specs) - 1:
             await asyncio.sleep(3)
 
@@ -425,6 +450,7 @@ async def regenerate_photo(index, current_specs):
     spec = get_next_spec(side)
 
     prompt = build_front_prompt(spec) if side == "front" else build_back_prompt(spec)
+
     job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
     url = await poll_job(job_id)
 
