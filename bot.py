@@ -30,10 +30,16 @@ USER_DATA_FILE = "user_data.json"
 GRAPHQL_URL = "https://api.buffer.com/graphql"
 
 POV_PHRASES = [
-    "POV: аура того самого парня",
-    "POV: дисциплина и характер",
-    "POV: энергия уверенности",
-    "POV: спокойствие и контроль"
+    "POV: аура того самого парня который просто делает свое дело =>",
+    "POV: твой парень воздуха и это буквально его аура =>",
+    "POV: тот самый тип который летом начинает вставать в 6 утра, работать над собой =>",
+    "POV: худи для парней чья аура ощущается буквально так =>",
+    "POV: лучшее худи для твоего парня воздухана =>",
+    "POV: аура того самого кента который все время занят =>",
+    "POV: тот самый кент у которого на уме только тренировки и бизнес =>",
+    "POV: когда твоя аура говорит громче чем твои слова =>",
+    "POV: аура того самого кента который всегда на движе и в делах =>",
+    "POV: тот самый тип который делает результат пока другие спят =>"
 ]
 
 
@@ -41,11 +47,9 @@ POV_PHRASES = [
 
 def load_user_data():
     global USER_DATA
-
     if not os.path.exists(USER_DATA_FILE):
         USER_DATA = {}
         return
-
     try:
         with open(USER_DATA_FILE, "r", encoding="utf-8") as f:
             USER_DATA = json.load(f)
@@ -63,10 +67,8 @@ def save_user_data():
 
 def get_user_storage(user_id):
     user_id = str(user_id)
-
     if user_id not in USER_DATA:
         USER_DATA[user_id] = {}
-
     return USER_DATA[user_id]
 
 
@@ -89,57 +91,34 @@ async def graphql_request(api_key, query, variables=None):
                 "variables": variables or {}
             }
         )
-
     try:
         data = response.json()
     except Exception:
         raise Exception(f"Buffer вернул не JSON: {response.text}")
-
     if response.status_code >= 400:
         raise Exception(f"Buffer ошибка {response.status_code}: {data}")
-
     if "errors" in data:
         raise Exception(f"Buffer GraphQL ошибка: {data['errors']}")
-
     return data.get("data", {})
 
 
 async def get_profiles(api_key):
-    account_query = """
-    {
-      account {
-        organizations {
-          id
-          name
-        }
-      }
-    }
-    """
-
-    account_data = await graphql_request(api_key, account_query)
+    account_data = await graphql_request(
+        api_key, "{ account { organizations { id name } } }"
+    )
     organizations = account_data.get("account", {}).get("organizations", [])
-
     if not organizations:
         raise Exception("У аккаунта Buffer нет организаций")
-
     org_id = organizations[0]["id"]
 
     channels_query = """
     query GetChannels($input: ChannelsInput!) {
-      channels(input: $input) {
-        id
-        name
-        service
-      }
+      channels(input: $input) { id name service }
     }
     """
-
     channels_data = await graphql_request(
-        api_key,
-        channels_query,
-        {"input": {"organizationId": org_id}}
+        api_key, channels_query, {"input": {"organizationId": org_id}}
     )
-
     profiles = []
     for ch in channels_data.get("channels", []):
         profiles.append({
@@ -147,7 +126,6 @@ async def get_profiles(api_key):
             "service": ch.get("service", "unknown"),
             "formatted_username": ch.get("name") or ch.get("id"),
         })
-
     return profiles
 
 
@@ -156,33 +134,16 @@ async def send_to_buffer(api_key, profile_id, image_urls, caption):
     mutation CreatePost($input: CreatePostInput!) {
       createPost(input: $input) {
         __typename
-        ... on PostActionSuccess {
-          post {
-            id
-          }
-        }
-        ... on InvalidInputError {
-          message
-        }
-        ... on NotFoundError {
-          message
-        }
-        ... on UnauthorizedError {
-          message
-        }
-        ... on UnexpectedError {
-          message
-        }
-        ... on RestProxyError {
-          message
-        }
-        ... on LimitReachedError {
-          message
-        }
+        ... on PostActionSuccess { post { id } }
+        ... on InvalidInputError { message }
+        ... on NotFoundError { message }
+        ... on UnauthorizedError { message }
+        ... on UnexpectedError { message }
+        ... on RestProxyError { message }
+        ... on LimitReachedError { message }
       }
     }
     """
-
     variables = {
         "input": {
             "channelId": profile_id,
@@ -194,15 +155,11 @@ async def send_to_buffer(api_key, profile_id, image_urls, caption):
             }
         }
     }
-
     data = await graphql_request(api_key, mutation, variables)
     result = data.get("createPost", {})
-
     typename = result.get("__typename", "")
-
     if typename != "PostActionSuccess":
-        raise Exception(result.get("message", f"Неизвестная ошибка Buffer: {typename}"))
-
+        raise Exception(result.get("message", f"Buffer ошибка: {typename}"))
     return True
 
 
@@ -222,6 +179,10 @@ def build_ai_keyboard(user_id, count):
             for i in range(count)
         ]
         rows.append(regen_buttons)
+
+    rows.append([
+        InlineKeyboardButton("🔄 Фраза", callback_data="regen_caption")
+    ])
 
     if buffer_connected:
         rows.append([
@@ -244,7 +205,6 @@ def build_ai_keyboard(user_id, count):
 
 def build_start_keyboard(user_id):
     storage = get_user_storage(user_id)
-
     buffer_connected = bool(
         storage.get("buffer_api_key") and storage.get("buffer_profile_id")
     )
@@ -269,29 +229,24 @@ def build_start_keyboard(user_id):
 
 # ---------------- SEND MEDIA ----------------
 
-async def send_single_photo(context, user_id, path):
-    with open(path, "rb") as f:
-        await context.bot.send_photo(chat_id=user_id, photo=f)
+async def send_media(context, user_id, paths):
+    valid_paths = [p for p in paths if p and os.path.exists(p)]
+    if not valid_paths:
+        raise Exception("Файлы не найдены")
 
-
-async def send_media_group_chunk(context, user_id, chunk_paths):
     opened_files = []
-
     try:
-        if len(chunk_paths) == 1:
-            f = open(chunk_paths[0], "rb")
+        if len(valid_paths) == 1:
+            f = open(valid_paths[0], "rb")
             opened_files.append(f)
             await context.bot.send_photo(chat_id=user_id, photo=f)
-            return
-
-        media = []
-        for path in chunk_paths:
-            f = open(path, "rb")
-            opened_files.append(f)
-            media.append(InputMediaPhoto(f))
-
-        await context.bot.send_media_group(chat_id=user_id, media=media)
-
+        else:
+            media = []
+            for path in valid_paths:
+                f = open(path, "rb")
+                opened_files.append(f)
+                media.append(InputMediaPhoto(f))
+            await context.bot.send_media_group(chat_id=user_id, media=media)
     finally:
         for f in opened_files:
             try:
@@ -300,23 +255,10 @@ async def send_media_group_chunk(context, user_id, chunk_paths):
                 pass
 
 
-async def send_media(context, user_id, paths):
-    valid_paths = [p for p in paths if p and os.path.exists(p)]
-
-    if not valid_paths:
-        raise Exception("Файлы не найдены")
-
-    # Telegram media group: максимум 10 файлов
-    for i in range(0, len(valid_paths), 10):
-        chunk = valid_paths[i:i + 10]
-        await send_media_group_chunk(context, user_id, chunk)
-
-
 # ---------------- START / MENU ----------------
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
-
     await update.message.reply_text(
         "Выберите режим:",
         reply_markup=build_start_keyboard(user_id)
@@ -326,16 +268,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def go_start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-
     user_id = query.from_user.id
-
     await query.message.reply_text(
         "Выберите режим:",
         reply_markup=build_start_keyboard(user_id)
     )
 
 
-# ---------------- SLIDES MODE ----------------
+# ---------------- SLIDES ----------------
 
 async def generate_slides(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -354,8 +294,6 @@ async def generate_slides(update: Update, context: ContextTypes.DEFAULT_TYPE):
         storage["paths"] = paths
         storage["caption"] = caption
         storage["mode"] = "slides"
-
-        # Для слайдов убираем urls Buffer, чтобы случайно не отправить старые AI-фото
         storage.pop("urls", None)
         storage.pop("specs", None)
         save_user_data()
@@ -374,7 +312,7 @@ async def generate_slides(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 
-# ---------------- AI MODE ----------------
+# ---------------- AI GENERATION ----------------
 
 async def background_ai_generate(context, user_id):
     try:
@@ -399,7 +337,7 @@ async def background_ai_generate(context, user_id):
 
         await context.bot.send_message(
             chat_id=user_id,
-            text="✅ AI фотосессия готова",
+            text=f"✅ AI фотосессия готова\n\n{storage['caption']}",
             reply_markup=build_ai_keyboard(user_id, len(paths))
         )
 
@@ -413,7 +351,6 @@ async def background_ai_generate(context, user_id):
 async def ai_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-
     user_id = query.from_user.id
 
     await query.edit_message_text("⏳ Запуск AI генерации...")
@@ -422,6 +359,36 @@ async def ai_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         background_ai_generate(context, user_id)
     )
 
+
+# ---------------- REGEN CAPTION ----------------
+
+async def regen_caption_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    user_id = query.from_user.id
+    storage = get_user_storage(user_id)
+
+    old_caption = storage.get("caption", "")
+
+    new_caption = old_caption
+    for _ in range(20):
+        candidate = get_random_caption()
+        if candidate != old_caption:
+            new_caption = candidate
+            break
+
+    storage["caption"] = new_caption
+    save_user_data()
+
+    await context.bot.send_message(
+        chat_id=user_id,
+        text=f"🔄 Новая фраза:\n\n{new_caption}",
+        reply_markup=build_ai_keyboard(user_id, len(storage.get("paths", [])))
+    )
+
+
+# ---------------- REGEN PHOTO ----------------
 
 async def regen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -464,21 +431,20 @@ async def regen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         storage["paths"][index] = new_path
         storage["specs"][index] = new_spec
         storage["urls"][index] = new_url
-        storage["mode"] = "ai"
         save_user_data()
 
         await send_media(context, user_id, storage["paths"])
 
         await context.bot.send_message(
             chat_id=user_id,
-            text="✅ Фото обновлены",
+            text=f"✅ Фото обновлены\n\n{storage['caption']}",
             reply_markup=build_ai_keyboard(user_id, len(storage["paths"]))
         )
 
     except Exception as e:
         await context.bot.send_message(
             chat_id=user_id,
-            text=f"❌ Ошибка перегенерации: {e}"
+            text=f"❌ Ошибка: {e}"
         )
 
 
@@ -500,8 +466,7 @@ async def buffer_connect_handler(update: Update, context: ContextTypes.DEFAULT_T
             "Как получить токен:\n"
             "1. Зайди в Buffer\n"
             "2. Открой настройки / developer app\n"
-            "3. Скопируй Access Token\n\n"
-            "После этого я привяжу твой Buffer."
+            "3. Скопируй Access Token"
         )
     )
 
@@ -520,7 +485,7 @@ async def buffer_token_message_handler(update: Update, context: ContextTypes.DEF
     storage["awaiting_buffer_token"] = False
     save_user_data()
 
-    await update.message.reply_text("⏳ Проверяю Buffer token...")
+    await update.message.reply_text("⏳ Проверяю Buffer токен...")
 
     try:
         profiles = await get_profiles(token)
@@ -528,7 +493,7 @@ async def buffer_token_message_handler(update: Update, context: ContextTypes.DEF
         if not profiles:
             await update.message.reply_text(
                 "❌ У Buffer аккаунта не найдено профилей.\n"
-                "Сначала подключи хотя бы одну соцсеть в Buffer."
+                "Сначала подключи соцсеть в Buffer."
             )
             return
 
@@ -556,7 +521,7 @@ async def buffer_token_message_handler(update: Update, context: ContextTypes.DEF
         )
 
     except Exception as e:
-        await update.message.reply_text(f"❌ Не удалось привязать Buffer: {e}")
+        await update.message.reply_text(f"❌ Ошибка привязки Buffer: {e}")
 
 
 # ---------------- BUFFER SEND ----------------
@@ -583,7 +548,7 @@ async def buffer_send_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     if storage.get("mode") != "ai":
         await context.bot.send_message(
             chat_id=user_id,
-            text="❌ В Buffer можно отправлять только AI фотосессию, потому что для слайдов нет публичных URL"
+            text="❌ В Buffer можно отправить только AI фотосессию"
         )
         return
 
@@ -626,7 +591,7 @@ async def buffer_send_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
 
             await context.bot.send_message(
                 chat_id=user_id,
-                text="❌ Токен Buffer недействителен. Привяжи Buffer заново."
+                text="❌ Токен Buffer недействителен. Привяжи заново."
             )
             return
 
@@ -644,17 +609,14 @@ def main():
     app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
-
     app.add_handler(CallbackQueryHandler(go_start_handler, pattern="^go_start$"))
     app.add_handler(CallbackQueryHandler(generate_slides, pattern="^slides$"))
     app.add_handler(CallbackQueryHandler(ai_handler, pattern="^ai$"))
+    app.add_handler(CallbackQueryHandler(regen_caption_handler, pattern="^regen_caption$"))
     app.add_handler(CallbackQueryHandler(regen_handler, pattern="^regen_"))
     app.add_handler(CallbackQueryHandler(buffer_connect_handler, pattern="^buffer_connect$"))
     app.add_handler(CallbackQueryHandler(buffer_send_handler, pattern="^buffer_send$"))
-
-    app.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, buffer_token_message_handler)
-    )
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, buffer_token_message_handler))
 
     print("Бот погнал!")
     app.run_polling()
