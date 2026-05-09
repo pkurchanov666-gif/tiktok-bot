@@ -130,7 +130,7 @@ BACK_SCENES = [
     }
 ]
 
-# ---------------- ПОЗЫ (БЕЗ РУК НИЧЕМ НЕ ЗАНЯТЫХ) ----------------
+# ---------------- ПОЗЫ ----------------
 
 FRONT_POSES = [
     "leaning naturally, right hand resting on upper thigh, "
@@ -159,29 +159,23 @@ FRONT_POSES = [
 ]
 
 BACK_POSES = [
-    "standing facing away, right hand resting on outer thigh, "
-    "left hand resting on lower back",
+    "standing facing away, hood up covering head, right hand resting on outer thigh, "
+    "left arm hanging freely at side",
 
-    "standing facing away, left hand resting on outer thigh, "
-    "right hand resting on lower back",
+    "standing facing away, hood up covering head, left hand resting on outer thigh, "
+    "right arm hanging freely at side",
 
-    "standing facing away, both hands resting on outer thighs, "
-    "posture confident and relaxed",
+    "standing facing away, hood up covering head, both hands resting on outer thighs, "
+    "confident athletic posture",
 
-    "walking away, both arms moving naturally with stride, "
-    "shoulders relaxed",
+    "walking away, hood up covering head, both arms swinging naturally with stride, "
+    "relaxed walking pace",
 
-    "walking away, right arm swinging naturally with stride, "
-    "left hand resting on outer thigh",
+    "walking away, hood up covering head, right hand behind head on back of neck above shoulders, "
+    "left arm swinging freely with stride",
 
-    "walking away, left arm swinging naturally with stride, "
-    "right hand resting on outer thigh",
-
-    "walking away, both arms in natural movement with stride, "
-    "head facing forward",
-
-    "walking away with confident stride, arms swinging naturally, "
-    "relaxed confident posture"
+    "walking away, hood up covering head, left hand behind head on back of neck above shoulders, "
+    "right arm swinging freely with stride"
 ]
 
 
@@ -304,6 +298,11 @@ def build_back_prompt(spec):
         "f/4 depth of field ensures everything is in perfect focus. "
         "No blur, no bokeh, no soft areas. Unified sharp photograph. "
 
+        "HOODIE AND HEAD: "
+        "Black hoodie with hood UP covering the head completely. "
+        "Hood is pulled up covering head and back of neck. "
+        "Face is not visible, only back view. "
+
         "BACKGROUND DETAIL: "
         "Every element must be sharp and detailed: "
         "- Architecture: brick facades, clean lines, contemporary style clearly visible "
@@ -313,11 +312,12 @@ def build_back_prompt(spec):
         "- Urban elements: parking, courtyard, bridge details all crisp "
         "- Sky: natural atmospheric detail sharp "
 
-        "Subject: black hoodie, hood down, back view. "
+        "Subject: black hoodie with hood up, back view. "
         "Black wide-leg denim with visible texture. "
-        "Hands actively engaged - resting on thighs or back, or swinging naturally. "
-        "NO hands in pockets, NO hands in back pockets of jeans. "
-        "Arms always active or moving naturally with stride. "
+        "ABSOLUTELY NO HANDS IN ANY POCKETS. "
+        "Hands either resting freely at sides, on outer thighs, or behind head above neck. "
+        "Arms always visible and active or naturally swinging with stride. "
+        "No hidden hands. No pockets. No concealed arms. "
 
         f"Lighting: {spec['light']}. "
         "Soft natural light, even across entire scene, no harsh shadows. "
