@@ -80,13 +80,6 @@ BACK_SCENES = [
         "light": "soft natural daylight, sharp detailed light across entire street"
     },
     {
-        "scene": "walking through upscale neighborhood street, "
-                 "person small in frame, modern brick buildings with clean lines, "
-                 "high-end residential area, polished pavement, contemporary style, "
-                 "expensive but understated aesthetic",
-        "light": "soft natural daylight, sharp detailed illumination"
-    },
-    {
         "scene": "walking through underground parking structure, "
                  "person small in frame, modern concrete parking garage, "
                  "clean polished floor, organized parking spaces with cars, "
@@ -115,10 +108,10 @@ BACK_SCENES = [
         "light": "soft natural daylight, sharp detailed light across waterfront"
     },
     {
-        "scene": "standing on rooftop of skyscraper near glass railings, "
+        "scene": "standing on rooftop of skyscraper with clean sky view, "
                  "person small in frame, rooftop level with modern glass railings, "
-                 "contemporary architecture visible, city view below, "
-                 "high elevation, clean urban skyline, professional setting",
+                 "only blue sky and rooftop edges visible, no other buildings, "
+                 "high elevation, open clean skyline, professional setting",
         "light": "soft natural daylight, sharp detailed light across rooftop"
     },
     {
@@ -127,10 +120,17 @@ BACK_SCENES = [
                  "upscale neighborhood, clean modern design, expensive aesthetic, "
                  "no excess, sophisticated urban environment",
         "light": "soft natural daylight, sharp detailed illumination"
+    },
+    {
+        "scene": "walking through modern residential complex courtyard, "
+                 "person small in frame, contemporary apartment buildings with glass facades, "
+                 "sleek metal railings and modern design elements, clean minimalist courtyard, "
+                 "polished pavement with visible texture, sharp architectural details",
+        "light": "soft natural daylight, sharp detailed light across courtyard"
     }
 ]
 
-# ---------------- ПОЗЫ ----------------
+# ---------------- ПОЗЫ (БЕЗ РУК НИЧЕМ НЕ ЗАНЯТЫХ) ----------------
 
 FRONT_POSES = [
     "leaning naturally, right hand resting on upper thigh, "
@@ -142,9 +142,6 @@ FRONT_POSES = [
     "leaning naturally, left hand resting on upper thigh, "
     "right hand resting on lower back",
 
-    "leaning naturally, both hands resting on thighs, "
-    "shoulders relaxed and confident",
-
     "leaning naturally, right hand resting on hip, "
     "left hand resting on upper thigh",
 
@@ -155,15 +152,18 @@ FRONT_POSES = [
     "right hand resting on hip",
 
     "leaning naturally, right hand resting on hip, "
-    "left hand resting on upper thigh, chin slightly down"
+    "left hand resting on upper thigh, chin slightly down",
+
+    "leaning naturally, both hands resting firmly on thighs, "
+    "shoulders confident, chin level"
 ]
 
 BACK_POSES = [
     "standing facing away, right hand resting on outer thigh, "
-    "left arm relaxed at side",
+    "left hand resting on lower back",
 
     "standing facing away, left hand resting on outer thigh, "
-    "right arm relaxed at side",
+    "right hand resting on lower back",
 
     "standing facing away, both hands resting on outer thighs, "
     "posture confident and relaxed",
@@ -172,15 +172,15 @@ BACK_POSES = [
     "shoulders relaxed",
 
     "walking away, right arm swinging naturally with stride, "
-    "left arm at side",
+    "left hand resting on outer thigh",
 
     "walking away, left arm swinging naturally with stride, "
-    "right arm at side",
+    "right hand resting on outer thigh",
 
     "walking away, both arms in natural movement with stride, "
     "head facing forward",
 
-    "walking away with slight turn, arms moving naturally, "
+    "walking away with confident stride, arms swinging naturally, "
     "relaxed confident posture"
 ]
 
@@ -266,8 +266,8 @@ def build_front_prompt(spec):
 
         "Black wide-leg denim, heavy texture visible. "
 
-        "Hands visible, not touching hood or face. "
-        "Hands rest naturally on thighs or at sides. "
+        "Hands visible, actively engaged with thighs or hips. "
+        "Hands rest naturally on thighs or hip. "
         "Natural confident posture. "
 
         "Background sharp and detailed. Not blurred. "
@@ -315,9 +315,9 @@ def build_back_prompt(spec):
 
         "Subject: black hoodie, hood down, back view. "
         "Black wide-leg denim with visible texture. "
-        "Hands resting naturally at thighs or swinging with natural movement. "
+        "Hands actively engaged - resting on thighs or back, or swinging naturally. "
         "NO hands in pockets, NO hands in back pockets of jeans. "
-        "Arms hang naturally or move naturally with stride. "
+        "Arms always active or moving naturally with stride. "
 
         f"Lighting: {spec['light']}. "
         "Soft natural light, even across entire scene, no harsh shadows. "
