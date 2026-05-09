@@ -12,6 +12,36 @@ SAVE_DIR = "generations"
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
+# ---------------- 25 ФОНОВ ДЛЯ BACK ФОТО ----------------
+
+BACK_BACKGROUNDS = [
+    "https://i.ibb.co/Q202Tjs/5188269594370577196.jpg",
+    "https://i.ibb.co/bMFggbS5/5188269594370577197.jpg",
+    "https://i.ibb.co/gMqqyZC1/5188269594370577198.jpg",
+    "https://i.ibb.co/vCrrMv6B/5188269594370577199.jpg",
+    "https://i.ibb.co/wNpL22K1/5188269594370577200.jpg",
+    "https://i.ibb.co/MkK2LmcJ/5188269594370577201.jpg",
+    "https://i.ibb.co/tTp0ZZjH/5188269594370577202.jpg",
+    "https://i.ibb.co/ZznnWzL8/5188269594370577203.jpg",
+    "https://i.ibb.co/ksZ5F1PG/5188269594370577204.jpg",
+    "https://i.ibb.co/5g3Cmmys/5188269594370577205.jpg",
+    "https://i.ibb.co/35L07V91/5188269594370577206.jpg",
+    "https://i.ibb.co/5x6GhY2T/5188269594370577207.jpg",
+    "https://i.ibb.co/pvT20qmb/5188269594370577208.jpg",
+    "https://i.ibb.co/SDFDpTXH/5188269594370577209.jpg",
+    "https://i.ibb.co/FkTQGZYj/5188269594370577173.jpg",
+    "https://i.ibb.co/233bJXqc/5188269594370577176.jpg",
+    "https://i.ibb.co/cKLPQcw1/5188269594370577174.jpg",
+    "https://i.ibb.co/C3c4dxN6/5188269594370577175.jpg",
+    "https://i.ibb.co/JjsyBCxw/5188269594370577177.jpg",
+    "https://i.ibb.co/DPgbpSGm/5188269594370577178.jpg",
+    "https://i.ibb.co/Z6TdkrCY/5188269594370577179.jpg",
+    "https://i.ibb.co/8LZDkMZc/5188269594370577180.jpg",
+    "https://i.ibb.co/DFqg1Gg/5188269594370577181.jpg",
+    "https://i.ibb.co/5WMJcgYN/5188269594370577182.jpg",
+    "https://i.ibb.co/jvNW8tD5/5188269594370577183.jpg"
+]
+
 # ---------------- FRONT SCENES ----------------
 
 FRONT_SCENES = [
@@ -69,67 +99,6 @@ FRONT_SCENES = [
     }
 ]
 
-# ---------------- BACK SCENES ----------------
-
-BACK_SCENES = [
-    {
-        "scene": "walking on stylish street with brick-style facade buildings, "
-                 "person small in frame, contemporary architecture with modern brick texture, "
-                 "clean pavement with visible texture, upscale residential street, "
-                 "elegant aesthetic without excess, sharp architectural details",
-        "light": "soft natural daylight, sharp detailed light across entire street"
-    },
-    {
-        "scene": "walking through underground parking structure, "
-                 "person small in frame, modern concrete parking garage, "
-                 "clean polished floor, organized parking spaces with cars, "
-                 "LED ambient lighting, contemporary infrastructure",
-        "light": "soft ambient LED lighting, sharp detailed illumination"
-    },
-    {
-        "scene": "standing in courtyard of construction development, "
-                 "person small in frame, modern residential construction, "
-                 "clean brick-style contemporary buildings, organized courtyard space, "
-                 "new development aesthetic, professional urban setting",
-        "light": "soft natural daylight, sharp detailed light across courtyard"
-    },
-    {
-        "scene": "walking along modern bridge over water, "
-                 "person small in frame, contemporary bridge design with metal railings, "
-                 "water view below, clean bridge pavement, modern minimalist architecture, "
-                 "water reflection details visible",
-        "light": "soft natural daylight, sharp detailed light across bridge"
-    },
-    {
-        "scene": "walking on modern waterfront promenade, "
-                 "person small in frame, contemporary architecture along water, "
-                 "waterfront design with metal railings, polished pavement, "
-                 "water view and urban design, clean aesthetic",
-        "light": "soft natural daylight, sharp detailed light across waterfront"
-    },
-    {
-        "scene": "standing on rooftop of skyscraper with clean sky view, "
-                 "person small in frame, rooftop level with modern glass railings, "
-                 "only blue sky and rooftop edges visible, no other buildings, "
-                 "high elevation, open clean skyline, professional setting",
-        "light": "soft natural daylight, sharp detailed light across rooftop"
-    },
-    {
-        "scene": "walking on elegant street with modern brick architecture, "
-                 "person small in frame, contemporary style with quality brick facade, "
-                 "upscale neighborhood, clean modern design, expensive aesthetic, "
-                 "no excess, sophisticated urban environment",
-        "light": "soft natural daylight, sharp detailed illumination"
-    },
-    {
-        "scene": "walking through modern residential complex courtyard, "
-                 "person small in frame, contemporary apartment buildings with glass facades, "
-                 "sleek metal railings and modern design elements, clean minimalist courtyard, "
-                 "polished pavement with visible texture, sharp architectural details",
-        "light": "soft natural daylight, sharp detailed light across courtyard"
-    }
-]
-
 # ---------------- ПОЗЫ ----------------
 
 FRONT_POSES = [
@@ -183,8 +152,8 @@ BACK_POSES = [
 
 def get_unique_specs():
     specs = []
-    used_scenes = set()
     used_poses = set()
+    used_backgrounds = set()
     sides = ["back", "front", "back"]
 
     for side in sides:
@@ -192,20 +161,20 @@ def get_unique_specs():
             scenes = FRONT_SCENES
             poses = FRONT_POSES
             ref = REF_FRONT
+            bg = None
+            scene_data = random.choice(scenes)
         else:
-            scenes = BACK_SCENES
             poses = BACK_POSES
             ref = REF_BACK
+            scene_data = {"scene": "", "light": "soft natural daylight"}
+            
+            # Выбираем RANDOM фон для BACK фото
+            available_bgs = [b for b in BACK_BACKGROUNDS if b not in used_backgrounds]
+            if not available_bgs:
+                available_bgs = BACK_BACKGROUNDS
+            bg = random.choice(available_bgs)
+            used_backgrounds.add(bg)
 
-        # ВЫБИРАЕМ СЦЕНУ КОТОРАЯ ЕЩЕ НЕ ИСПОЛЬЗОВАЛАСЬ
-        available_scenes = [s for s in scenes if s["scene"][:50] not in used_scenes]
-        if not available_scenes:
-            available_scenes = scenes
-        
-        scene_data = random.choice(available_scenes)
-        used_scenes.add(scene_data["scene"][:50])
-
-        # ВЫБИРАЕМ ПОЗУ КОТОРАЯ ЕЩЕ НЕ ИСПОЛЬЗОВАЛАСЬ
         available_poses = [p for p in poses if p not in used_poses]
         if not available_poses:
             available_poses = poses
@@ -215,11 +184,12 @@ def get_unique_specs():
 
         specs.append({
             "side": side,
-            "scene": scene_data["scene"],
-            "light": scene_data["light"],
+            "scene": scene_data.get("scene", ""),
+            "light": scene_data.get("light", "soft natural daylight"),
             "pose": pose,
             "seed": random.randint(100000, 999999),
-            "ref": ref
+            "ref": ref,
+            "background": bg
         })
 
     return specs
@@ -231,11 +201,12 @@ def build_front_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
-        "Ultra-realistic 9:16 professional fashion photograph. "
-        "Front facing shot. "
+        "Ultra-realistic RAW 9:16 professional fashion photograph. "
+        "STRICT FRONT VIEW CLOSE SHOT ONLY. "
         "Sony A7R V, 35mm lens, f/4, ISO 200. "
         "Camera at eye level, 1.5 meters from subject. "
         "Framing from head to knees. Subject 70-75 percent of frame. "
+        "Subject facing camera directly. "
 
         "CRITICAL - CHEST LOGO RENDERING: "
         "Chest logo must be EXTREMELY SHARP and PERFECTLY CLEAR. "
@@ -248,15 +219,15 @@ def build_front_prompt(spec):
 
         "HOODIE SPECIFICATIONS: "
         "Premium black hoodie, completely flat clean front. "
-        "No front pocket, no kangaroo pouch, no zipper. "
+        "No front pocket, no kangaroo pouch, no zipper, no drawstrings. "
         "Only the chest logo visible on front. "
 
         "Sharp focus throughout - subject and background equally sharp. "
         "No blur, no bokeh. One unified photograph. "
 
         "Subject leans or stands against environment naturally. "
-        "Visible contact with surface: wall, car, or railing. "
-        "Not floating. Part of the location. "
+        "Visible physical contact with surface: wall, car, or railing. "
+        "NOT floating. NOT cut out. Part of the location. "
 
         "Black wide-leg denim, heavy texture visible. "
 
@@ -264,8 +235,8 @@ def build_front_prompt(spec):
         "Hands rest naturally on thighs or hip. "
         "Natural confident posture. "
 
-        "Background sharp and detailed. Not blurred. "
-        "Architecture, pavement, car details all clear. "
+        "Background sharp and detailed. NOT blurred. "
+        "Architecture, pavement, car details all clearly visible. "
 
         f"Lighting: {spec['light']}. "
         "Soft natural light, no harsh shadows, no flash. "
@@ -273,6 +244,9 @@ def build_front_prompt(spec):
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
+
+        "Generate an ultra-realistic professional fashion photograph. "
+        "Everything sharp. Everything real. Professional quality."
     ) + uid
 
 
@@ -282,62 +256,93 @@ def build_back_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
-        "Ultra-realistic 9:16 professional photograph. "
-        "Back view shot in modern urban environment. "
-        "Sony A7R V, 35mm, f/4, ISO 400. "
-        "Camera at 1.6m height, straight forward, parallel to ground. "
+        "Ultra-realistic RAW 9:16 professional environmental photograph. "
+        "Back view shot integrated into the provided background location. "
+        "Evening or golden hour time of day. Realistic warm evening atmosphere. "
 
-        "Camera 25-30 meters from subject. "
-        "Full body visible, feet on ground. "
-        "Ground visible 30 percent of frame below feet. "
-        "Subject 8-12 percent of frame height - small but clear. "
-        "Environment dominates, subject is focal point. "
+        "CRITICAL INSTRUCTION - SCALE AND HUMAN PROPORTIONS: "
+        "The subject MUST be placed at CORRECT HUMAN SCALE. "
+        "Subject height must be proportional to: "
+        "- Standard door height = 2.1 meters "
+        "- Standard window height = 1.5 meters "
+        "- Standard railing height = 1.2 meters "
+        "- Standard bench height = 0.5 meters "
+        "- Ground features and step dimensions "
+        "Subject must appear to be a NORMAL ADULT HUMAN (1.75 meters tall). "
+        "NOT a giant filling the frame. NOT a tiny dwarf. HUMAN SCALE. "
+        "Head approximately 1/7 of total body height. "
+        "Torso approximately 1/3 of body. Legs approximately 1/2 of body. "
+        "Proportions must match real human anatomy exactly. "
 
-        "SHARP FOCUS THROUGHOUT: "
-        "Sharp focus everywhere - foreground, subject, background all equally sharp. "
-        "f/4 depth of field ensures everything is in perfect focus. "
-        "No blur, no bokeh, no soft areas. Unified sharp photograph. "
+        "CRITICAL INSTRUCTION - BACKGROUND INTEGRATION: "
+        "The subject must be naturally and realistically placed within the exact location "
+        "shown in the provided background reference image. "
+        "Subject is authentically PART of this environment, not floating, not composited. "
+        "Match ALL lighting, perspective, depth and atmospheric conditions from background. "
 
-        "HOODIE AND HEAD: "
-        "Black hoodie with hood UP covering the head completely. "
-        "Hood is pulled up covering head and back of neck. "
-        "Face is not visible, only back view. "
+        "Subject Positioning: "
+        "Place subject in CENTER-MID area of frame, naturally integrated. "
+        "Subject scale: 10-15 percent of frame height (correct human size, not tiny, not giant). "
+        "Full body visible from head to feet, standing or walking naturally. "
+        "Feet MUST clearly touch the ground surface visible in background. "
+        "Subject must cast REALISTIC SHADOWS matching background's light direction and time of day. "
+        "Perspective and depth MUST match background photograph exactly. "
 
-        "BACKGROUND DETAIL: "
-        "Every element must be sharp and detailed: "
-        "- Architecture: brick facades, clean lines, contemporary style clearly visible "
-        "- Pavement: texture visible, lines sharp, quality surface "
-        "- Railings: metal details with sharp reflections "
-        "- Water features: reflections and edges sharp "
-        "- Urban elements: parking, courtyard, bridge details all crisp "
-        "- Sky: natural atmospheric detail sharp "
+        "Subject Appearance: "
+        "Black hoodie with hood UP covering head completely. "
+        "Face completely hidden, BACK VIEW ONLY. "
+        "Black wide-leg baggy denim jeans, heavy texture visible. "
+        "Hands visible: either at sides, on thighs, or behind head above neck. "
+        "ABSOLUTELY NO hands in pockets, NO hidden arms, NO denim pockets. "
+        "Natural confident posture appropriate for location and movement. "
 
-        "Subject: black hoodie with hood up, back view. "
-        "Black wide-leg denim with visible texture. "
-        "ABSOLUTELY NO HANDS IN ANY POCKETS. "
-        "Hands either resting freely at sides, on outer thighs, or behind head above neck. "
-        "Arms always visible and active or naturally swinging with stride. "
-        "No hidden hands. No pockets. No concealed arms. "
+        "Lighting Integration - EVENING/GOLDEN HOUR: "
+        "This is an EVENING or GOLDEN HOUR photograph - warm evening light. "
+        "Match exact lighting conditions from background photograph. "
+        "Subject must be lit CONSISTENTLY with background environment. "
+        "Shadows, highlights and COLOR TEMPERATURE must match background exactly. "
+        "Light source direction MUST match background's light angle. "
+        "EVENING LIGHT creates LONGER SHADOWS - render these REALISTICALLY on ground. "
+        "Color temperature: WARM GOLDEN/AMBER TONES for evening atmosphere. "
+        "No artificial lighting. No flash. No studio setup. "
+        "Light behaves realistically across subject, ground and surroundings. "
 
-        f"Lighting: {spec['light']}. "
-        "Soft natural light, even across entire scene, no harsh shadows. "
-        "Light illuminates every detail equally. "
+        "Photography Quality: "
+        "Sharp focus throughout entire image. "
+        "Subject and background equally sharp and detailed. "
+        "No blur. No bokeh. No selective focus. "
+        "ONE unified realistic photograph. "
+        "Ultra-realistic seamless integration, NOT composited or artificial. "
+        "Looks like real photograph taken at location, NOT CGI or edited composite. "
 
-        "Setting: Modern urban streets, upscale neighborhoods, contemporary design. "
-        "Clean aesthetic, professional environment. "
+        "HUMAN SCALE VERIFICATION CHECKLIST: "
+        "[ ] Subject height proportional to doors, windows, railings? YES "
+        "[ ] Subject appears NORMAL ADULT SIZE? YES "
+        "[ ] NOT scaled as giant? YES "
+        "[ ] NOT scaled as tiny figure? YES "
+        "[ ] Head to body proportions correct? YES "
+        "[ ] Feet clearly on ground? YES "
+        "[ ] Realistic human anatomy? YES "
 
-        f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
 
-        "Professional environmental photography. "
-        "Background rendered with extreme clarity and definition. "
+        "Generate a natural realistic evening photograph where the subject is authentically "
+        "integrated into the exact location shown in the provided background image, "
+        "at CORRECT HUMAN SCALE with realistic proportions, "
+        "with realistic evening lighting and shadows. "
+        "Result must look like a single real photograph taken at that location in the evening. "
+        "NOT a composite. NOT digital manipulation. REAL PHOTOGRAPH."
     ) + uid
 
 
 # ---------------- POLZA ----------------
 
-def submit_job(prompt, image_url):
+def submit_job(prompt, image_url, background_url=None):
     polza_key = os.getenv("POLZA_API_KEY")
+
+    images = [{"type": "url", "data": image_url}]
+    if background_url:
+        images.append({"type": "url", "data": background_url})
 
     response = requests.post(
         "https://polza.ai/api/v1/media",
@@ -351,7 +356,7 @@ def submit_job(prompt, image_url):
                 "prompt": prompt,
                 "aspect_ratio": "9:16",
                 "image_resolution": "1K",
-                "images": [{"type": "url", "data": image_url}]
+                "images": images
             },
             "async": True
         },
@@ -431,7 +436,7 @@ async def poll_job(job_id, retry_count=0, max_retries=3):
             status = str(data.get("status", "")).lower()
 
             logger.info(
-                f"[POLZA] job={job_id} waited={waited}s status={status} keys={list(data.keys())}"
+                f"[POLZA] job={job_id} waited={waited}s status={status}"
             )
 
             if status in {"failed", "error", "canceled", "cancelled"}:
@@ -439,7 +444,7 @@ async def poll_job(job_id, retry_count=0, max_retries=3):
                 logger.error(f"[POLZA] Job failed: {error_msg}")
                 
                 if "BAD_GATEWAY" in error_msg and retry_count < max_retries:
-                    logger.info(f"[POLZA] Retrying job (attempt {retry_count + 1}/{max_retries})")
+                    logger.info(f"[POLZA] Retrying...")
                     await asyncio.sleep(10)
                     return None
                 
@@ -447,15 +452,15 @@ async def poll_job(job_id, retry_count=0, max_retries=3):
 
             url = extract_url(data)
             if url:
-                logger.info(f"[POLZA] url: {url}")
+                logger.info(f"[POLZA] Generated: {url}")
                 return url
 
         except Exception as e:
             if "failed" in str(e).lower():
                 raise
-            logger.warning(f"[POLZA] poll error job={job_id}: {e}")
+            logger.warning(f"[POLZA] Poll error: {e}")
 
-    raise Exception(f"Timeout {max_wait}s. Last: {last_data}")
+    raise Exception(f"Timeout {max_wait}s")
 
 
 async def download_image(url, path):
@@ -473,12 +478,17 @@ async def generate_all_photos():
     max_job_retries = 3
 
     for i, spec in enumerate(specs):
-        prompt = build_front_prompt(spec) if spec["side"] == "front" else build_back_prompt(spec)
+        if spec["side"] == "front":
+            prompt = build_front_prompt(spec)
+            bg_url = None
+        else:
+            prompt = build_back_prompt(spec)
+            bg_url = spec["background"]
         
         job_id = None
         for attempt in range(max_job_retries):
             try:
-                job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
+                job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"], bg_url)
                 if job_id:
                     break
             except Exception as e:
@@ -487,19 +497,19 @@ async def generate_all_photos():
                     await asyncio.sleep(5)
         
         if not job_id:
-            logger.error(f"[SUBMIT] Failed to submit job for spec {i} after {max_job_retries} attempts")
+            logger.error(f"[SUBMIT] Failed for spec {i}")
             continue
         
         job_ids.append(job_id)
         if i < len(specs) - 1:
-            await asyncio.sleep(5)
+            await asyncio.sleep(3)
 
     urls = await asyncio.gather(*[poll_job(job_id) for job_id in job_ids], return_exceptions=True)
 
     paths = []
     for index, url in enumerate(urls):
         if isinstance(url, Exception):
-            logger.error(f"[DOWNLOAD] Failed to get URL for index {index}: {url}")
+            logger.error(f"[DOWNLOAD] Failed for index {index}: {url}")
             continue
         if not url:
             logger.warning(f"[DOWNLOAD] No URL for index {index}")
@@ -510,112 +520,83 @@ async def generate_all_photos():
             await download_image(url, path)
             paths.append(path)
         except Exception as e:
-            logger.error(f"[DOWNLOAD] Failed to download image {index}: {e}")
+            logger.error(f"[DOWNLOAD] Failed: {e}")
 
     return paths, specs, list(urls)
 
 
 async def regenerate_photo(index, current_specs):
-    """Регенерирует фото с другой сценой/позой и новым промптом"""
+    """Регенерирует фото с новым фоном (для BACK) или новой сценой (для FRONT)"""
     
-    logger.info(f"[REGEN] ========== REGENERATE PHOTO {index} ==========")
+    logger.info(f"[REGEN] Photo {index}")
     
     if index < 0 or index >= len(current_specs):
         raise Exception(f"Invalid index {index}")
     
     old_spec = current_specs[index]
     side = old_spec["side"]
-    old_scene = old_spec.get("scene", "")[:50]
-    old_pose = old_spec.get("pose", "")
-
-    logger.info(f"[REGEN] Old side: {side}, Old scene: {old_scene[:30]}...")
 
     if side == "front":
         scenes = FRONT_SCENES
         poses = FRONT_POSES
         ref = REF_FRONT
+        bg = None
+        scene_data = random.choice(scenes)
     else:
-        scenes = BACK_SCENES
         poses = BACK_POSES
         ref = REF_BACK
+        scene_data = {"scene": "", "light": "soft natural daylight"}
+        
+        # Выбираем НОВЫЙ фон (не старый)
+        available_bgs = [b for b in BACK_BACKGROUNDS if b != old_spec.get("background")]
+        if not available_bgs:
+            available_bgs = BACK_BACKGROUNDS
+        bg = random.choice(available_bgs)
 
-    # НАХОДИМ ВСЕ ИСПОЛЬЗОВАННЫЕ СЦЕНЫ В ДРУГИХ ФОТО
-    used_scenes_in_session = set()
-    for i, spec in enumerate(current_specs):
-        if i != index:
-            used_scenes_in_session.add(spec.get("scene", "")[:50])
-
-    # ВЫБИРАЕМ СЦЕНУ КОТОРАЯ:
-    # 1. НЕ СТАРАЯ СЦЕНА ДЛЯ ЭТОГО ФОТО
-    # 2. НЕ ИСПОЛЬЗОВАНА В ДРУГИХ ФОТО СЕССИИ
-    available_scenes = [
-        s for s in scenes 
-        if s["scene"][:50] != old_scene and s["scene"][:50] not in used_scenes_in_session
-    ]
-    
-    if not available_scenes:
-        available_scenes = [s for s in scenes if s["scene"][:50] != old_scene]
-    
-    if not available_scenes:
-        available_scenes = scenes
-
-    scene_data = random.choice(available_scenes)
-
-    # ВЫБИРАЕМ ДРУГУЮ ПОЗУ (не старую)
-    available_poses = [p for p in poses if p != old_pose]
+    available_poses = [p for p in poses if p != old_spec.get("pose")]
     if not available_poses:
         available_poses = poses
     pose = random.choice(available_poses)
 
-    # СОВЕРШЕННО НОВЫЙ SPEC с НОВЫМ seed
     new_spec = {
         "side": side,
-        "scene": scene_data["scene"],
-        "light": scene_data["light"],
+        "scene": scene_data.get("scene", ""),
+        "light": scene_data.get("light", "soft natural daylight"),
         "pose": pose,
         "seed": random.randint(100000, 999999),
-        "ref": ref
+        "ref": ref,
+        "background": bg
     }
 
-    logger.info(f"[REGEN] New side: {side}, New seed: {new_spec['seed']}")
-
-    # Собираем ПОЛНЫЙ промпт
     if side == "front":
-        full_prompt = build_front_prompt(new_spec)
+        prompt = build_front_prompt(new_spec)
+        bg_url = None
     else:
-        full_prompt = build_back_prompt(new_spec)
+        prompt = build_back_prompt(new_spec)
+        bg_url = bg
 
-    prompt_length = len(full_prompt)
-    logger.info(f"[REGEN] Prompt length: {prompt_length}")
-
-    # Отправляем задачу
     try:
-        job_id = await asyncio.to_thread(submit_job, full_prompt, new_spec["ref"])
-        logger.info(f"[REGEN] Job submitted: {job_id}")
+        job_id = await asyncio.to_thread(submit_job, prompt, new_spec["ref"], bg_url)
+        logger.info(f"[REGEN] Job: {job_id}")
     except Exception as e:
         logger.error(f"[REGEN] Submit failed: {e}")
-        raise Exception(f"Failed to submit job: {e}")
+        raise
 
-    # Ждем результата
     try:
         url = await poll_job(job_id)
         if not url:
-            logger.error(f"[REGEN] No URL returned from poll_job")
-            raise Exception("No URL returned from poll_job")
-        logger.info(f"[REGEN] URL received successfully")
+            raise Exception("No URL")
     except Exception as e:
         logger.error(f"[REGEN] Poll failed: {e}")
-        raise Exception(f"Failed to poll job: {e}")
+        raise
 
-    # Скачиваем изображение
     path = os.path.join(SAVE_DIR, f"ai_{int(time.time() * 1000)}_regen_{index}.png")
     try:
         await download_image(url, path)
-        logger.info(f"[REGEN] Downloaded: {path}")
     except Exception as e:
         logger.error(f"[REGEN] Download failed: {e}")
-        raise Exception(f"Failed to download image: {e}")
+        raise
 
-    logger.info(f"[REGEN] ========== COMPLETE ==========")
-
+    current_specs[index] = new_spec
+    
     return path, new_spec, url
