@@ -75,66 +75,64 @@ FRONT_SCENES = [
     }
 ]
 
-# ---------------- BACK SCENES (СОВРЕМЕННЫЕ ЖИЛЫЕ КОМПЛЕКСЫ - БЕЗ ОЗЕЛЕНЕНИЯ) ----------------
+# ---------------- BACK SCENES (НАБЕРЕЖНАЯ И СОВРЕМЕННЫЕ ЗДАНИЯ) ----------------
 
 BACK_SCENES = [
     {
-        "scene": "walking through modern residential complex courtyard, "
-                 "person small in frame, contemporary apartment buildings with sharp architectural details, "
-                 "clean minimalist courtyard with polished stone pavement, modern metal railings, "
-                 "contemporary design with no vegetation, sharp details everywhere",
-        "light": "soft natural daylight, sharp detailed light across entire courtyard"
+        "scene": "walking along modern waterfront promenade, "
+                 "person small in frame, contemporary residential tower with sharp glass facades, "
+                 "sleek metal railings along promenade, polished stone pavement with visible texture, "
+                 "water view on one side, modern architecture on other side, clean minimalist design",
+        "light": "soft natural daylight, sharp detailed light across entire waterfront"
     },
     {
-        "scene": "standing in residential complex entrance area, "
-                 "person small in frame, modern apartment tower with sharp glass and metal facades, "
-                 "clean granite or marble pavement with visible lines, minimalist architecture, "
-                 "entrance canopy with sharp reflections, contemporary design",
-        "light": "soft natural daylight, sharp detailed illumination across entrance"
+        "scene": "walking on waterfront plaza near modern residential building, "
+                 "person small in frame, contemporary tower with sharp window grid pattern, "
+                 "clean stone pavement with visible lines, modern metal railings, "
+                 "water and sky visible, contemporary design aesthetic",
+        "light": "soft diffused daylight, sharp detailed illumination across plaza and building"
     },
     {
-        "scene": "walking through plaza of modern residential building, "
-                 "person small in frame, contemporary apartment tower with sharp window grid pattern, "
-                 "polished stone plaza with clear texture and lines, steel and glass architectural elements, "
-                 "modern street furniture with sharp edges, no plants or vegetation",
-        "light": "soft diffused daylight, sharp detailed light across plaza and building"
+        "scene": "walking along modern waterfront promenade beside tall glass building, "
+                 "person small in frame, sleek contemporary residential tower with sharp reflections, "
+                 "polished pavement stretches along water, metal railings with sharp details, "
+                 "water view and urban architecture, modern minimalist setting",
+        "light": "soft natural daylight, sharp detailed light across waterfront"
     },
     {
-        "scene": "standing in courtyard of modern apartment complex, "
-                 "person small in frame, contemporary residential building with sharp wall panels, "
-                 "clean minimalist courtyard design with polished concrete or stone, "
-                 "metal railings and modern details with sharp reflections, "
-                 "contemporary minimalist aesthetic",
-        "light": "soft natural daylight, sharp balanced light across courtyard"
-    },
-    {
-        "scene": "walking through central plaza of residential community, "
-                 "person small in frame, modern apartment buildings visible with sharp architectural details, "
-                 "polished stone pavement with visible texture and lines, contemporary design, "
-                 "metal railings and street furniture clearly visible, minimalist aesthetic",
-        "light": "soft diffused daylight, sharp detailed illumination across plaza"
-    },
-    {
-        "scene": "standing in open courtyard of modern residential tower, "
-                 "person small in frame, contemporary building with sharp glass and metal facade details, "
-                 "clean minimalist courtyard with polished pavement, "
-                 "architectural railings with sharp reflections and definition, "
-                 "modern steel and glass elements sharp and detailed",
-        "light": "soft natural daylight, sharp detailed light across complex"
-    },
-    {
-        "scene": "walking through passage between modern residential buildings, "
-                 "person small in frame, contemporary towers with sharp glass window patterns, "
-                 "clean pavement stretches with visible texture and lines, metal railings and details sharp, "
-                 "modern minimalist architecture with sharp reflections, no vegetation",
+        "scene": "walking on pedestrian passage along modern building facade, "
+                 "person small in frame, contemporary glass and steel building with sharp window details, "
+                 "clean polished pavement with visible texture, metal railings clearly visible, "
+                 "modern minimalist architecture, urban professional setting",
         "light": "soft diffused daylight, sharp detailed illumination across passage"
     },
     {
-        "scene": "standing in pedestrian zone of modern residential development, "
-                 "person small in frame, contemporary buildings with sharp facade and window details, "
-                 "polished stone or concrete pavement with clear texture, modern street design, "
-                 "architectural elements and railings with sharp reflections, contemporary aesthetic",
-        "light": "soft natural daylight, sharp detailed light across entire zone"
+        "scene": "walking along waterfront next to contemporary residential tower, "
+                 "person small in frame, modern building with sharp architectural details, "
+                 "sleek metal railings separate waterfront, polished stone ground with texture, "
+                 "water reflections and clean urban design, contemporary aesthetic",
+        "light": "soft natural daylight, sharp detailed light across waterfront area"
+    },
+    {
+        "scene": "walking on modern plaza beside tall contemporary office building, "
+                 "person small in frame, glass facade with sharp window reflections, "
+                 "clean pavement stretches with visible lines and texture, metal railings sharp, "
+                 "contemporary urban architecture, minimalist design",
+        "light": "soft natural daylight, sharp detailed illumination across plaza"
+    },
+    {
+        "scene": "walking along elevated waterfront promenade beside modern tower, "
+                 "person small in frame, contemporary residential building with sharp wall panels, "
+                 "polished pavement with clear texture, modern metal railings with reflections, "
+                 "water view and sky, clean professional urban setting",
+        "light": "soft diffused daylight, sharp detailed light across waterfront"
+    },
+    {
+        "scene": "walking on pedestrian area along contemporary glass building, "
+                 "person small in frame, sleek modern architecture with sharp facade details, "
+                 "polished ground pavement with visible texture, clean urban design, "
+                 "metal railings and architectural elements sharp and defined, waterfront view",
+        "light": "soft natural daylight, sharp detailed illumination across entire area"
     }
 ]
 
@@ -299,7 +297,7 @@ def build_back_prompt(spec):
 
     return (
         "Ultra-realistic 9:16 professional photograph. "
-        "Back view shot in modern residential complex. "
+        "Back view shot on modern waterfront and contemporary buildings. "
         "Sony A7R V, 35mm, f/4, ISO 400. "
         "Camera at 1.6m height, straight forward, parallel to ground. "
 
@@ -316,10 +314,11 @@ def build_back_prompt(spec):
 
         "BACKGROUND DETAIL: "
         "Every element must be sharp and detailed: "
-        "- Building facades: sharp wall panels, glass windows with clear reflections "
-        "- Pavement: texture visible, lines sharp, polished stone or concrete surface "
-        "- Architectural elements: metal railings, columns, edges all sharp and defined "
-        "- Street design: modern minimalist aesthetic with sharp details "
+        "- Building facades: sharp glass windows with reflections, wall panels clearly visible "
+        "- Pavement: polished stone or concrete with visible texture and lines "
+        "- Railings: metal railings with sharp reflections and architectural details "
+        "- Water feature: waterfront, water reflections, edge definition all sharp "
+        "- Architecture: contemporary design elements, lines and details crisp "
         "- Sky: natural atmospheric detail sharp "
 
         "Subject: black hoodie, hood down, back view. "
@@ -330,9 +329,9 @@ def build_back_prompt(spec):
         "Soft natural light, even across entire scene, no harsh shadows. "
         "Light illuminates every detail equally. "
 
-        "Setting: Modern residential complex. "
-        "Contemporary minimalist architecture. "
-        "Clean aesthetic, no vegetation or greenery. "
+        "Setting: Modern waterfront promenade or contemporary building plaza. "
+        "Sleek contemporary architecture with glass and steel. "
+        "Clean urban aesthetic, professional environment. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
