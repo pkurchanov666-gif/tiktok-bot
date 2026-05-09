@@ -4,9 +4,40 @@ import json
 import os
 import httpx
 
-from telegram import (
-    Update,
-    
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, ContextTypes, filters
+
+from config import BOT_TOKEN
+from slides import get_random_photos, create_slides
+from replicate_api import generate_all_photos, regenerate_photo
+
+logging.basicConfig(level=logging.INFO)
+
+USER_DATA = {}
+USER_DATA_FILE = "user_data.json"
+GRAPHQL_URL = "https://api.buffer.com/graphql"
+
+POV_PHRASES = [
+    "POV: аура того самого парня который просто делает свое дело =>",
+    "POV: твой парень воздуха и это буквально его аура =>",
+    "POV: тот самый тип который летом начинает вставать в 6 утра, работать над собой =>",
+    "POV: худи для парней чья аура ощущается буквально так =>",
+    "POV: лучшее худи для твоего парня воздухана =>",
+    "POV: аура того самого кента который все время занят =>",
+    "POV: тот самый кент у которого на уме только тренировки и бизнес =>",
+    "POV: когда твоя аура говорит громче чем твои слова =>",
+    "POV: аура того самого кента который всегда на движе и в делах =>",
+    "POV: тот самый тип который делает результат пока другие спят =>"
+]
+
+
+# ---------------- STORAGE ----------------
+
+def load_user_data():
+    global USER_DATA
+    if not os.path.exists(USER_DATA_FILE):
+        USER_DATA = {}
+        return
     try:
         with open(USER_DATA_FILE, "r", encoding="utf-8") as f:
             USER_DATA = json.load(f)
@@ -385,20 +416,29 @@ async def regen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         new_path, new_spec, new_url = await regenerate_photo(index, storage["specs"])
 
+        if not new_path or not new_spec or not new_url:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text="❌ Ошибка генерации - пустой результат"
+            )
+            return
+
         storage["paths"][index] = new_path
         storage["specs"][index] = new_spec
         storage["urls"][index] = new_url
         save_user_data()
 
-        await send_media(context, user_id, storage["paths"])
+        await send_media(context, user_id, [new_path])
 
         await context.bot.send_message(
             chat_id=user_id,
-            text=f"✅ Фото обновлены\n\n{storage['caption']}",
+            text=f"✅ Фото {index+1} обновлено\n\n{storage['caption']}",
             reply_markup=build_ai_keyboard(user_id, len(storage["paths"]))
         )
 
     except Exception as e:
+        import traceback
+        logging.error(f"Regen error: {traceback.format_exc()}")
         await context.bot.send_message(
             chat_id=user_id,
             text=f"❌ Ошибка: {e}"
