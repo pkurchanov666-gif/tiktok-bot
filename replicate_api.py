@@ -42,6 +42,9 @@ BACK_BACKGROUNDS = [
     "https://i.ibb.co/jvNW8tD5/5188269594370577183.jpg"
 ]
 
+# ГЛОБАЛЬНЫЙ ТРЕКЕР ИСПОЛЬЗОВАННЫХ ФОНОВ
+used_backgrounds_global = set()
+
 # ---------------- FRONT SCENES ----------------
 
 FRONT_SCENES = [
@@ -102,29 +105,29 @@ FRONT_SCENES = [
 # ---------------- ПОЗЫ ----------------
 
 FRONT_POSES = [
-    "leaning naturally, right hand resting on upper thigh, "
-    "left hand resting on lower back",
+    "leaning naturally, right fingertips resting lightly on the hood fabric near the temple, "
+    "left hand resting loosely on upper thigh",
 
-    "leaning naturally, both hands resting on thighs, "
+    "leaning naturally, both hands resting lightly on both sides of the hood from the front, "
     "chin slightly down, elbows relaxed",
 
-    "leaning naturally, left hand resting on upper thigh, "
-    "right hand resting on lower back",
+    "leaning naturally, left fingertips resting lightly on the hood fabric near the cheek, "
+    "right arm relaxed along outer thigh",
 
-    "leaning naturally, right hand resting on hip, "
-    "left hand resting on upper thigh",
+    "leaning naturally, both hands resting lightly near the hood opening without pulling the fabric, "
+    "shoulders relaxed",
 
-    "leaning naturally, right hand in relaxed position along outer thigh, "
-    "left hand resting on hip",
+    "leaning naturally, right hand resting lightly on the hood fabric near the temple, "
+    "left hand resting flat on upper thigh",
 
-    "leaning naturally, left hand in relaxed position along outer thigh, "
-    "right hand resting on hip",
+    "leaning naturally, right hand resting on the back of the head, "
+    "left arm relaxed along outer thigh",
 
-    "leaning naturally, right hand resting on hip, "
-    "left hand resting on upper thigh, chin slightly down",
+    "leaning naturally, left hand resting on the back of the head, "
+    "right arm relaxed along outer thigh",
 
-    "leaning naturally, both hands resting firmly on thighs, "
-    "shoulders confident, chin level"
+    "leaning naturally, right hand resting on the back of the head, "
+    "left hand resting on upper thigh, chin slightly down"
 ]
 
 BACK_POSES = [
@@ -150,10 +153,25 @@ BACK_POSES = [
 
 # ---------------- SPEC ----------------
 
+def get_random_background():
+    """Выбирает случайный фон, исключая уже использованные"""
+    global used_backgrounds_global
+    
+    available_bgs = [b for b in BACK_BACKGROUNDS if b not in used_backgrounds_global]
+    
+    # Если все фоны использованы, сбрасываем счетчик и начинаем заново
+    if not available_bgs:
+        used_backgrounds_global.clear()
+        available_bgs = BACK_BACKGROUNDS
+    
+    bg = random.choice(available_bgs)
+    used_backgrounds_global.add(bg)
+    return bg
+
+
 def get_unique_specs():
     specs = []
     used_poses = set()
-    used_backgrounds = set()
     sides = ["back", "front", "back"]
 
     for side in sides:
@@ -168,12 +186,8 @@ def get_unique_specs():
             ref = REF_BACK
             scene_data = {"scene": "", "light": "soft natural daylight"}
             
-            # Выбираем RANDOM фон для BACK фото
-            available_bgs = [b for b in BACK_BACKGROUNDS if b not in used_backgrounds]
-            if not available_bgs:
-                available_bgs = BACK_BACKGROUNDS
-            bg = random.choice(available_bgs)
-            used_backgrounds.add(bg)
+            # Выбираем случайный фон (не повторяющийся)
+            bg = get_random_background()
 
         available_poses = [p for p in poses if p not in used_poses]
         if not available_poses:
@@ -201,52 +215,50 @@ def build_front_prompt(spec):
     uid = f" UID:{spec['seed']}-{random.random()}"
 
     return (
-        "Ultra-realistic RAW 9:16 professional fashion photograph. "
+        "Ultra-realistic RAW 9:16 photograph. "
         "STRICT FRONT VIEW CLOSE SHOT ONLY. "
         "Sony A7R V, 35mm lens, f/4, ISO 200. "
-        "Camera at eye level, 1.5 meters from subject. "
-        "Framing from head to knees. Subject 70-75 percent of frame. "
+        "Camera at eye level, 1.2 meters from subject. "
+        "Framing from head to mid-thigh. Subject 70-75 percent of frame. "
         "Subject facing camera directly. "
 
         "CRITICAL - CHEST LOGO RENDERING: "
         "Chest logo must be EXTREMELY SHARP and PERFECTLY CLEAR. "
-        "Logo is the focal point of the hoodie. "
-        "Logo rendering: maximum sharpness, exact size and position from reference image. "
-        "Logo must be crisp, clear, fully readable with no blur or distortion. "
-        "Logo color and details must match reference image exactly. "
-        "Light reflects perfectly on logo, enhancing visibility and definition. "
-        "Logo edges are sharp and well-defined. "
+        "Logo is the focal point. Maximum sharpness, exact size and position from reference. "
+        "Logo crisp, clear, fully readable. Not blurred. Not distorted. "
+        "Logo color and details match reference image exactly. "
 
         "HOODIE SPECIFICATIONS: "
         "Premium black hoodie, completely flat clean front. "
-        "No front pocket, no kangaroo pouch, no zipper, no drawstrings. "
+        "No front pocket. No kangaroo pouch. No zipper. No drawstrings. "
         "Only the chest logo visible on front. "
 
         "Sharp focus throughout - subject and background equally sharp. "
-        "No blur, no bokeh. One unified photograph. "
+        "No blur. No bokeh. One unified photograph. "
 
-        "Subject leans or stands against environment naturally. "
+        "Subject must physically interact with environment naturally. "
         "Visible physical contact with surface: wall, car, or railing. "
-        "NOT floating. NOT cut out. Part of the location. "
+        "Not floating. Not cut out. Part of the location. "
 
-        "Black wide-leg denim, heavy texture visible. "
+        "Black wide-leg denim jeans, heavy texture visible and sharp. "
 
-        "Hands visible, actively engaged with thighs or hips. "
-        "Hands rest naturally on thighs or hip. "
+        "Hands actively engaged. Visible in frame. "
+        "If touching hoodie: fingers visible on fabric. "
+        "If on head: hand visible, fingers defined. "
         "Natural confident posture. "
 
-        "Background sharp and detailed. NOT blurred. "
-        "Architecture, pavement, car details all clearly visible. "
+        "Background sharp and detailed. Not blurred. "
+        "Architecture, pavement, car details all clearly visible and sharp. "
 
         f"Lighting: {spec['light']}. "
-        "Soft natural light, no harsh shadows, no flash. "
+        "Soft natural light. No harsh shadows. No flash. "
         "Light enhances logo visibility and detail. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
 
-        "Generate an ultra-realistic professional fashion photograph. "
-        "Everything sharp. Everything real. Professional quality."
+        "Generate ultra-realistic professional fashion photograph. "
+        "Everything sharp. Everything real. Premium quality."
     ) + uid
 
 
@@ -266,7 +278,6 @@ def build_back_prompt(spec):
         "- Standard door height = 2.1 meters "
         "- Standard window height = 1.5 meters "
         "- Standard railing height = 1.2 meters "
-        "- Standard bench height = 0.5 meters "
         "- Ground features and step dimensions "
         "Subject must appear to be a NORMAL ADULT HUMAN (1.75 meters tall). "
         "NOT a giant filling the frame. NOT a tiny dwarf. HUMAN SCALE. "
@@ -292,8 +303,9 @@ def build_back_prompt(spec):
         "Black hoodie with hood UP covering head completely. "
         "Face completely hidden, BACK VIEW ONLY. "
         "Black wide-leg baggy denim jeans, heavy texture visible. "
-        "Hands visible: either at sides, on thighs, or behind head above neck. "
-        "ABSOLUTELY NO hands in pockets, NO hidden arms, NO denim pockets. "
+        "Hands visible and active: resting on thighs, or behind head above neck. "
+        "Hands must be NATURALLY POSITIONED. "
+        "If walking: one arm may move naturally with stride. "
         "Natural confident posture appropriate for location and movement. "
 
         "Lighting Integration - EVENING/GOLDEN HOUR: "
@@ -315,14 +327,12 @@ def build_back_prompt(spec):
         "Ultra-realistic seamless integration, NOT composited or artificial. "
         "Looks like real photograph taken at location, NOT CGI or edited composite. "
 
-        "HUMAN SCALE VERIFICATION CHECKLIST: "
-        "[ ] Subject height proportional to doors, windows, railings? YES "
-        "[ ] Subject appears NORMAL ADULT SIZE? YES "
-        "[ ] NOT scaled as giant? YES "
-        "[ ] NOT scaled as tiny figure? YES "
-        "[ ] Head to body proportions correct? YES "
-        "[ ] Feet clearly on ground? YES "
-        "[ ] Realistic human anatomy? YES "
+        "HUMAN SCALE VERIFICATION: "
+        "Subject height proportional to doors, windows, railings? YES. "
+        "Subject appears NORMAL ADULT SIZE? YES. "
+        "NOT scaled as giant? YES. NOT scaled as tiny figure? YES. "
+        "Head to body proportions correct? YES. Feet clearly on ground? YES. "
+        "Realistic human anatomy? YES. "
 
         f"Pose: {spec['pose']}. "
 
@@ -547,15 +557,13 @@ async def regenerate_photo(index, current_specs):
         ref = REF_BACK
         scene_data = {"scene": "", "light": "soft natural daylight"}
         
-        # Выбираем НОВЫЙ фон (не старый)
-        available_bgs = [b for b in BACK_BACKGROUNDS if b != old_spec.get("background")]
-        if not available_bgs:
-            available_bgs = BACK_BACKGROUNDS
-        bg = random.choice(available_bgs)
+        # Выбираем новый случайный фон (не повторяющийся)
+        bg = get_random_background()
 
     available_poses = [p for p in poses if p != old_spec.get("pose")]
     if not available_poses:
         available_poses = poses
+    
     pose = random.choice(available_poses)
 
     new_spec = {
