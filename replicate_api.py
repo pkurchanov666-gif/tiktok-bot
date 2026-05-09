@@ -56,12 +56,6 @@ FRONT_SCENES = [
         "light": "soft natural daylight, clean even light"
     },
     {
-        "scene": "standing very close to black granite entrance of modern business center, "
-                 "body near glass door, only part of door and handles visible, "
-                 "interior barely seen through glass",
-        "light": "soft diffused daylight, gentle reflections from granite and glass"
-    },
-    {
         "scene": "leaning tight against a black luxury SUV in private garage, "
                  "body very close to car surface, only part of SUV in frame, "
                  "epoxy floor close beneath feet, soft ambient lighting",
@@ -75,64 +69,64 @@ FRONT_SCENES = [
     }
 ]
 
-# ---------------- BACK SCENES (НАБЕРЕЖНАЯ И СОВРЕМЕННЫЕ ЗДАНИЯ) ----------------
+# ---------------- BACK SCENES ----------------
 
 BACK_SCENES = [
     {
-        "scene": "walking along modern waterfront promenade, "
-                 "person small in frame, contemporary residential tower with sharp glass facades, "
-                 "sleek metal railings along promenade, polished stone pavement with visible texture, "
-                 "water view on one side, modern architecture on other side, clean minimalist design",
-        "light": "soft natural daylight, sharp detailed light across entire waterfront"
+        "scene": "walking on stylish street with brick-style facade buildings, "
+                 "person small in frame, contemporary architecture with modern brick texture, "
+                 "clean pavement with visible texture, upscale residential street, "
+                 "elegant aesthetic without excess, sharp architectural details",
+        "light": "soft natural daylight, sharp detailed light across entire street"
     },
     {
-        "scene": "walking on waterfront plaza near modern residential building, "
-                 "person small in frame, contemporary tower with sharp window grid pattern, "
-                 "clean stone pavement with visible lines, modern metal railings, "
-                 "water and sky visible, contemporary design aesthetic",
-        "light": "soft diffused daylight, sharp detailed illumination across plaza and building"
+        "scene": "walking through upscale neighborhood street, "
+                 "person small in frame, modern brick buildings with clean lines, "
+                 "high-end residential area, polished pavement, contemporary style, "
+                 "expensive but understated aesthetic",
+        "light": "soft natural daylight, sharp detailed illumination"
     },
     {
-        "scene": "walking along modern waterfront promenade beside tall glass building, "
-                 "person small in frame, sleek contemporary residential tower with sharp reflections, "
-                 "polished pavement stretches along water, metal railings with sharp details, "
-                 "water view and urban architecture, modern minimalist setting",
+        "scene": "walking through underground parking structure, "
+                 "person small in frame, modern concrete parking garage, "
+                 "clean polished floor, organized parking spaces with cars, "
+                 "LED ambient lighting, contemporary infrastructure",
+        "light": "soft ambient LED lighting, sharp detailed illumination"
+    },
+    {
+        "scene": "standing in courtyard of construction development, "
+                 "person small in frame, modern residential construction, "
+                 "clean brick-style contemporary buildings, organized courtyard space, "
+                 "new development aesthetic, professional urban setting",
+        "light": "soft natural daylight, sharp detailed light across courtyard"
+    },
+    {
+        "scene": "walking along modern bridge over water, "
+                 "person small in frame, contemporary bridge design with metal railings, "
+                 "water view below, clean bridge pavement, modern minimalist architecture, "
+                 "water reflection details visible",
+        "light": "soft natural daylight, sharp detailed light across bridge"
+    },
+    {
+        "scene": "walking on modern waterfront promenade, "
+                 "person small in frame, contemporary architecture along water, "
+                 "waterfront design with metal railings, polished pavement, "
+                 "water view and urban design, clean aesthetic",
         "light": "soft natural daylight, sharp detailed light across waterfront"
     },
     {
-        "scene": "walking on pedestrian passage along modern building facade, "
-                 "person small in frame, contemporary glass and steel building with sharp window details, "
-                 "clean polished pavement with visible texture, metal railings clearly visible, "
-                 "modern minimalist architecture, urban professional setting",
-        "light": "soft diffused daylight, sharp detailed illumination across passage"
+        "scene": "standing on rooftop of skyscraper near glass railings, "
+                 "person small in frame, rooftop level with modern glass railings, "
+                 "contemporary architecture visible, city view below, "
+                 "high elevation, clean urban skyline, professional setting",
+        "light": "soft natural daylight, sharp detailed light across rooftop"
     },
     {
-        "scene": "walking along waterfront next to contemporary residential tower, "
-                 "person small in frame, modern building with sharp architectural details, "
-                 "sleek metal railings separate waterfront, polished stone ground with texture, "
-                 "water reflections and clean urban design, contemporary aesthetic",
-        "light": "soft natural daylight, sharp detailed light across waterfront area"
-    },
-    {
-        "scene": "walking on modern plaza beside tall contemporary office building, "
-                 "person small in frame, glass facade with sharp window reflections, "
-                 "clean pavement stretches with visible lines and texture, metal railings sharp, "
-                 "contemporary urban architecture, minimalist design",
-        "light": "soft natural daylight, sharp detailed illumination across plaza"
-    },
-    {
-        "scene": "walking along elevated waterfront promenade beside modern tower, "
-                 "person small in frame, contemporary residential building with sharp wall panels, "
-                 "polished pavement with clear texture, modern metal railings with reflections, "
-                 "water view and sky, clean professional urban setting",
-        "light": "soft diffused daylight, sharp detailed light across waterfront"
-    },
-    {
-        "scene": "walking on pedestrian area along contemporary glass building, "
-                 "person small in frame, sleek modern architecture with sharp facade details, "
-                 "polished ground pavement with visible texture, clean urban design, "
-                 "metal railings and architectural elements sharp and defined, waterfront view",
-        "light": "soft natural daylight, sharp detailed illumination across entire area"
+        "scene": "walking on elegant street with modern brick architecture, "
+                 "person small in frame, contemporary style with quality brick facade, "
+                 "upscale neighborhood, clean modern design, expensive aesthetic, "
+                 "no excess, sophisticated urban environment",
+        "light": "soft natural daylight, sharp detailed illumination"
     }
 ]
 
@@ -165,14 +159,14 @@ FRONT_POSES = [
 ]
 
 BACK_POSES = [
-    "standing facing away, both hands resting at sides naturally, "
-    "arms relaxed",
-
     "standing facing away, right hand resting on outer thigh, "
     "left arm relaxed at side",
 
     "standing facing away, left hand resting on outer thigh, "
     "right arm relaxed at side",
+
+    "standing facing away, both hands resting on outer thighs, "
+    "posture confident and relaxed",
 
     "walking away, both arms moving naturally with stride, "
     "shoulders relaxed",
@@ -182,12 +176,6 @@ BACK_POSES = [
 
     "walking away, left arm swinging naturally with stride, "
     "right arm at side",
-
-    "standing facing away, both hands resting on outer thighs, "
-    "posture confident and relaxed",
-
-    "standing facing away, hands at sides naturally, "
-    "shoulders back slightly",
 
     "walking away, both arms in natural movement with stride, "
     "head facing forward",
@@ -297,7 +285,7 @@ def build_back_prompt(spec):
 
     return (
         "Ultra-realistic 9:16 professional photograph. "
-        "Back view shot on modern waterfront and contemporary buildings. "
+        "Back view shot in modern urban environment. "
         "Sony A7R V, 35mm, f/4, ISO 400. "
         "Camera at 1.6m height, straight forward, parallel to ground. "
 
@@ -314,24 +302,23 @@ def build_back_prompt(spec):
 
         "BACKGROUND DETAIL: "
         "Every element must be sharp and detailed: "
-        "- Building facades: sharp glass windows with reflections, wall panels clearly visible "
-        "- Pavement: polished stone or concrete with visible texture and lines "
-        "- Railings: metal railings with sharp reflections and architectural details "
-        "- Water feature: waterfront, water reflections, edge definition all sharp "
-        "- Architecture: contemporary design elements, lines and details crisp "
+        "- Architecture: brick facades, clean lines, contemporary style clearly visible "
+        "- Pavement: texture visible, lines sharp, quality surface "
+        "- Railings: metal details with sharp reflections "
+        "- Water features: reflections and edges sharp "
+        "- Urban elements: parking, courtyard, bridge details all crisp "
         "- Sky: natural atmospheric detail sharp "
 
         "Subject: black hoodie, hood down, back view. "
         "Black wide-leg denim with visible texture. "
-        "Hands relaxed at sides or on thighs. "
+        "Hands relaxed or on thighs naturally. "
 
         f"Lighting: {spec['light']}. "
         "Soft natural light, even across entire scene, no harsh shadows. "
         "Light illuminates every detail equally. "
 
-        "Setting: Modern waterfront promenade or contemporary building plaza. "
-        "Sleek contemporary architecture with glass and steel. "
-        "Clean urban aesthetic, professional environment. "
+        "Setting: Modern urban streets, upscale neighborhoods, contemporary design. "
+        "Clean aesthetic, professional environment. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
@@ -551,12 +538,13 @@ async def regenerate_photo(index, current_specs):
         available_poses = poses
     pose = random.choice(available_poses)
 
+    # НОВЫЙ SEED каждый раз при регенерации
     spec = {
         "side": side,
         "scene": scene_data["scene"],
         "light": scene_data["light"],
         "pose": pose,
-        "seed": old_spec["seed"],
+        "seed": random.randint(100000, 999999),
         "ref": ref
     }
 
@@ -576,3 +564,4 @@ async def regenerate_photo(index, current_specs):
     current_specs[index] = spec
     
     return path, spec, url
+             
