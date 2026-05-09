@@ -218,6 +218,7 @@ def build_start_keyboard(user_id):
 # ---------------- SEND MEDIA ----------------
 
 async def send_media(context, user_id, paths):
+    """Отправляет все фото в альбоме"""
     valid_paths = [p for p in paths if p and os.path.exists(p)]
     if not valid_paths:
         raise Exception("Файлы не найдены")
@@ -225,10 +226,12 @@ async def send_media(context, user_id, paths):
     opened_files = []
     try:
         if len(valid_paths) == 1:
+            # Одно фото - отправляем как обычное фото
             f = open(valid_paths[0], "rb")
             opened_files.append(f)
             await context.bot.send_photo(chat_id=user_id, photo=f)
         else:
+            # Несколько фото - отправляем как альбом
             media = []
             for path in valid_paths:
                 f = open(path, "rb")
@@ -376,7 +379,7 @@ async def regen_caption_handler(update: Update, context: ContextTypes.DEFAULT_TY
     )
 
 
-# ---------------- REGEN PHOTO ----------------
+# ---------------- REGEN PHOTO (ИСПРАВЛЕННАЯ) ----------------
 
 async def regen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -414,6 +417,7 @@ async def regen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     try:
+        # Передаем весь список specs для правильной регенерации
         new_path, new_spec, new_url = await regenerate_photo(index, storage["specs"])
 
         if not new_path or not new_spec or not new_url:
@@ -423,12 +427,14 @@ async def regen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
 
+        # Обновляем данные
         storage["paths"][index] = new_path
         storage["specs"][index] = new_spec
         storage["urls"][index] = new_url
         save_user_data()
 
-        await send_media(context, user_id, [new_path])
+        # ОТПРАВЛЯЕМ ВСЕ 3 ФОТО - 2 старых + 1 новое!
+        await send_media(context, user_id, storage["paths"])
 
         await context.bot.send_message(
             chat_id=user_id,
