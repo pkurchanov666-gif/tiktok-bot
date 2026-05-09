@@ -203,15 +203,19 @@ def get_unique_specs():
             poses = BACK_POSES
             ref = REF_BACK
 
+        # ВЫБИРАЕМ СЦЕНУ КОТОРАЯ ЕЩЕ НЕ ИСПОЛЬЗОВАЛАСЬ
         available_scenes = [s for s in scenes if s["scene"][:50] not in used_scenes]
         if not available_scenes:
             available_scenes = scenes
+        
         scene_data = random.choice(available_scenes)
         used_scenes.add(scene_data["scene"][:50])
 
+        # ВЫБИРАЕМ ПОЗУ КОТОРАЯ ЕЩЕ НЕ ИСПОЛЬЗОВАЛАСЬ
         available_poses = [p for p in poses if p not in used_poses]
         if not available_poses:
             available_poses = poses
+        
         pose = random.choice(available_poses)
         used_poses.add(pose)
 
@@ -535,31 +539,47 @@ async def regenerate_photo(index, current_specs):
         poses = BACK_POSES
         ref = REF_BACK
 
-    # Выбираем ДРУГУЮ сцену (не старую)
-    available_scenes = [s for s in scenes if s["scene"][:50] != old_scene]
+    # НАХОДИМ ВСЕ ИСПОЛЬЗОВАННЫЕ СЦЕНЫ В ДРУГИХ ФОТО
+    used_scenes_in_session = set()
+    for i, spec in enumerate(current_specs):
+        if i != index:
+            used_scenes_in_session.add(spec.get("scene", "")[:50])
+
+    # ВЫБИРАЕМ СЦЕНУ КОТОРАЯ:
+    # 1. НЕ СТАРАЯ СЦЕНА ДЛЯ ЭТОГО ФОТО
+    # 2. НЕ ИСПОЛЬЗОВАНА В ДРУГИХ ФОТО СЕССИИ
+    available_scenes = [
+        s for s in scenes 
+        if s["scene"][:50] != old_scene and s["scene"][:50] not in used_scenes_in_session
+    ]
+    
+    if not available_scenes:
+        available_scenes = [s for s in scenes if s["scene"][:50] != old_scene]
+    
     if not available_scenes:
         available_scenes = scenes
+
     scene_data = random.choice(available_scenes)
 
-    # Выбираем ДРУГУЮ позу (не старую)
+    # ВЫБИРАЕМ ДРУГУЮ ПОЗУ (не старую)
     available_poses = [p for p in poses if p != old_pose]
     if not available_poses:
         available_poses = poses
     pose = random.choice(available_poses)
 
-    # СОВЕРШЕННО НОВЫЙ SPEC с НОВЫМ seed для нового промпта
+    # СОВЕРШЕННО НОВЫЙ SPEC с НОВЫМ seed
     new_spec = {
         "side": side,
         "scene": scene_data["scene"],
         "light": scene_data["light"],
         "pose": pose,
-        "seed": random.randint(100000, 999999),  # ← НОВЫЙ SEED!
+        "seed": random.randint(100000, 999999),
         "ref": ref
     }
 
     logger.info(f"[REGEN] New side: {side}, New seed: {new_spec['seed']}")
 
-    # Собираем ПОЛНЫЙ промпт с новыми параметрами
+    # Собираем ПОЛНЫЙ промпт
     if side == "front":
         full_prompt = build_front_prompt(new_spec)
     else:
@@ -567,10 +587,8 @@ async def regenerate_photo(index, current_specs):
 
     prompt_length = len(full_prompt)
     logger.info(f"[REGEN] Prompt length: {prompt_length}")
-    logger.info(f"[REGEN] New scene: {new_spec['scene'][:50]}...")
-    logger.info(f"[REGEN] New pose: {new_spec['pose'][:50]}...")
 
-    # Отправляем задачу с ПОЛНЫМ промптом
+    # Отправляем задачу
     try:
         job_id = await asyncio.to_thread(submit_job, full_prompt, new_spec["ref"])
         logger.info(f"[REGEN] Job submitted: {job_id}")
