@@ -311,7 +311,9 @@ def build_back_prompt(spec):
 
         "Subject: black hoodie, hood down, back view. "
         "Black wide-leg denim with visible texture. "
-        "Hands relaxed or on thighs naturally. "
+        "Hands resting naturally at thighs or swinging with natural movement. "
+        "NO hands in pockets, NO hands in back pockets of jeans. "
+        "Arms hang naturally or move naturally with stride. "
 
         f"Lighting: {spec['light']}. "
         "Soft natural light, even across entire scene, no harsh shadows. "
@@ -510,12 +512,19 @@ async def generate_all_photos():
 
 
 async def regenerate_photo(index, current_specs):
-    """Регенерирует фото с тем же персонажем, но другой сценой/позой"""
+    """Регенерирует фото с другой сценой/позой и новым промптом"""
+    
+    logger.info(f"[REGEN] ========== REGENERATE PHOTO {index} ==========")
+    
+    if index < 0 or index >= len(current_specs):
+        raise Exception(f"Invalid index {index}")
     
     old_spec = current_specs[index]
     side = old_spec["side"]
     old_scene = old_spec.get("scene", "")[:50]
     old_pose = old_spec.get("pose", "")
+
+    logger.info(f"[REGEN] Old side: {side}, Old scene: {old_scene[:30]}...")
 
     if side == "front":
         scenes = FRONT_SCENES
@@ -526,42 +535,69 @@ async def regenerate_photo(index, current_specs):
         poses = BACK_POSES
         ref = REF_BACK
 
-    # Выбираем другую сцену
+    # Выбираем ДРУГУЮ сцену (не старую)
     available_scenes = [s for s in scenes if s["scene"][:50] != old_scene]
     if not available_scenes:
         available_scenes = scenes
     scene_data = random.choice(available_scenes)
 
-    # Выбираем другую позу
+    # Выбираем ДРУГУЮ позу (не старую)
     available_poses = [p for p in poses if p != old_pose]
     if not available_poses:
         available_poses = poses
     pose = random.choice(available_poses)
 
-    # НОВЫЙ SEED каждый раз при регенерации
-    spec = {
+    # СОВЕРШЕННО НОВЫЙ SPEC с НОВЫМ seed для нового промпта
+    new_spec = {
         "side": side,
         "scene": scene_data["scene"],
         "light": scene_data["light"],
         "pose": pose,
-        "seed": random.randint(100000, 999999),
+        "seed": random.randint(100000, 999999),  # ← НОВЫЙ SEED!
         "ref": ref
     }
 
+    logger.info(f"[REGEN] New side: {side}, New seed: {new_spec['seed']}")
+
+    # Собираем ПОЛНЫЙ промпт с новыми параметрами
     if side == "front":
-        prompt = build_front_prompt(spec)
+        full_prompt = build_front_prompt(new_spec)
     else:
-        prompt = build_back_prompt(spec)
-    
-    logger.info(f"[REGEN] index={index}, seed={spec['seed']}, new_scene={scene_data['scene'][:40]}, new_pose={pose[:40]}")
-    
-    job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
-    url = await poll_job(job_id)
+        full_prompt = build_back_prompt(new_spec)
 
+    prompt_length = len(full_prompt)
+    logger.info(f"[REGEN] Prompt length: {prompt_length}")
+    logger.info(f"[REGEN] New scene: {new_spec['scene'][:50]}...")
+    logger.info(f"[REGEN] New pose: {new_spec['pose'][:50]}...")
+
+    # Отправляем задачу с ПОЛНЫМ промптом
+    try:
+        job_id = await asyncio.to_thread(submit_job, full_prompt, new_spec["ref"])
+        logger.info(f"[REGEN] Job submitted: {job_id}")
+    except Exception as e:
+        logger.error(f"[REGEN] Submit failed: {e}")
+        raise Exception(f"Failed to submit job: {e}")
+
+    # Ждем результата
+    try:
+        url = await poll_job(job_id)
+        if not url:
+            logger.error(f"[REGEN] No URL returned from poll_job")
+            raise Exception("No URL returned from poll_job")
+        logger.info(f"[REGEN] URL received successfully")
+    except Exception as e:
+        logger.error(f"[REGEN] Poll failed: {e}")
+        raise Exception(f"Failed to poll job: {e}")
+
+    # Скачиваем изображение
     path = os.path.join(SAVE_DIR, f"ai_{int(time.time() * 1000)}_regen_{index}.png")
-    await download_image(url, path)
+    try:
+        await download_image(url, path)
+        logger.info(f"[REGEN] Downloaded: {path}")
+    except Exception as e:
+        logger.error(f"[REGEN] Download failed: {e}")
+        raise Exception(f"Failed to download image: {e}")
 
-    current_specs[index] = spec
-    
-    return path, spec, url
-             
+    logger.info(f"[REGEN] ========== COMPLETE ==========")
+
+    return path, new_spec, url
