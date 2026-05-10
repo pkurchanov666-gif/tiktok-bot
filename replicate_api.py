@@ -116,49 +116,63 @@ BACK_SCENES = [
     }
 ]
 
-# ---------------- FRONT POSES ----------------
+# ---------------- ПОЗЫ ----------------
 
 FRONT_POSES = [
-    "leaning naturally, right fingertips resting lightly on the hood fabric near the temple, left hand resting loosely on upper thigh",
-    "leaning naturally, both hands resting lightly on both sides of the hood from the front, chin slightly down, elbows relaxed",
-    "leaning naturally, left fingertips resting lightly on the hood fabric near the cheek, right arm relaxed along outer thigh",
-    "leaning naturally, both hands resting lightly near the hood opening without pulling the fabric, shoulders relaxed",
-    "leaning naturally, right hand resting lightly on the hood fabric near the temple, left hand resting flat on upper thigh",
-    "leaning naturally, right hand resting on the back of the head, left arm relaxed along outer thigh",
-    "leaning naturally, left hand resting on the back of the head, right arm relaxed along outer thigh",
-    "leaning naturally, right hand resting on the back of the head, left hand resting on upper thigh, chin slightly down"
+    "leaning naturally, right fingertips resting lightly on the hood fabric near the temple, "
+    "left hand resting loosely on upper thigh",
+
+    "leaning naturally, both hands resting lightly on both sides of the hood from the front, "
+    "chin slightly down, elbows relaxed",
+
+    "leaning naturally, left fingertips resting lightly on the hood fabric near the cheek, "
+    "right hand resting loosely on upper thigh",
+
+    "leaning naturally, both hands resting lightly near the hood opening without pulling the fabric, "
+    "shoulders relaxed",
+
+    "leaning naturally, right hand resting lightly on the hood fabric near the temple, "
+    "left hand resting flat on upper thigh",
+
+    "leaning naturally, right hand resting on the back of the head above the neck, "
+    "left hand resting loosely on upper thigh",
+
+    "leaning naturally, left hand resting on the back of the head above the neck, "
+    "right hand resting loosely on upper thigh",
+
+    "leaning naturally, right hand resting on the back of the head above the neck, "
+    "left hand resting on upper thigh, chin slightly down"
 ]
 
-# ---------------- BACK POSES ----------------
-
 BACK_POSES = [
-    "standing facing away, right hand resting lightly on the back of the hood, left hand resting lightly on the back of the head above the neck",
-    "standing facing away, left hand resting lightly on the back of the hood, right hand resting lightly on the back of the head above the neck",
-    "standing facing away, both hands resting lightly on the hood from behind, elbows slightly outward",
+    "standing facing away, right hand resting lightly on the back of the hood, "
+    "left hand resting lightly on the back of the head above the neck",
+
+    "standing facing away, left hand resting lightly on the back of the hood, "
+    "right hand resting lightly on the back of the head above the neck",
+
+    "standing facing away, both hands resting lightly on the hood from behind, "
+    "elbows slightly outward",
+
     "standing facing away, both hands resting lightly on the back of the head above the neck",
-    "walking away, right hand resting lightly on the back of the hood, left hand resting lightly on the back of the head above the neck",
-    "walking away, left hand resting lightly on the back of the hood, right hand resting lightly on the back of the head above the neck",
+
+    "walking away, right hand resting lightly on the back of the hood, "
+    "left hand resting lightly on the back of the head above the neck",
+
+    "walking away, left hand resting lightly on the back of the hood, "
+    "right hand resting lightly on the back of the head above the neck",
+
     "walking away, both hands lightly touching the hood from behind, head slightly lowered",
+
     "walking away, both hands resting lightly on the back of the head above the neck"
 ]
 
 
 # ---------------- SPEC ----------------
 
-def build_spec(side, scene_data, pose, ref):
-    return {
-        "side": side,
-        "scene": scene_data["scene"],
-        "light": scene_data["light"],
-        "pose": pose,
-        "seed": random.randint(100000, 999999),
-        "ref": ref
-    }
-
-
 def get_unique_specs():
     specs = []
-    used_scene_keys = set()
+    used_scenes = set()
     used_poses = set()
     sides = ["back", "front", "back"]
 
@@ -172,21 +186,26 @@ def get_unique_specs():
             poses = BACK_POSES
             ref = REF_BACK
 
-        available_scenes = [s for s in scenes if s["scene"][:80] not in used_scene_keys]
+        available_scenes = [s for s in scenes if s["scene"][:50] not in used_scenes]
         if not available_scenes:
             available_scenes = scenes
-
         scene_data = random.choice(available_scenes)
-        used_scene_keys.add(scene_data["scene"][:80])
+        used_scenes.add(scene_data["scene"][:50])
 
         available_poses = [p for p in poses if p not in used_poses]
         if not available_poses:
             available_poses = poses
-
         pose = random.choice(available_poses)
         used_poses.add(pose)
 
-        specs.append(build_spec(side, scene_data, pose, ref))
+        specs.append({
+            "side": side,
+            "scene": scene_data["scene"],
+            "light": scene_data["light"],
+            "pose": pose,
+            "seed": random.randint(100000, 999999),
+            "ref": ref
+        })
 
     return specs
 
@@ -199,66 +218,47 @@ def build_front_prompt(spec):
     return (
         "Ultra-realistic RAW 9:16 photograph. "
         "STRICT FRONT VIEW CLOSE SHOT ONLY. "
-        "This image is only for a front-facing close fashion shot. "
-        "Never use back-view composition. Never use far-distance back-view scene logic. "
+        "Never use back-view composition. "
 
-        "Real photo taken on location by a professional photographer. "
-        "Sony A7R V, 35mm lens, f/8, ISO 200. "
-        "Camera at eye level. Straight-on. No tilt. "
-        "Camera exactly 1.0 meter from subject. "
-        "Framing from head to knees. Subject fills 80 to 85 percent of frame. "
-        "Subject is facing the camera. "
+        "Real photo taken on location. "
+        "Sony A7R V, 35mm, f/8, ISO 200. "
+        "Eye level. Straight-on. No tilt. "
+        "Camera 1.0 meter from subject. "
+        "Head to knees framing. Subject fills 80-85 percent of frame. "
+        "Subject facing camera. "
 
-        "The subject must physically interact with the environment object described in the scene. "
-        "If the scene contains a wall, pillar or facade, the shoulder or upper back must visibly lean against it. "
-        "If the scene contains a car, the body must stand naturally very close to the car door or fender. "
-        "If the scene contains railings, the body must lean lightly against them. "
-        "Visible physical contact with the environment is required. "
-        "The subject must feel anchored in the scene, not floating, not cut out, not composited. "
+        "Subject must physically interact with the environment. "
+        "If wall or pillar — shoulder or back must lean against it. "
+        "If car — body must stand very close to door or fender. "
+        "If railing — body must lean lightly against it. "
+        "Visible physical contact with the environment required. "
 
-        "The hood may be worn up or may rest naturally behind the head. "
-        "If a hand interacts with the hood, the fingers must visibly touch the fabric. "
-        "If the hood is down, the hand must rest naturally on the back of the head, not on the neck. "
-        "No floating hand near the head. No hand touching air. "
-        "Do not pull the hood. Do not stretch the hood. "
-        "No visible fabric tension caused by the hand. "
+        "Hood may be up or resting behind the head. "
+        "If hand touches hood — fingers must visibly touch fabric. "
+        "If hood is down — hand must rest on back of head above neck. "
+        "No floating hand. No hand touching air. "
+        "No pulling. No stretching hood. "
 
-        "EXTREME MACRO-LEVEL FABRIC DETAIL. "
-        "Photograph the hoodie fabric like a macro fashion editorial shot. "
-        "Every cotton fiber visible and sharp. "
-        "Every weave, stitch, seam and micro wrinkle rendered with extreme clarity. "
-        "Light physically interacts with the fabric surface: "
-        "micro shadows in folds, subtle highlights on raised fibers, realistic cotton texture. "
-        "The fabric must feel tactile, real, premium, natural. "
-        "Not smooth. Not plastic. Not flat. "
-        "Black denim jeans must also show realistic denim texture, visible weave, folds and thickness. "
+        "EXTREME MACRO FABRIC DETAIL. "
+        "Every cotton fiber visible. Every weave and stitch sharp. "
+        "Micro shadows in folds. Highlights on raised fibers. "
+        "Fabric real and tactile. Not smooth. Not plastic. "
+        "Black denim jeans texture also fully visible. "
 
-        "Deep depth of field. Everything sharp. No bokeh. No blur. "
+        "Everything sharp. No bokeh. No blur. "
         "Background sharp and real. One unified photograph. "
-        "The environment must look like a real photograph, not CGI, not a backdrop. "
 
         f"Lighting: {spec['light']}. "
-        "No direct sunlight. No harsh shadows. No strong contrast. "
-        "Soft natural diffused light only. "
-        "Light must behave realistically across the surface the subject leans against, "
-        "hoodie fabric and jeans. No flash. No studio light. "
+        "No direct sun. No harsh shadows. Soft diffused light only. No flash. "
 
-        "ABSOLUTE STRICT HOODIE RULES: "
-        "THE HOODIE HAS NO FRONT POCKET. "
-        "NO KANGAROO POCKET. NO FRONT POUCH. NO POCKET OF ANY KIND ON THE FRONT. "
-        "NO ZIPPER. NO DRAWSTRINGS. "
-        "Completely flat clean front. Only the chest logo. "
-        "Logo must be maximum sharpness, exact size and exact position from reference. "
-        "Logo must be crisp, clear and fully readable. Not blurred. Not distorted. "
+        "HOODIE: NO FRONT POCKET. NO KANGAROO POCKET. NO POUCH. NO ZIPPER. NO DRAWSTRINGS. "
+        "Flat clean front. Only chest logo. "
+        "Logo maximum sharpness. Exact from reference. Crisp and readable. "
 
-        "MANDATORY black wide-leg baggy denim jeans. "
-        "The jeans must be black. "
-        "Very wide at thighs, knees and calves. "
-        "Heavy black denim texture visible. "
+        "Black wide-leg baggy denim jeans. Very wide at thighs knees calves. "
         "Not slim. Not skinny. Not tapered. "
 
-        "Hands actively engaged. Not hanging freely at sides. "
-        "No hands in back pockets. No hands in hoodie pocket. "
+        "Hands engaged. No hands hanging down. No hands in any pocket. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
@@ -272,59 +272,41 @@ def build_back_prompt(spec):
 
     return (
         "Ultra-realistic RAW 9:16 photograph. "
-        "STRICT BACK VIEW LONG SHOT ONLY. "
-        "This image is only for a rear-view environmental shot. "
-        "The subject is seen fully from behind. "
+        "STRICT BACK VIEW LONG SHOT ONLY. Subject seen from behind. "
         "Never use close front-view scene logic. "
-        "Never use close-up wall portrait, close car-door portrait, "
-        "or any scene intended for a front-facing close image. "
 
         "Real photo taken on location. "
-        "Sony A7R V, 35mm lens, f/11, ISO 400. "
-        "Camera at 1.6 meters height. Straight forward. Parallel to ground. "
-        "No high angle. No top-down. No drone. No tilt. "
+        "Sony A7R V, 35mm, f/11, ISO 400. "
+        "Camera 1.6m height. Straight forward. No high angle. No drone. "
 
-        "Camera 20 to 25 meters from subject. "
-        "Full body visible from head to feet. "
-        "Feet flat on the ground. "
-        "At least 20 percent of frame is visible ground below the feet. "
-        "Do not crop at ankles. Do not crop at shins. "
-        "Subject is 10 to 15 percent of frame height. "
-        "Person is small but clearly readable in a large environment. "
-        "Environment dominates the frame. "
+        "Camera 20-25 meters from subject. "
+        "Full body head to feet. Feet on ground. "
+        "At least 20 percent of frame is ground below feet. "
+        "Subject 10-15 percent of frame. "
 
-        "CRITICAL: everything in focus. "
-        "Foreground sharp, subject sharp, background sharp. "
-        "Zero blur. Zero bokeh. Zero shallow depth of field. "
-        "Every detail in the full image must remain sharp. "
+        "CRITICAL: f/11 aperture. EVERYTHING sharp. "
+        "Foreground sharp. Subject sharp. Background sharp. "
+        "Zero blur. Zero bokeh. Zero depth falloff. "
+        "Every detail from front to back perfectly sharp. "
 
         f"Lighting: {spec['light']}. "
-        "No direct sunlight. No harsh shadows. Soft diffused light only. No flash. "
+        "No direct sun. No harsh shadows. No flash. "
 
-        "MANDATORY black wide-leg baggy denim jeans. "
-        "The jeans must be black. "
-        "Wide silhouette clearly visible from long distance. "
-        "Wide at thighs, knees and calves. "
-        "Heavy black denim. Not slim. Not skinny. Not tapered. "
+        "Black wide-leg baggy jeans. Very wide silhouette. "
+        "Not slim. Not skinny. Not tapered. "
 
-        "Black hoodie. No pocket. Hood up. Face hidden. Seen from behind only. "
+        "Black hoodie. No pocket. Hood up. Face hidden. "
 
-        "If hands interact with the hood, they only rest lightly on the fabric surface. "
-        "They do not grip the edge. They do not pull the hood. "
-        "The hood keeps its natural relaxed shape. "
-        "No visible fabric tension caused by the hands. "
+        "STRICT HAND RULES: "
+        "Hands may ONLY rest lightly on the hood or on the back of the head above the neck. "
+        "NEVER let hands hang down freely. "
+        "NEVER put hands near any pocket. "
+        "NEVER put hands on thighs or hips. "
+        "NEVER let arms dangle at the sides. "
+        "Both hands must be visibly placed on the hood or on the back of the head. "
+        "No pulling hood. No stretching hood. "
 
-        "No passive pose. "
-        "No hands hanging down. "
-        "No hands near front pockets. "
-        "No hands near back pockets. "
-        "No hands on thighs. "
-        "No hands on hips. "
-        "Hands must rest lightly on the hood or rest on the back of the head above the neck only. "
-
-        "Never place the subject on a car traffic lane or roadway. "
-        "Use only pedestrian surfaces, parking surfaces, staircase, promenade, covered walkway, "
-        "or bridge walkway. "
+        "Subject on pedestrian surface only. No roadway. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
@@ -358,7 +340,7 @@ def submit_job(prompt, image_url):
     try:
         data = response.json()
     except Exception:
-        raise Exception(f"Polza вернула не JSON: {response.text}")
+        raise Exception(f"Polza non-JSON: {response.text}")
 
     logger.info(f"[POLZA] submit: {data}")
 
@@ -374,7 +356,7 @@ def extract_url(obj, depth=0):
         return None
 
     if isinstance(obj, str):
-        if obj.startswith("http") and "ibb.co" not in obj and "polza.ai/api" not in obj:
+        if obj.startswith("http") and "ibb.co" not in obj:
             return obj
         return None
 
@@ -391,19 +373,17 @@ def extract_url(obj, depth=0):
                 found = extract_url(obj[key], depth + 1)
                 if found:
                     return found
-
-        for key, value in obj.items():
-            if key not in priority_keys:
-                found = extract_url(value, depth + 1)
-                if found:
-                    return found
+        for value in obj.values():
+            found = extract_url(value, depth + 1)
+            if found:
+                return found
 
     return None
 
 
 async def poll_job(job_id):
     polza_key = os.getenv("POLZA_API_KEY")
-    max_wait = 900
+    max_wait = 1200
     interval = 5
     waited = 0
     last_data = None
@@ -420,27 +400,21 @@ async def poll_job(job_id):
                 timeout=30
             )
 
-            raw_text = response.text
-            logger.info(f"[POLZA] job={job_id} waited={waited}s raw={raw_text[:500]}")
-
             try:
                 data = response.json()
             except Exception:
-                logger.warning(f"[POLZA] non-JSON: {raw_text[:300]}")
+                logger.warning(f"[POLZA] non-JSON: {response.text[:300]}")
                 continue
 
             last_data = data
             status = str(data.get("status", "")).lower()
 
+            logger.info(
+                f"[POLZA] job={job_id} waited={waited}s status={status} keys={list(data.keys())}"
+            )
+
             if status in {"failed", "error", "canceled", "cancelled"}:
                 raise Exception(f"Polza job failed: {data}")
-
-            if status in {"completed", "succeeded", "done", "ready"}:
-                url = extract_url(data)
-                if url:
-                    logger.info(f"[POLZA] got url: {url}")
-                    return url
-                logger.warning(f"[POLZA] status={status}, but url not found in: {data}")
 
             url = extract_url(data)
             if url:
@@ -456,8 +430,18 @@ async def poll_job(job_id):
 
 
 async def download_image(url, path):
-    response = await asyncio.to_thread(requests.get, url, timeout=60)
+    response = await asyncio.to_thread(
+        requests.get,
+        url,
+        timeout=120,
+        headers={"User-Agent": "Mozilla/5.0"}
+    )
+
+    if response.status_code >= 400:
+        raise Exception(f"Download error {response.status_code}: {url}")
+
     os.makedirs(SAVE_DIR, exist_ok=True)
+
     with open(path, "wb") as f:
         f.write(response.content)
 
@@ -489,7 +473,7 @@ async def generate_all_photos():
 
 async def regenerate_photo(index, current_specs):
     side = current_specs[index]["side"]
-    old_scene = current_specs[index].get("scene", "")[:80]
+    old_scene = current_specs[index].get("scene", "")[:50]
     old_pose = current_specs[index].get("pose", "")
 
     if side == "front":
@@ -501,7 +485,7 @@ async def regenerate_photo(index, current_specs):
         poses = BACK_POSES
         ref = REF_BACK
 
-    available_scenes = [s for s in scenes if s["scene"][:80] != old_scene]
+    available_scenes = [s for s in scenes if s["scene"][:50] != old_scene]
     if not available_scenes:
         available_scenes = scenes
     scene_data = random.choice(available_scenes)
@@ -511,7 +495,14 @@ async def regenerate_photo(index, current_specs):
         available_poses = poses
     pose = random.choice(available_poses)
 
-    spec = build_spec(side, scene_data, pose, ref)
+    spec = {
+        "side": side,
+        "scene": scene_data["scene"],
+        "light": scene_data["light"],
+        "pose": pose,
+        "seed": random.randint(100000, 999999),
+        "ref": ref
+    }
 
     prompt = build_front_prompt(spec) if side == "front" else build_back_prompt(spec)
     job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
