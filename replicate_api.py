@@ -46,54 +46,58 @@ FRONT_SCENES = [
     {
         "scene": "leaning against a dark Porsche parked in a clean underground garage, "
                  "car door and fender very close to body, polished concrete floor, "
-                 "soft LED lights, other cars blurred far away",
-        "light": "soft ambient garage lighting, even illumination, no harsh shadows"
+                 "soft LED lights, other cars blurred far away, evening atmosphere",
+        "light": "soft warm evening garage lighting, ambient LED glow, golden warm tones, no harsh shadows"
     },
     {
         "scene": "standing with body very close to a black Lamborghini Urus, "
                  "almost touching the car, only part of hood visible in frame, "
-                 "modern business street behind, clean granite pavement",
-        "light": "soft natural daylight, balanced light"
+                 "modern business street behind in evening dusk, clean granite pavement, "
+                 "city lights beginning to glow",
+        "light": "golden hour evening light, warm amber tones, soft natural glow transitioning to dusk"
     },
     {
         "scene": "leaning against a dark glass building facade, "
-                 "body pressed close to glass, contemporary architecture right behind",
-        "light": "soft diffused daylight, gentle reflections from glass"
+                 "body pressed close to glass, contemporary architecture right behind, "
+                 "evening city reflections in glass",
+        "light": "soft evening diffused light, warm golden reflections from glass, ambient city glow"
     },
     {
         "scene": "standing body-close to a black Mercedes-AMG GT, "
                  "car door very near, only small part of car visible, "
-                 "marble columns and modern entrance barely visible",
-        "light": "soft natural daylight, balanced illumination"
+                 "marble columns and modern entrance barely visible, evening dusk setting",
+        "light": "soft golden hour evening light, warm natural illumination, gentle shadows"
     },
     {
         "scene": "leaning close against modern glass railing, "
-                 "railing tight against body, city view far behind",
-        "light": "soft golden hour light, warm natural glow"
+                 "railing tight against body, city view far behind, "
+                 "evening cityscape with glowing lights in background",
+        "light": "soft golden hour evening light, warm natural glow, ambient city lights in distance"
     },
     {
         "scene": "standing body-close to a black Audi A8 parked on quiet street, "
                  "almost touching car door, only part of door and fender in frame, "
-                 "elegant house facade and plants blurred behind",
-        "light": "soft natural daylight, even light across subject and car surface"
+                 "elegant house facade and plants blurred behind, evening atmosphere, "
+                 "street lamps beginning to illuminate",
+        "light": "soft evening daylight transitioning to dusk, warm golden tones, gentle ambient glow"
     },
     {
         "scene": "leaning tight against dark stone wall in modern residential courtyard, "
                  "wall close behind, body pressed against it, "
-                 "minimalist architecture partially visible",
-        "light": "soft natural daylight, clean even light"
+                 "minimalist architecture partially visible, evening setting with soft lighting",
+        "light": "soft warm evening light, natural golden glow, ambient architectural lighting"
     },
     {
         "scene": "leaning tight against a black luxury SUV in private garage, "
                  "body very close to car surface, only part of SUV in frame, "
-                 "epoxy floor close beneath feet, soft ambient lighting",
-        "light": "soft indirect LED lighting, subtle highlights on car and fabric"
+                 "epoxy floor close beneath feet, evening atmosphere with warm lighting",
+        "light": "soft indirect LED evening lighting, warm golden tones, subtle highlights on car and fabric"
     },
     {
         "scene": "standing on rooftop parking right next to a parked car, "
                  "body very close to vehicle, only small portion visible, "
-                 "concrete and white parking lines at feet, open sky above",
-        "light": "soft natural daylight, even overcast lighting"
+                 "concrete and white parking lines at feet, open evening sky above with sunset colors",
+        "light": "soft golden hour evening light, warm sunset tones, natural evening atmosphere"
     }
 ]
 
@@ -218,16 +222,26 @@ def build_front_prompt(spec):
     return (
         "Ultra-realistic RAW 9:16 photograph. "
         "STRICT FRONT VIEW CLOSE SHOT ONLY. "
-        "Sony A7R V, 35mm lens, f/4, ISO 200. "
+        "EVENING TIME - Golden hour or dusk atmosphere. "
+        "Sony A7R V, 35mm lens, f/4, ISO 400. "
         "Camera at eye level, 1.2 meters from subject. "
         "Framing from head to mid-thigh. Subject 70-75 percent of frame. "
         "Subject facing camera directly. "
+
+        "EVENING LIGHTING ATMOSPHERE: "
+        "Warm golden hour or early dusk lighting. "
+        "Soft amber and golden tones throughout the image. "
+        "Natural evening glow, warm color temperature. "
+        "Gentle shadows appropriate for evening time. "
+        "Ambient city lights or architectural lighting softly visible in background. "
+        "No harsh midday sun. No bright daylight. Evening atmosphere only. "
 
         "CRITICAL - CHEST LOGO RENDERING: "
         "Chest logo must be EXTREMELY SHARP and PERFECTLY CLEAR. "
         "Logo is the focal point. Maximum sharpness, exact size and position from reference. "
         "Logo crisp, clear, fully readable. Not blurred. Not distorted. "
         "Logo color and details match reference image exactly. "
+        "Logo well-lit by evening light, clearly visible. "
 
         "HOODIE SPECIFICATIONS: "
         "Premium black hoodie, completely flat clean front. "
@@ -250,16 +264,21 @@ def build_front_prompt(spec):
 
         "Background sharp and detailed. Not blurred. "
         "Architecture, pavement, car details all clearly visible and sharp. "
+        "Evening atmosphere in background - warm lights, dusk sky, golden tones. "
 
         f"Lighting: {spec['light']}. "
-        "Soft natural light. No harsh shadows. No flash. "
+        "Warm evening light. Soft natural glow. No harsh shadows. No flash. "
+        "Golden hour or dusk color temperature. "
         "Light enhances logo visibility and detail. "
 
         f"Scene: {spec['scene']}. "
         f"Pose: {spec['pose']}. "
 
-        "Generate ultra-realistic professional fashion photograph. "
-        "Everything sharp. Everything real. Premium quality."
+        "TIME OF DAY: Evening, golden hour or early dusk. "
+        "Warm amber tones. Soft evening glow. Natural evening atmosphere. "
+
+        "Generate ultra-realistic professional evening fashion photograph. "
+        "Everything sharp. Everything real. Evening atmosphere. Premium quality."
     ) + uid
 
 
