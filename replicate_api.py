@@ -12,34 +12,29 @@ SAVE_DIR = "generations"
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
-# ---------------- 25 ФОНОВ ДЛЯ BACK ФОТО ----------------
+# ---------------- 20 ФОНОВ ДЛЯ BACK ФОТО ----------------
 
 BACK_BACKGROUNDS = [
-    "https://i.ibb.co/Q202Tjs/5188269594370577196.jpg",
-    "https://i.ibb.co/bMFggbS5/5188269594370577197.jpg",
-    "https://i.ibb.co/gMqqyZC1/5188269594370577198.jpg",
-    "https://i.ibb.co/vCrrMv6B/5188269594370577199.jpg",
-    "https://i.ibb.co/wNpL22K1/5188269594370577200.jpg",
-    "https://i.ibb.co/MkK2LmcJ/5188269594370577201.jpg",
-    "https://i.ibb.co/tTp0ZZjH/5188269594370577202.jpg",
     "https://i.ibb.co/ZznnWzL8/5188269594370577203.jpg",
     "https://i.ibb.co/ksZ5F1PG/5188269594370577204.jpg",
-    "https://i.ibb.co/5g3Cmmys/5188269594370577205.jpg",
     "https://i.ibb.co/35L07V91/5188269594370577206.jpg",
     "https://i.ibb.co/5x6GhY2T/5188269594370577207.jpg",
     "https://i.ibb.co/pvT20qmb/5188269594370577208.jpg",
-    "https://i.ibb.co/SDFDpTXH/5188269594370577209.jpg",
+    "https://i.ibb.co/XrSnJK6x/5188269594370577210.jpg",
     "https://i.ibb.co/FkTQGZYj/5188269594370577173.jpg",
     "https://i.ibb.co/233bJXqc/5188269594370577176.jpg",
     "https://i.ibb.co/cKLPQcw1/5188269594370577174.jpg",
-    "https://i.ibb.co/C3c4dxN6/5188269594370577175.jpg",
     "https://i.ibb.co/JjsyBCxw/5188269594370577177.jpg",
     "https://i.ibb.co/DPgbpSGm/5188269594370577178.jpg",
     "https://i.ibb.co/Z6TdkrCY/5188269594370577179.jpg",
     "https://i.ibb.co/8LZDkMZc/5188269594370577180.jpg",
     "https://i.ibb.co/DFqg1Gg/5188269594370577181.jpg",
-    "https://i.ibb.co/5WMJcgYN/5188269594370577182.jpg",
-    "https://i.ibb.co/jvNW8tD5/5188269594370577183.jpg"
+    "https://i.ibb.co/jvNW8tD5/5188269594370577183.jpg",
+    "https://i.ibb.co/kVhXCppK/5188269594370577184.jpg",
+    "https://i.ibb.co/LXTr6Hn7/5188269594370577185.jpg",
+    "https://i.ibb.co/TDqy7wjw/5188269594370577186.jpg",
+    "https://i.ibb.co/bMFggbS5/5188269594370577197.jpg",
+    "https://i.ibb.co/gMqqyZC1/5188269594370577198.jpg"
 ]
 
 # ГЛОБАЛЬНЫЙ ТРЕКЕР ИСПОЛЬЗОВАННЫХ ФОНОВ
@@ -132,22 +127,28 @@ FRONT_POSES = [
 
 BACK_POSES = [
     "standing facing away, hood up covering head, right hand resting on outer thigh, "
-    "left arm hanging freely at side",
+    "left arm hanging freely at side, relaxed natural posture",
 
     "standing facing away, hood up covering head, left hand resting on outer thigh, "
-    "right arm hanging freely at side",
+    "right arm hanging freely at side, relaxed natural posture",
 
     "standing facing away, hood up covering head, both hands resting on outer thighs, "
-    "confident athletic posture",
+    "confident athletic posture, arms naturally positioned",
+
+    "standing facing away, hood up covering head, both arms hanging naturally at sides, "
+    "straight relaxed posture",
 
     "walking away, hood up covering head, both arms swinging naturally with stride, "
-    "relaxed walking pace",
+    "relaxed walking pace, natural movement",
 
     "walking away, hood up covering head, right hand behind head on back of neck above shoulders, "
-    "left arm swinging freely with stride",
+    "left arm swinging freely with stride, natural walking motion",
 
     "walking away, hood up covering head, left hand behind head on back of neck above shoulders, "
-    "right arm swinging freely with stride"
+    "right arm swinging freely with stride, natural walking motion",
+    
+    "standing facing away, hood up covering head, one hand adjusting hood near head, "
+    "other arm hanging naturally at side"
 ]
 
 
@@ -303,9 +304,10 @@ def build_back_prompt(spec):
         "Black hoodie with hood UP covering head completely. "
         "Face completely hidden, BACK VIEW ONLY. "
         "Black wide-leg baggy denim jeans, heavy texture visible. "
-        "Hands visible and active: resting on thighs, or behind head above neck. "
-        "Hands must be NATURALLY POSITIONED. "
-        "If walking: one arm may move naturally with stride. "
+        "Hands visible and naturally positioned. "
+        "Arms hanging naturally at sides, or one hand behind head on back of neck, or adjusting hood. "
+        "HANDS MUST NEVER touch lower back area or hip area. "
+        "HANDS positioned only: at sides, on outer thighs, behind head/neck, or near hood. "
         "Natural confident posture appropriate for location and movement. "
 
         "Lighting Integration - EVENING/GOLDEN HOUR: "
