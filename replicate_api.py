@@ -8,6 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 SAVE_DIR = "generations"
+MAX_PROMPT_LENGTH = 4900
 
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
@@ -37,66 +38,45 @@ BACK_BACKGROUNDS = [
     "https://i.ibb.co/gMqqyZC1/5188269594370577198.jpg"
 ]
 
-# ГЛОБАЛЬНЫЙ ТРЕКЕР ИСПОЛЬЗОВАННЫХ ФОНОВ
 used_backgrounds_global = set()
 
 # ---------------- FRONT SCENES ----------------
 
 FRONT_SCENES = [
     {
-        "scene": "leaning against a dark Porsche parked in a clean underground garage, "
-                 "car door and fender very close to body, polished concrete floor, "
-                 "soft LED lights, other cars blurred far away, evening atmosphere",
-        "light": "soft warm evening garage lighting, ambient LED glow, golden warm tones, no harsh shadows"
+        "scene": "leaning against dark Porsche in underground garage, car door and fender very close to body, polished concrete floor, soft LED lights, other cars blurred far away, evening atmosphere",
+        "light": "soft ambient garage lighting, golden warm tones, even illumination"
     },
     {
-        "scene": "standing with body very close to a black Lamborghini Urus, "
-                 "almost touching the car, only part of hood visible in frame, "
-                 "modern business street behind in evening dusk, clean granite pavement, "
-                 "city lights beginning to glow",
+        "scene": "standing with body very close to black Lamborghini Urus, almost touching the car, only part of hood visible in frame, modern business street behind in evening dusk, clean granite pavement, city lights beginning to glow",
         "light": "golden hour evening light, warm amber tones, soft natural glow transitioning to dusk"
     },
     {
-        "scene": "leaning against a dark glass building facade, "
-                 "body pressed close to glass, contemporary architecture right behind, "
-                 "evening city reflections in glass",
+        "scene": "leaning against dark glass building facade, body pressed close to glass, contemporary architecture right behind, evening city reflections in glass, urban environment",
         "light": "soft evening diffused light, warm golden reflections from glass, ambient city glow"
     },
     {
-        "scene": "standing body-close to a black Mercedes-AMG GT, "
-                 "car door very near, only small part of car visible, "
-                 "marble columns and modern entrance barely visible, evening dusk setting",
+        "scene": "standing body-close to black Mercedes-AMG GT, car door very near, only small part of car visible, marble columns and modern entrance barely visible, evening dusk setting, luxury location",
         "light": "soft golden hour evening light, warm natural illumination, gentle shadows"
     },
     {
-        "scene": "leaning close against modern glass railing, "
-                 "railing tight against body, city view far behind, "
-                 "evening cityscape with glowing lights in background",
+        "scene": "leaning close against modern glass railing, railing tight against body, city view far behind, evening cityscape with glowing lights in background, rooftop or modern building",
         "light": "soft golden hour evening light, warm natural glow, ambient city lights in distance"
     },
     {
-        "scene": "standing body-close to a black Audi A8 parked on quiet street, "
-                 "almost touching car door, only part of door and fender in frame, "
-                 "elegant house facade and plants blurred behind, evening atmosphere, "
-                 "street lamps beginning to illuminate",
+        "scene": "standing body-close to black Audi A8 parked on quiet street, almost touching car door, only part of door and fender in frame, elegant house facade and plants blurred behind, evening atmosphere, street lamps beginning to illuminate",
         "light": "soft evening daylight transitioning to dusk, warm golden tones, gentle ambient glow"
     },
     {
-        "scene": "leaning tight against dark stone wall in modern residential courtyard, "
-                 "wall close behind, body pressed against it, "
-                 "minimalist architecture partially visible, evening setting with soft lighting",
+        "scene": "leaning tight against dark stone wall in modern residential courtyard, wall close behind, body pressed against it, minimalist architecture partially visible, evening setting with soft lighting, urban courtyard",
         "light": "soft warm evening light, natural golden glow, ambient architectural lighting"
     },
     {
-        "scene": "leaning tight against a black luxury SUV in private garage, "
-                 "body very close to car surface, only part of SUV in frame, "
-                 "epoxy floor close beneath feet, evening atmosphere with warm lighting",
+        "scene": "leaning tight against black luxury SUV in private garage, body very close to car surface, only part of SUV in frame, epoxy floor close beneath feet, evening atmosphere with warm lighting, clean modern garage",
         "light": "soft indirect LED evening lighting, warm golden tones, subtle highlights on car and fabric"
     },
     {
-        "scene": "standing on rooftop parking right next to a parked car, "
-                 "body very close to vehicle, only small portion visible, "
-                 "concrete and white parking lines at feet, open evening sky above with sunset colors",
+        "scene": "standing on rooftop parking right next to parked car, body very close to vehicle, only small portion visible, concrete and white parking lines at feet, open evening sky above with sunset colors, urban rooftop",
         "light": "soft golden hour evening light, warm sunset tones, natural evening atmosphere"
     }
 ]
@@ -104,63 +84,33 @@ FRONT_SCENES = [
 # ---------------- ПОЗЫ ----------------
 
 FRONT_POSES = [
-    "leaning naturally, right fingertips resting lightly on the hood fabric near the temple, "
-    "left hand resting loosely on upper thigh, hood down",
-
-    "leaning naturally, both hands resting lightly on both sides of the hood from the front, "
-    "chin slightly down, elbows relaxed, hood down",
-
-    "leaning naturally, left fingertips resting lightly on the hood fabric near the cheek, "
-    "right arm relaxed along outer thigh, hood down",
-
-    "leaning naturally, both hands resting lightly near the hood opening without pulling the fabric, "
-    "shoulders relaxed, hood down",
-
-    "leaning naturally, right hand resting lightly on the hood fabric near the temple, "
-    "left hand resting flat on upper thigh, hood down",
-
-    "leaning naturally, right hand resting on the back of the head, "
-    "left arm relaxed along outer thigh, hood down",
-
-    "leaning naturally, left hand resting on the back of the head, "
-    "right arm relaxed along outer thigh, hood down",
-
-    "leaning naturally, right hand resting on the back of the head, "
-    "left hand resting on upper thigh, chin slightly down, hood down"
+    "leaning naturally, right fingertips resting lightly on hood fabric near temple, left hand resting loosely on upper thigh, relaxed elbows, hood down",
+    "leaning naturally, both hands resting lightly on both sides of hood from the front, chin slightly down, elbows relaxed, shoulders against surface, hood down",
+    "leaning naturally, left fingertips resting lightly on hood fabric near cheek, right arm relaxed along outer thigh, natural posture, hood down",
+    "leaning naturally, both hands resting lightly near hood opening without pulling the fabric, shoulders relaxed, confident stance, hood down",
+    "leaning naturally, right hand resting lightly on hood fabric near temple, left hand resting flat on upper thigh, balanced posture, hood down",
+    "leaning naturally, right hand resting on back of head, left arm relaxed along outer thigh, comfortable position, hood down",
+    "leaning naturally, left hand resting on back of head, right arm relaxed along outer thigh, natural lean, hood down",
+    "leaning naturally, right hand resting on back of head, left hand resting on upper thigh, chin slightly down, relaxed stance, hood down"
 ]
 
 BACK_POSES = [
-    "walking away, hood UP completely covering head, "
-    "right hand behind head touching back of neck ABOVE shoulders, "
-    "left arm swinging naturally with stride at side of body",
-
-    "walking away, hood UP completely covering head, "
-    "left hand behind head touching back of neck ABOVE shoulders, "
-    "right arm swinging naturally with stride at side of body",
-    
-    "standing facing away, hood UP completely covering head, "
-    "right hand raised to adjust hood near head, "
-    "left hand raised near hood fabric on other side",
-    
-    "standing facing away, hood UP completely covering head, "
-    "left hand raised to adjust hood near head, "
-    "right hand touching hood fabric near shoulder area"
+    "walking away, hood UP covering head completely, both arms swinging naturally with stride, relaxed walking pace, natural movement",
+    "walking away, hood UP covering head completely, right hand behind head on neck above shoulders, left arm swinging naturally with stride, natural walking motion",
+    "walking away, hood UP covering head completely, left hand behind head on neck above shoulders, right arm swinging naturally with stride, natural walking motion",
+    "standing facing away, hood UP covering head completely, right hand raised adjusting hood near head, left hand also raised touching hood fabric on other side, active positioning",
+    "standing facing away, hood UP covering head completely, both hands raised adjusting hood, fingers touching hood fabric near head and shoulders, engaged posture"
 ]
 
 
-# ---------------- SPEC ----------------
+# ============ FUNCTIONS ============
 
 def get_random_background():
-    """Выбирает случайный фон, исключая уже использованные"""
     global used_backgrounds_global
-    
     available_bgs = [b for b in BACK_BACKGROUNDS if b not in used_backgrounds_global]
-    
-    # Если все фоны использованы, сбрасываем счетчик и начинаем заново
     if not available_bgs:
         used_backgrounds_global.clear()
         available_bgs = BACK_BACKGROUNDS
-    
     bg = random.choice(available_bgs)
     used_backgrounds_global.add(bg)
     return bg
@@ -181,9 +131,7 @@ def get_unique_specs():
         else:
             poses = BACK_POSES
             ref = REF_BACK
-            scene_data = {"scene": "", "light": "soft natural daylight"}
-            
-            # Выбираем случайный фон (не повторяющийся)
+            scene_data = {"scene": "", "light": "soft warm evening light"}
             bg = get_random_background()
 
         available_poses = [p for p in poses if p not in used_poses]
@@ -196,7 +144,7 @@ def get_unique_specs():
         specs.append({
             "side": side,
             "scene": scene_data.get("scene", ""),
-            "light": scene_data.get("light", "soft natural daylight"),
+            "light": scene_data.get("light", "warm light"),
             "pose": pose,
             "seed": random.randint(100000, 999999),
             "ref": ref,
@@ -206,195 +154,162 @@ def get_unique_specs():
     return specs
 
 
-# ---------------- FRONT PROMPT ----------------
+# ============ PROMPTS ============
 
 def build_front_prompt(spec):
-    uid = f" UID:{spec['seed']}-{random.random()}"
-
-    return (
-        "Ultra-realistic RAW 9:16 photograph. "
-        "STRICT FRONT VIEW CLOSE SHOT ONLY. "
-        "EVENING TIME - Golden hour or dusk atmosphere. "
-        "Sony A7R V, 35mm lens, f/4, ISO 400. "
-        "Camera at eye level, 1.2 meters from subject. "
-        "Framing from head to mid-thigh. Subject 70-75 percent of frame. "
-        "Subject facing camera directly. "
-
-        "HOOD POSITION FOR FRONT VIEW: "
-        "Hood is DOWN. Hood rests on shoulders and back. "
-        "Head and face visible (face hidden as per reference style). "
-        "Hood fabric visible behind head and on shoulders. "
-
-        "EVENING LIGHTING ATMOSPHERE: "
-        "Warm golden hour or early dusk lighting. "
-        "Soft amber and golden tones throughout the image. "
-        "Natural evening glow, warm color temperature. "
-        "Gentle shadows appropriate for evening time. "
-        "Ambient city lights or architectural lighting softly visible in background. "
-        "No harsh midday sun. No bright daylight. Evening atmosphere only. "
-
-        "CRITICAL - CHEST LOGO RENDERING: "
-        "Chest logo must be EXTREMELY SHARP and PERFECTLY CLEAR. "
-        "Logo is the focal point. Maximum sharpness, exact size and position from reference. "
-        "Logo crisp, clear, fully readable. Not blurred. Not distorted. "
-        "Logo color and details match reference image exactly. "
-        "Logo well-lit by evening light, clearly visible. "
-
-        "HOODIE SPECIFICATIONS: "
-        "Premium black hoodie, completely flat clean front. "
-        "No front pocket. No kangaroo pouch. No zipper. No drawstrings. "
-        "Only the chest logo visible on front. "
-
-        "Sharp focus throughout - subject and background equally sharp. "
-        "No blur. No bokeh. One unified photograph. "
-
-        "Subject must physically interact with environment naturally. "
-        "Visible physical contact with surface: wall, car, or railing. "
-        "Not floating. Not cut out. Part of the location. "
-
-        "Black wide-leg denim jeans, heavy texture visible and sharp. "
-
-        "Hands actively engaged. Visible in frame. "
-        "If touching hoodie: fingers visible on fabric. "
-        "If on head: hand visible, fingers defined. "
-        "Natural confident posture. "
-
-        "Background sharp and detailed. Not blurred. "
+    uid = f" UID:{spec['seed']}"
+    
+    prompt = (
+        "Ultra-realistic RAW 9:16 professional photography. STRICT FRONT VIEW CLOSE SHOT ONLY. "
+        "EVENING TIME - Golden hour or early dusk atmosphere. Sony A7R V camera, 35mm lens, f/4 aperture, ISO 400. "
+        "Camera positioned at eye level, 1.2 meters distance from subject. Framing spans from head to mid-thigh. "
+        "Subject occupies 70-75 percent of frame. Subject facing camera directly, centered composition. "
+        
+        "HOOD POSITION AND STYLING: Hood is DOWN resting on shoulders and back of subject. "
+        "Head and face clearly visible matching reference style. Hood fabric clearly visible behind head and draped on shoulders. "
+        "Premium fabric appearance with natural draping. Hood edges clearly defined. "
+        
+        "EVENING LIGHTING ATMOSPHERE - CRITICAL: Warm golden hour or early dusk lighting throughout. "
+        "Soft amber and golden tones dominating entire image. Natural evening glow with warm color temperature. "
+        "Gentle shadows appropriate for evening time, no harsh contrast. Ambient city lights or architectural lighting softly visible in background. "
+        "No harsh midday sun. No bright daylight. Pure evening atmosphere. Warm light bathes subject and environment equally. "
+        
+        "CHEST LOGO - CRITICAL REQUIREMENT: Chest logo must be EXTREMELY SHARP and PERFECTLY CLEAR. "
+        "Logo is focal point of image with maximum sharpness throughout. Exact size and position matching reference. "
+        "Logo crisp, clear, fully readable. Not blurred, not distorted. Logo colors and details match reference exactly. "
+        "Logo well-lit by evening light, clearly visible and prominent. Fine details of logo visible. "
+        
+        "HOODIE SPECIFICATIONS AND QUALITY: Premium quality black hoodie with completely flat, clean front. "
+        "No front pocket visible, no kangaroo pouch, no zipper visible, no drawstrings visible. "
+        "Only chest logo visible on front surface. Premium fabric with subtle texture visible. "
+        "Natural fabric draping visible. Clean construction evident. "
+        
+        "FOCUS AND SHARPNESS - CRITICAL: Sharp focus throughout entire image. "
+        "Subject and background equally sharp and detailed. No blur, no bokeh effects. "
+        "One unified professional photograph. Everything in focus. Every detail visible and sharp. "
+        
+        "SUBJECT ENVIRONMENT INTERACTION: Subject must physically interact with environment naturally. "
+        "Visible physical contact with surface: wall, car door, or railing. Contact point clearly visible. "
+        "Subject authentically part of location, not floating, not cut out. Grounded in environment. "
+        
+        "JEANS - FABRIC DETAIL: Black wide-leg denim jeans with heavy texture clearly visible and sharp. "
+        "Denim weave pattern visible. Stitching details visible. Natural fabric folds visible. "
+        "Premium denim quality evident through fabric texture. "
+        
+        "HANDS AND POSTURE - CRITICAL: Hands actively engaged and clearly visible in frame. "
+        "If touching hoodie: fingers clearly visible on fabric, natural contact. "
+        "If positioned on head: hand visible, fingers well-defined. Natural confident posture throughout. "
+        "Body language relaxed and comfortable. Professional fashion shoot posture. "
+        
+        "BACKGROUND ENVIRONMENT - SHARP: Background sharp and detailed, not blurred. "
         "Architecture, pavement, car details all clearly visible and sharp. "
-        "Evening atmosphere in background - warm lights, dusk sky, golden tones. "
-
-        f"Lighting: {spec['light']}. "
-        "Warm evening light. Soft natural glow. No harsh shadows. No flash. "
-        "Golden hour or dusk color temperature. "
-        "Light enhances logo visibility and detail. "
-
+        "Evening atmosphere in background: warm lights, dusk sky, golden tones. "
+        "Environmental details support evening setting. Background complements subject. "
         f"Scene: {spec['scene']}. "
+        
+        f"Lighting: {spec['light']}. Warm evening light, soft natural glow. No harsh shadows. No flash used. "
+        "Golden hour or dusk color temperature. Light enhances logo visibility and detail throughout image. "
+        "Professional lighting setup creating premium appearance. "
+        
         f"Pose: {spec['pose']}. "
+        
+        "TIME OF DAY AND ATMOSPHERE: Evening, golden hour or early dusk setting. Warm amber tones. "
+        "Soft evening glow throughout. Natural evening atmosphere. Time is critical evening period. "
+        
+        "FINAL RENDER REQUIREMENTS: Generate ultra-realistic professional evening fashion photograph. "
+        "Everything sharp, everything real, photorealistic. Premium quality lighting and composition. "
+        "Professional fashion magazine quality. Perfect for commercial use. "
+    )
+    
+    prompt += uid
+    
+    if len(prompt) > MAX_PROMPT_LENGTH:
+        logger.warning(f"[PROMPT] FRONT too long: {len(prompt)} > {MAX_PROMPT_LENGTH}")
+        prompt = prompt[:MAX_PROMPT_LENGTH]
+    
+    logger.info(f"[PROMPT] FRONT: {len(prompt)}/{MAX_PROMPT_LENGTH} chars")
+    return prompt
 
-        "TIME OF DAY: Evening, golden hour or early dusk. "
-        "Warm amber tones. Soft evening glow. Natural evening atmosphere. "
-
-        "Generate ultra-realistic professional evening fashion photograph. "
-        "Everything sharp. Everything real. Evening atmosphere. Premium quality."
-    ) + uid
-
-
-# ---------------- BACK PROMPT ----------------
 
 def build_back_prompt(spec):
-    uid = f" UID:{spec['seed']}-{random.random()}"
-
-    return (
+    uid = f" UID:{spec['seed']}"
+    
+    prompt = (
         "Ultra-realistic RAW 9:16 professional environmental photograph. "
-        "Back view shot integrated into the provided background location. "
+        "Back view shot integrated into provided background location. "
         "Evening or golden hour time of day. Realistic warm evening atmosphere. "
-
-        "CRITICAL - HOOD MUST BE UP: "
-        "Hood MUST be UP on head, completely covering the head. "
-        "This is MANDATORY. Hood covering head from back view. "
-        "Hood fabric clearly visible covering head and upper back. "
-        "NO exceptions - hood is ALWAYS UP for back view shots. "
-
-        "CRITICAL - ARM AND HAND POSITIONING RULES: "
-        "FORBIDDEN ZONES - hands must NEVER be positioned: "
-        "- On hips or hip area "
-        "- On buttocks or lower back "
-        "- In back pockets "
-        "- Behind back at waist level "
-        "- Anywhere near lower torso from behind "
-        "- Hanging loosely doing nothing "
         
-        "ALLOWED hand positions ONLY: "
-        "- Behind head touching NECK area ABOVE shoulders "
-        "- Actively adjusting hood near head/upper back area "
-        "- Both hands must be ENGAGED in activity "
-        "- NEVER idle or hanging free "
-        "- NEVER touching lower body or hip area "
-
-        "CRITICAL INSTRUCTION - SCALE AND HUMAN PROPORTIONS: "
-        "The subject MUST be placed at CORRECT HUMAN SCALE. "
-        "Subject height must be proportional to: "
-        "- Standard door height = 2.1 meters "
-        "- Standard window height = 1.5 meters "
-        "- Standard railing height = 1.2 meters "
-        "- Ground features and step dimensions "
-        "Subject must appear to be a NORMAL ADULT HUMAN (1.75 meters tall). "
-        "NOT a giant filling the frame. NOT a tiny dwarf. HUMAN SCALE. "
-        "Head approximately 1/7 of total body height. "
-        "Torso approximately 1/3 of body. Legs approximately 1/2 of body. "
-        "Proportions must match real human anatomy exactly. "
-
-        "CRITICAL INSTRUCTION - BACKGROUND INTEGRATION: "
-        "The subject must be naturally and realistically placed within the exact location "
-        "shown in the provided background reference image. "
-        "Subject is authentically PART of this environment, not floating, not composited. "
+        "HOOD MANDATORY - CRITICAL: Hood MUST be UP on head, completely covering head. "
+        "This is MANDATORY requirement. Hood covering head from back view. "
+        "Hood fabric clearly visible covering head and upper back. "
+        "Face completely hidden, BACK VIEW ONLY. NO exceptions - hood is ALWAYS UP. "
+        
+        "HAND AND ARM POSITIONING - CRITICAL: "
+        "FORBIDDEN ZONES - hands must NEVER touch: hips, buttocks, lower back, hip area, back pockets, waist level, anywhere near lower torso. "
+        "ALLOWED when WALKING: arms swing naturally at sides with motion. "
+        "ALLOWED when STANDING: both hands actively adjusting hood near head. "
+        "NO idle standing with hands hanging free. NEVER touching lower body or hip area. "
+        
+        "HUMAN SCALE AND PROPORTIONS - CRITICAL: Subject MUST be at CORRECT HUMAN SCALE. "
+        "Subject height proportional to standard doors (2.1 meters), windows (1.5 meters), railings (1.2 meters), ground features. "
+        "Normal adult human (1.75 meters tall). NOT giant filling frame. NOT tiny dwarf. HUMAN SCALE correct. "
+        "Head approximately 1/7 of total body height. Torso approximately 1/3 of body. Legs approximately 1/2 of body. "
+        "Proportions must match real human anatomy exactly. Real-world scale maintained throughout. "
+        
+        "BACKGROUND INTEGRATION - CRITICAL: Subject naturally and realistically placed in exact location from background reference. "
+        "Subject authentically PART of environment, not floating, not composited. "
         "Match ALL lighting, perspective, depth and atmospheric conditions from background. "
-
-        "Subject Positioning: "
-        "Place subject in CENTER-MID area of frame, naturally integrated. "
-        "Subject scale: 10-15 percent of frame height (correct human size, not tiny, not giant). "
+        
+        "SUBJECT POSITIONING: Place in CENTER-MID area of frame, naturally integrated. "
+        "Subject scale 10-15 percent of frame height (correct human size). "
         "Full body visible from head to feet, standing or walking naturally. "
-        "Feet MUST clearly touch the ground surface visible in background. "
+        "Feet MUST clearly touch ground surface visible in background. "
         "Subject must cast REALISTIC SHADOWS matching background's light direction and time of day. "
         "Perspective and depth MUST match background photograph exactly. "
-
-        "Subject Appearance: "
-        "Black hoodie with HOOD UP - HOOD COMPLETELY COVERING HEAD. "
-        "Face completely hidden, BACK VIEW ONLY. "
-        "Hood must be clearly visible on head from behind. "
-        "Black wide-leg baggy denim jeans, heavy texture visible. "
-        "Arms and hands ACTIVELY positioned - behind head/neck or adjusting hood. "
+        
+        "SUBJECT APPEARANCE AND CLOTHING: Black hoodie with HOOD UP completely covering head. "
+        "Face completely hidden, BACK VIEW ONLY. Hood clearly visible on head from behind. "
+        "Black wide-leg baggy denim jeans, heavy texture clearly visible. "
+        "Arms and hands positioned according to activity: "
+        "If WALKING: arms swing naturally OR one hand behind head at neck above shoulders. "
+        "If STANDING: both hands actively adjusting hood. "
         "ABSOLUTELY NO hands on hips, lower back, or buttocks area. "
-        "ABSOLUTELY NO idle hands hanging free. "
-        "Natural confident posture appropriate for location and movement. "
-
-        "Lighting Integration - EVENING/GOLDEN HOUR: "
-        "This is an EVENING or GOLDEN HOUR photograph - warm evening light. "
-        "Match exact lighting conditions from background photograph. "
-        "Subject must be lit CONSISTENTLY with background environment. "
-        "Shadows, highlights and COLOR TEMPERATURE must match background exactly. "
+        "ABSOLUTELY NO standing with idle hands. Natural confident posture. "
+        
+        "EVENING LIGHTING INTEGRATION - CRITICAL: This is EVENING or GOLDEN HOUR photograph - warm evening light. "
+        "Match exact lighting conditions from background photograph precisely. "
+        "Subject lit CONSISTENTLY with background environment. "
+        "Shadows, highlights and COLOR TEMPERATURE match background exactly. "
         "Light source direction MUST match background's light angle. "
         "EVENING LIGHT creates LONGER SHADOWS - render these REALISTICALLY on ground. "
         "Color temperature: WARM GOLDEN/AMBER TONES for evening atmosphere. "
-        "No artificial lighting. No flash. No studio setup. "
+        "No artificial lighting, no flash, no studio setup. "
         "Light behaves realistically across subject, ground and surroundings. "
-
-        "Photography Quality: "
-        "Sharp focus throughout entire image. "
-        "Subject and background equally sharp and detailed. "
-        "No blur. No bokeh. No selective focus. "
-        "ONE unified realistic photograph. "
-        "Ultra-realistic seamless integration, NOT composited or artificial. "
+        
+        "PHOTOGRAPHY QUALITY - CRITICAL: Sharp focus throughout entire image. "
+        "Subject and background equally sharp and detailed. No blur, no bokeh, no selective focus. "
+        "ONE unified realistic photograph. Ultra-realistic seamless integration, NOT composited or artificial. "
         "Looks like real photograph taken at location, NOT CGI or edited composite. "
-
-        "HUMAN SCALE VERIFICATION: "
-        "Subject height proportional to doors, windows, railings? YES. "
-        "Subject appears NORMAL ADULT SIZE? YES. "
-        "NOT scaled as giant? YES. NOT scaled as tiny figure? YES. "
-        "Head to body proportions correct? YES. Feet clearly on ground? YES. "
-        "Realistic human anatomy? YES. "
-        "HOOD IS UP ON HEAD? YES - MANDATORY. "
-        "Hands NOT on hips/buttocks/lower back? YES - MANDATORY. "
-        "Hands actively engaged, not idle? YES - MANDATORY. "
-
+        
         f"Pose: {spec['pose']}. "
+        
+        "Generate natural realistic evening photograph where subject is authentically integrated into background location at CORRECT HUMAN SCALE with realistic proportions, "
+        "HOOD UP on head (MANDATORY), hands positioned correctly (adjusting hood when standing, or swinging when walking), "
+        "realistic evening lighting and shadows. Result must look like single real photograph taken at that location in evening. "
+        "NOT composite. NOT manipulation. REAL PHOTOGRAPH. Professional quality rendering."
+    )
+    
+    prompt += uid
+    
+    if len(prompt) > MAX_PROMPT_LENGTH:
+        logger.warning(f"[PROMPT] BACK too long: {len(prompt)} > {MAX_PROMPT_LENGTH}")
+        prompt = prompt[:MAX_PROMPT_LENGTH]
+    
+    logger.info(f"[PROMPT] BACK: {len(prompt)}/{MAX_PROMPT_LENGTH} chars")
+    return prompt
 
-        "REMINDER: Hood MUST be UP covering head completely. "
-        "REMINDER: Hands must be ACTIVELY engaged - behind head/neck or adjusting hood. "
-        "REMINDER: NO idle hands. NO hands on hips/lower body. "
 
-        "Generate a natural realistic evening photograph where the subject is authentically "
-        "integrated into the exact location shown in the provided background image, "
-        "at CORRECT HUMAN SCALE with realistic proportions, "
-        "with HOOD UP on head, "
-        "with hands ACTIVELY engaged (behind head or adjusting hood), "
-        "with realistic evening lighting and shadows. "
-        "Result must look like a single real photograph taken at that location in the evening. "
-        "NOT a composite. NOT digital manipulation. REAL PHOTOGRAPH."
-    ) + uid
-
-
-# ---------------- POLZA ----------------
+# ============ POLZA API ============
 
 def submit_job(prompt, image_url, background_url=None):
     polza_key = os.getenv("POLZA_API_KEY")
@@ -425,13 +340,13 @@ def submit_job(prompt, image_url, background_url=None):
     try:
         data = response.json()
     except Exception:
-        raise Exception(f"Polza вернула не JSON: {response.text}")
+        raise Exception(f"Non-JSON response: {response.text}")
 
-    logger.info(f"[POLZA] submit: {data}")
+    logger.info(f"[POLZA] Submit response: {data}")
 
     job_id = data.get("id") or data.get("task_id")
     if not job_id:
-        raise Exception(f"Polza submit error: {data}")
+        raise Exception(f"No job ID in response: {data}")
 
     return job_id
 
@@ -471,7 +386,6 @@ async def poll_job(job_id, retry_count=0, max_retries=3):
     max_wait = 1200
     interval = 5
     waited = 0
-    last_data = None
 
     while waited < max_wait:
         await asyncio.sleep(interval)
@@ -488,22 +402,19 @@ async def poll_job(job_id, retry_count=0, max_retries=3):
             try:
                 data = response.json()
             except Exception:
-                logger.warning(f"[POLZA] non-JSON: {response.text[:300]}")
+                logger.warning(f"[POLZA] Non-JSON: {response.text[:200]}")
                 continue
 
-            last_data = data
             status = str(data.get("status", "")).lower()
 
-            logger.info(
-                f"[POLZA] job={job_id} waited={waited}s status={status}"
-            )
+            logger.info(f"[POLZA] Job {job_id}: waited {waited}s, status {status}")
 
             if status in {"failed", "error", "canceled", "cancelled"}:
                 error_msg = str(data.get("error", {}))
                 logger.error(f"[POLZA] Job failed: {error_msg}")
                 
                 if "BAD_GATEWAY" in error_msg and retry_count < max_retries:
-                    logger.info(f"[POLZA] Retrying...")
+                    logger.info(f"[POLZA] Retrying job...")
                     await asyncio.sleep(10)
                     return None
                 
@@ -529,14 +440,18 @@ async def download_image(url, path):
         f.write(response.content)
 
 
-# ---------------- GENERATION ----------------
+# ============ GENERATION ============
 
 async def generate_all_photos():
     specs = get_unique_specs()
+    logger.info(f"[GENERATE] Starting {len(specs)} photos: {[s['side'] for s in specs]}")
+    
     job_ids = []
     max_job_retries = 3
 
     for i, spec in enumerate(specs):
+        logger.info(f"[GENERATE] Processing spec {i}: {spec['side']}")
+        
         if spec["side"] == "front":
             prompt = build_front_prompt(spec)
             bg_url = None
@@ -549,9 +464,10 @@ async def generate_all_photos():
             try:
                 job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"], bg_url)
                 if job_id:
+                    logger.info(f"[GENERATE] Spec {i} submitted: {job_id}")
                     break
             except Exception as e:
-                logger.warning(f"[SUBMIT] Attempt {attempt + 1} failed: {e}")
+                logger.warning(f"[SUBMIT] Spec {i} attempt {attempt + 1}: {e}")
                 if attempt < max_job_retries - 1:
                     await asyncio.sleep(5)
         
@@ -563,12 +479,16 @@ async def generate_all_photos():
         if i < len(specs) - 1:
             await asyncio.sleep(3)
 
+    logger.info(f"[GENERATE] Submitted {len(job_ids)}/{len(specs)} jobs")
+
     urls = await asyncio.gather(*[poll_job(job_id) for job_id in job_ids], return_exceptions=True)
+    
+    logger.info(f"[GENERATE] Received {len(urls)} results")
 
     paths = []
     for index, url in enumerate(urls):
         if isinstance(url, Exception):
-            logger.error(f"[DOWNLOAD] Failed for index {index}: {url}")
+            logger.error(f"[DOWNLOAD] Index {index}: {url}")
             continue
         if not url:
             logger.warning(f"[DOWNLOAD] No URL for index {index}")
@@ -578,15 +498,15 @@ async def generate_all_photos():
         try:
             await download_image(url, path)
             paths.append(path)
+            logger.info(f"[DOWNLOAD] Saved index {index}")
         except Exception as e:
-            logger.error(f"[DOWNLOAD] Failed: {e}")
+            logger.error(f"[DOWNLOAD] Index {index}: {e}")
 
+    logger.info(f"[GENERATE] Final: {len(paths)}/{len(specs)} photos saved")
     return paths, specs, list(urls)
 
 
 async def regenerate_photo(index, current_specs):
-    """Регенерирует фото с новым фоном (для BACK) или новой сценой (для FRONT)"""
-    
     logger.info(f"[REGEN] Photo {index}")
     
     if index < 0 or index >= len(current_specs):
@@ -604,9 +524,7 @@ async def regenerate_photo(index, current_specs):
     else:
         poses = BACK_POSES
         ref = REF_BACK
-        scene_data = {"scene": "", "light": "soft natural daylight"}
-        
-        # Выбираем новый случайный фон (не повторяющийся)
+        scene_data = {"scene": "", "light": "soft warm evening light"}
         bg = get_random_background()
 
     available_poses = [p for p in poses if p != old_spec.get("pose")]
@@ -618,7 +536,7 @@ async def regenerate_photo(index, current_specs):
     new_spec = {
         "side": side,
         "scene": scene_data.get("scene", ""),
-        "light": scene_data.get("light", "soft natural daylight"),
+        "light": scene_data.get("light", "warm light"),
         "pose": pose,
         "seed": random.randint(100000, 999999),
         "ref": ref,
