@@ -131,10 +131,6 @@ FRONT_POSES = [
 
 BACK_POSES = [
     "walking away, hood UP completely covering head, "
-    "both arms swinging naturally with walking motion, "
-    "relaxed walking pace, natural stride",
-
-    "walking away, hood UP completely covering head, "
     "right hand behind head touching back of neck ABOVE shoulders, "
     "left arm swinging naturally with stride at side of body",
 
@@ -143,12 +139,12 @@ BACK_POSES = [
     "right arm swinging naturally with stride at side of body",
     
     "standing facing away, hood UP completely covering head, "
-    "right hand raised adjusting hood near head, "
-    "left hand also raised touching hood fabric on other side",
+    "right hand raised to adjust hood near head, "
+    "left hand raised near hood fabric on other side",
     
     "standing facing away, hood UP completely covering head, "
-    "both hands raised adjusting hood, "
-    "fingers touching hood fabric near head and shoulders"
+    "left hand raised to adjust hood near head, "
+    "right hand touching hood fabric near shoulder area"
 ]
 
 
@@ -306,12 +302,13 @@ def build_back_prompt(spec):
         "- In back pockets "
         "- Behind back at waist level "
         "- Anywhere near lower torso from behind "
+        "- Hanging loosely doing nothing "
         
-        "ALLOWED hand positions: "
-        "- When WALKING: arms can swing naturally at sides with motion "
-        "- When STANDING: hands MUST be actively adjusting hood "
-        "- When WALKING: one hand can be behind head at NECK (above shoulders) "
-        "- STANDING with idle hands is FORBIDDEN "
+        "ALLOWED hand positions ONLY: "
+        "- Behind head touching NECK area ABOVE shoulders "
+        "- Actively adjusting hood near head/upper back area "
+        "- Both hands must be ENGAGED in activity "
+        "- NEVER idle or hanging free "
         "- NEVER touching lower body or hip area "
 
         "CRITICAL INSTRUCTION - SCALE AND HUMAN PROPORTIONS: "
@@ -346,11 +343,9 @@ def build_back_prompt(spec):
         "Face completely hidden, BACK VIEW ONLY. "
         "Hood must be clearly visible on head from behind. "
         "Black wide-leg baggy denim jeans, heavy texture visible. "
-        "Arms positioned according to activity: "
-        "- If walking: arms swing naturally OR one hand behind head at neck "
-        "- If standing: both hands actively adjusting hood "
+        "Arms and hands ACTIVELY positioned - behind head/neck or adjusting hood. "
         "ABSOLUTELY NO hands on hips, lower back, or buttocks area. "
-        "ABSOLUTELY NO standing with idle hands. "
+        "ABSOLUTELY NO idle hands hanging free. "
         "Natural confident posture appropriate for location and movement. "
 
         "Lighting Integration - EVENING/GOLDEN HOUR: "
@@ -380,20 +375,19 @@ def build_back_prompt(spec):
         "Realistic human anatomy? YES. "
         "HOOD IS UP ON HEAD? YES - MANDATORY. "
         "Hands NOT on hips/buttocks/lower back? YES - MANDATORY. "
-        "If standing, hands adjusting hood? YES - MANDATORY. "
-        "If walking, arms in natural motion? ALLOWED. "
+        "Hands actively engaged, not idle? YES - MANDATORY. "
 
         f"Pose: {spec['pose']}. "
 
         "REMINDER: Hood MUST be UP covering head completely. "
-        "REMINDER: When standing - hands MUST adjust hood. When walking - arms can swing naturally. "
-        "REMINDER: NO hands on hips/lower body. NO standing with idle hands. "
+        "REMINDER: Hands must be ACTIVELY engaged - behind head/neck or adjusting hood. "
+        "REMINDER: NO idle hands. NO hands on hips/lower body. "
 
         "Generate a natural realistic evening photograph where the subject is authentically "
         "integrated into the exact location shown in the provided background image, "
         "at CORRECT HUMAN SCALE with realistic proportions, "
         "with HOOD UP on head, "
-        "with hands positioned correctly (adjusting hood when standing, or swinging when walking), "
+        "with hands ACTIVELY engaged (behind head or adjusting hood), "
         "with realistic evening lighting and shadows. "
         "Result must look like a single real photograph taken at that location in the evening. "
         "NOT a composite. NOT digital manipulation. REAL PHOTOGRAPH."
