@@ -105,54 +105,57 @@ FRONT_SCENES = [
 
 FRONT_POSES = [
     "leaning naturally, right fingertips resting lightly on the hood fabric near the temple, "
-    "left hand resting loosely on upper thigh",
+    "left hand resting loosely on upper thigh, hood down",
 
     "leaning naturally, both hands resting lightly on both sides of the hood from the front, "
-    "chin slightly down, elbows relaxed",
+    "chin slightly down, elbows relaxed, hood down",
 
     "leaning naturally, left fingertips resting lightly on the hood fabric near the cheek, "
-    "right arm relaxed along outer thigh",
+    "right arm relaxed along outer thigh, hood down",
 
     "leaning naturally, both hands resting lightly near the hood opening without pulling the fabric, "
-    "shoulders relaxed",
+    "shoulders relaxed, hood down",
 
     "leaning naturally, right hand resting lightly on the hood fabric near the temple, "
-    "left hand resting flat on upper thigh",
+    "left hand resting flat on upper thigh, hood down",
 
     "leaning naturally, right hand resting on the back of the head, "
-    "left arm relaxed along outer thigh",
+    "left arm relaxed along outer thigh, hood down",
 
     "leaning naturally, left hand resting on the back of the head, "
-    "right arm relaxed along outer thigh",
+    "right arm relaxed along outer thigh, hood down",
 
     "leaning naturally, right hand resting on the back of the head, "
-    "left hand resting on upper thigh, chin slightly down"
+    "left hand resting on upper thigh, chin slightly down, hood down"
 ]
 
 BACK_POSES = [
-    "standing facing away, hood up covering head, right hand resting on outer thigh, "
-    "left arm hanging freely at side, relaxed natural posture",
+    "standing facing away, hood UP completely covering head, "
+    "both arms hanging straight down naturally at sides, completely relaxed",
 
-    "standing facing away, hood up covering head, left hand resting on outer thigh, "
-    "right arm hanging freely at side, relaxed natural posture",
+    "standing facing away, hood UP completely covering head, "
+    "left arm hanging straight down at side, right arm hanging straight down at side, "
+    "relaxed natural standing posture",
 
-    "standing facing away, hood up covering head, both hands resting on outer thighs, "
-    "confident athletic posture, arms naturally positioned",
+    "walking away, hood UP completely covering head, "
+    "both arms swinging naturally forward and back with walking motion, "
+    "natural walking stride, arms in motion at sides of body",
 
-    "standing facing away, hood up covering head, both arms hanging naturally at sides, "
-    "straight relaxed posture",
+    "walking away, hood UP completely covering head, "
+    "right hand behind head touching back of neck ABOVE shoulders, "
+    "left arm swinging naturally with stride at side of body",
 
-    "walking away, hood up covering head, both arms swinging naturally with stride, "
-    "relaxed walking pace, natural movement",
-
-    "walking away, hood up covering head, right hand behind head on back of neck above shoulders, "
-    "left arm swinging freely with stride, natural walking motion",
-
-    "walking away, hood up covering head, left hand behind head on back of neck above shoulders, "
-    "right arm swinging freely with stride, natural walking motion",
+    "walking away, hood UP completely covering head, "
+    "left hand behind head touching back of neck ABOVE shoulders, "
+    "right arm swinging naturally with stride at side of body",
     
-    "standing facing away, hood up covering head, one hand adjusting hood near head, "
-    "other arm hanging naturally at side"
+    "standing facing away, hood UP completely covering head, "
+    "right hand raised to adjust hood near head, "
+    "left arm hanging straight down at side",
+    
+    "standing facing away, hood UP completely covering head, "
+    "left hand raised to adjust hood near head, "
+    "right arm hanging straight down at side"
 ]
 
 
@@ -228,6 +231,11 @@ def build_front_prompt(spec):
         "Framing from head to mid-thigh. Subject 70-75 percent of frame. "
         "Subject facing camera directly. "
 
+        "HOOD POSITION FOR FRONT VIEW: "
+        "Hood is DOWN. Hood rests on shoulders and back. "
+        "Head and face visible (face hidden as per reference style). "
+        "Hood fabric visible behind head and on shoulders. "
+
         "EVENING LIGHTING ATMOSPHERE: "
         "Warm golden hour or early dusk lighting. "
         "Soft amber and golden tones throughout the image. "
@@ -292,6 +300,27 @@ def build_back_prompt(spec):
         "Back view shot integrated into the provided background location. "
         "Evening or golden hour time of day. Realistic warm evening atmosphere. "
 
+        "CRITICAL - HOOD MUST BE UP: "
+        "Hood MUST be UP on head, completely covering the head. "
+        "This is MANDATORY. Hood covering head from back view. "
+        "Hood fabric clearly visible covering head and upper back. "
+        "NO exceptions - hood is ALWAYS UP for back view shots. "
+
+        "CRITICAL - ARM AND HAND POSITIONING RULES: "
+        "FORBIDDEN ZONES - hands must NEVER be positioned: "
+        "- On hips or hip area "
+        "- On buttocks or lower back "
+        "- In back pockets "
+        "- Behind back at waist level "
+        "- Anywhere near lower torso from behind "
+        
+        "ALLOWED hand positions ONLY: "
+        "- Hanging straight down at sides of body "
+        "- Swinging naturally with walking motion at sides "
+        "- Behind head touching NECK area ABOVE shoulders "
+        "- Adjusting hood near head/upper back "
+        "- NEVER touching lower body or hip area "
+
         "CRITICAL INSTRUCTION - SCALE AND HUMAN PROPORTIONS: "
         "The subject MUST be placed at CORRECT HUMAN SCALE. "
         "Subject height must be proportional to: "
@@ -320,13 +349,12 @@ def build_back_prompt(spec):
         "Perspective and depth MUST match background photograph exactly. "
 
         "Subject Appearance: "
-        "Black hoodie with hood UP covering head completely. "
+        "Black hoodie with HOOD UP - HOOD COMPLETELY COVERING HEAD. "
         "Face completely hidden, BACK VIEW ONLY. "
+        "Hood must be clearly visible on head from behind. "
         "Black wide-leg baggy denim jeans, heavy texture visible. "
-        "Hands visible and naturally positioned. "
-        "Arms hanging naturally at sides, or one hand behind head on back of neck, or adjusting hood. "
-        "HANDS MUST NEVER touch lower back area or hip area. "
-        "HANDS positioned only: at sides, on outer thighs, behind head/neck, or near hood. "
+        "Arms and hands positioned according to ALLOWED positions only. "
+        "ABSOLUTELY NO hands on hips, lower back, or buttocks area. "
         "Natural confident posture appropriate for location and movement. "
 
         "Lighting Integration - EVENING/GOLDEN HOUR: "
@@ -354,12 +382,19 @@ def build_back_prompt(spec):
         "NOT scaled as giant? YES. NOT scaled as tiny figure? YES. "
         "Head to body proportions correct? YES. Feet clearly on ground? YES. "
         "Realistic human anatomy? YES. "
+        "HOOD IS UP ON HEAD? YES - MANDATORY. "
+        "Hands NOT on hips/buttocks/lower back? YES - MANDATORY. "
 
         f"Pose: {spec['pose']}. "
+
+        "REMINDER: Hood MUST be UP covering head completely. "
+        "REMINDER: Hands must NEVER touch hips, lower back, or buttocks area. "
 
         "Generate a natural realistic evening photograph where the subject is authentically "
         "integrated into the exact location shown in the provided background image, "
         "at CORRECT HUMAN SCALE with realistic proportions, "
+        "with HOOD UP on head, "
+        "with hands in ALLOWED positions only (NOT on hips or lower body), "
         "with realistic evening lighting and shadows. "
         "Result must look like a single real photograph taken at that location in the evening. "
         "NOT a composite. NOT digital manipulation. REAL PHOTOGRAPH."
