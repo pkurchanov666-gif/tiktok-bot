@@ -12,6 +12,37 @@ SAVE_DIR = "generations"
 REF_FRONT = "https://i.ibb.co/gLm8qMzr/5451731499716646851-1.jpg"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
+BG_REFS = [
+    "https://i.ibb.co/Q202Tjs/5188269594370577196.jpg",
+    "https://i.ibb.co/bMFggbS5/5188269594370577197.jpg",
+    "https://i.ibb.co/gMqqyZC1/5188269594370577198.jpg",
+    "https://i.ibb.co/vCrrMv6B/5188269594370577199.jpg",
+    "https://i.ibb.co/wNpL22K1/5188269594370577200.jpg",
+    "https://i.ibb.co/MkK2LmcJ/5188269594370577201.jpg",
+    "https://i.ibb.co/tTp0ZZjH/5188269594370577202.jpg",
+    "https://i.ibb.co/ZznnWzL8/5188269594370577203.jpg",
+    "https://i.ibb.co/ksZ5F1PG/5188269594370577204.jpg",
+    "https://i.ibb.co/5g3Cmmys/5188269594370577205.jpg",
+    "https://i.ibb.co/35L07V91/5188269594370577206.jpg",
+    "https://i.ibb.co/5x6GhY2T/5188269594370577207.jpg",
+    "https://i.ibb.co/pvT20qmb/5188269594370577208.jpg",
+    "https://i.ibb.co/SDFDpTXH/5188269594370577209.jpg",
+    "https://i.ibb.co/FkTQGZYj/5188269594370577173.jpg",
+    "https://i.ibb.co/233bJXqc/5188269594370577176.jpg",
+    "https://i.ibb.co/cKLPQcw1/5188269594370577174.jpg",
+    "https://i.ibb.co/C3c4dxN6/5188269594370577175.jpg",
+    "https://i.ibb.co/JjsyBCxw/5188269594370577177.jpg",
+    "https://i.ibb.co/DPgbpSGm/5188269594370577178.jpg",
+    "https://i.ibb.co/Z6TdkrCY/5188269594370577179.jpg",
+    "https://i.ibb.co/8LZDkMZc/5188269594370577180.jpg",
+    "https://i.ibb.co/DFqg1Gg/5188269594370577181.jpg",
+    "https://i.ibb.co/5WMJcgYN/5188269594370577182.jpg",
+    "https://i.ibb.co/jvNW8tD5/5188269594370577183.jpg",
+    "https://i.ibb.co/kVhXCppK/5188269594370577184.jpg",
+    "https://i.ibb.co/LXTr6Hn7/5188269594370577185.jpg",
+    "https://i.ibb.co/TDqy7wjw/5188269594370577186.jpg"
+]
+
 # ---------------- FRONT SCENES ----------------
 
 FRONT_SCENES = [
@@ -174,6 +205,7 @@ def get_unique_specs():
     specs = []
     used_scenes = set()
     used_poses = set()
+    used_bg_refs = set()
     sides = ["back", "front", "back"]
 
     for side in sides:
@@ -181,10 +213,17 @@ def get_unique_specs():
             scenes = FRONT_SCENES
             poses = FRONT_POSES
             ref = REF_FRONT
+            bg_ref = None
         else:
             scenes = BACK_SCENES
             poses = BACK_POSES
             ref = REF_BACK
+
+            available_bgs = [b for b in BG_REFS if b not in used_bg_refs]
+            if not available_bgs:
+                available_bgs = BG_REFS
+            bg_ref = random.choice(available_bgs)
+            used_bg_refs.add(bg_ref)
 
         available_scenes = [s for s in scenes if s["scene"][:50] not in used_scenes]
         if not available_scenes:
@@ -204,7 +243,8 @@ def get_unique_specs():
             "light": scene_data["light"],
             "pose": pose,
             "seed": random.randint(100000, 999999),
-            "ref": ref
+            "ref": ref,
+            "bg_ref": bg_ref
         })
 
     return specs
@@ -231,7 +271,6 @@ def build_front_prompt(spec):
         "If wall or pillar — shoulder or back must lean against it. "
         "If car — body must stand very close to door or fender. "
         "If railing — body must lean lightly against it. "
-        "Visible physical contact with the environment required. "
 
         "Hood may be up or resting behind the head. "
         "If hand touches hood — fingers must visibly touch fabric. "
@@ -275,6 +314,9 @@ def build_back_prompt(spec):
         "STRICT BACK VIEW LONG SHOT ONLY. Subject seen from behind. "
         "Never use close front-view scene logic. "
 
+        "Use the first reference image for the hoodie and subject appearance. "
+        "Use the second reference image for the environment, background composition and location mood. "
+
         "Real photo taken on location. "
         "Sony A7R V, 35mm, f/11, ISO 400. "
         "Camera 1.6m height. Straight forward. No high angle. No drone. "
@@ -284,10 +326,9 @@ def build_back_prompt(spec):
         "At least 20 percent of frame is ground below feet. "
         "Subject 10-15 percent of frame. "
 
-        "CRITICAL: f/11 aperture. EVERYTHING sharp. "
+        "CRITICAL: f/11. EVERYTHING sharp. "
         "Foreground sharp. Subject sharp. Background sharp. "
         "Zero blur. Zero bokeh. Zero depth falloff. "
-        "Every detail from front to back perfectly sharp. "
 
         f"Lighting: {spec['light']}. "
         "No direct sun. No harsh shadows. No flash. "
@@ -298,12 +339,9 @@ def build_back_prompt(spec):
         "Black hoodie. No pocket. Hood up. Face hidden. "
 
         "STRICT HAND RULES: "
-        "Hands may ONLY rest lightly on the hood or on the back of the head above the neck. "
-        "NEVER let hands hang down freely. "
-        "NEVER put hands near any pocket. "
-        "NEVER put hands on thighs or hips. "
-        "NEVER let arms dangle at the sides. "
-        "Both hands must be visibly placed on the hood or on the back of the head. "
+        "Both hands must be on the hood or on back of head above neck. "
+        "NEVER hands hanging down. NEVER hands near pockets. "
+        "NEVER hands on thighs or hips. NEVER arms dangling. "
         "No pulling hood. No stretching hood. "
 
         "Subject on pedestrian surface only. No roadway. "
@@ -315,8 +353,12 @@ def build_back_prompt(spec):
 
 # ---------------- POLZA ----------------
 
-def submit_job(prompt, image_url):
+def submit_job(prompt, image_url, bg_ref_url=None):
     polza_key = os.getenv("POLZA_API_KEY")
+
+    images = [{"type": "url", "data": image_url}]
+    if bg_ref_url:
+        images.append({"type": "url", "data": bg_ref_url})
 
     response = requests.post(
         "https://polza.ai/api/v1/media",
@@ -330,7 +372,7 @@ def submit_job(prompt, image_url):
                 "prompt": prompt,
                 "aspect_ratio": "9:16",
                 "image_resolution": "1K",
-                "images": [{"type": "url", "data": image_url}]
+                "images": images
             },
             "async": True
         },
@@ -431,9 +473,7 @@ async def poll_job(job_id):
 
 async def download_image(url, path):
     response = await asyncio.to_thread(
-        requests.get,
-        url,
-        timeout=120,
+        requests.get, url, timeout=120,
         headers={"User-Agent": "Mozilla/5.0"}
     )
 
@@ -441,7 +481,6 @@ async def download_image(url, path):
         raise Exception(f"Download error {response.status_code}: {url}")
 
     os.makedirs(SAVE_DIR, exist_ok=True)
-
     with open(path, "wb") as f:
         f.write(response.content)
 
@@ -454,7 +493,9 @@ async def generate_all_photos():
 
     for i, spec in enumerate(specs):
         prompt = build_front_prompt(spec) if spec["side"] == "front" else build_back_prompt(spec)
-        job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
+        job_id = await asyncio.to_thread(
+            submit_job, prompt, spec["ref"], spec.get("bg_ref")
+        )
         job_ids.append(job_id)
 
         if i < len(specs) - 1:
@@ -480,10 +521,12 @@ async def regenerate_photo(index, current_specs):
         scenes = FRONT_SCENES
         poses = FRONT_POSES
         ref = REF_FRONT
+        bg_ref = None
     else:
         scenes = BACK_SCENES
         poses = BACK_POSES
         ref = REF_BACK
+        bg_ref = random.choice(BG_REFS)
 
     available_scenes = [s for s in scenes if s["scene"][:50] != old_scene]
     if not available_scenes:
@@ -501,11 +544,12 @@ async def regenerate_photo(index, current_specs):
         "light": scene_data["light"],
         "pose": pose,
         "seed": random.randint(100000, 999999),
-        "ref": ref
+        "ref": ref,
+        "bg_ref": bg_ref
     }
 
     prompt = build_front_prompt(spec) if side == "front" else build_back_prompt(spec)
-    job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"])
+    job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"], spec.get("bg_ref"))
     url = await poll_job(job_id)
 
     path = os.path.join(SAVE_DIR, f"ai_{int(time.time() * 1000)}_regen.png")
