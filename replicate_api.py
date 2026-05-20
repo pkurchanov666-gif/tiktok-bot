@@ -4,6 +4,7 @@ import random
 import requests
 import asyncio
 import logging
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -316,7 +317,7 @@ def submit_job(prompt, image_url, background_url=None):
             "Content-Type": "application/json"
         },
         json=payload,
-        timeout=30
+        timeout=60
     )
 
     try:
@@ -365,7 +366,7 @@ def extract_url(obj, depth=0):
 
 async def poll_job(job_id, retry_count=0, max_retries=3):
     polza_key = os.getenv("POLZA_API_KEY")
-    max_wait = 1200
+    max_wait = 2400
     interval = 5
     waited = 0
 
@@ -378,7 +379,7 @@ async def poll_job(job_id, retry_count=0, max_retries=3):
                 requests.get,
                 f"https://polza.ai/api/v1/media/{job_id}",
                 headers={"Authorization": f"Bearer {polza_key}"},
-                timeout=30
+                timeout=60
             )
 
             try:
@@ -415,10 +416,20 @@ async def poll_job(job_id, retry_count=0, max_retries=3):
 
 
 async def download_image(url, path):
-    response = await asyncio.to_thread(requests.get, url, timeout=60)
+    """Стриминговое скачивание для тяжелых 4K файлов (17+ МБ)"""
     os.makedirs(SAVE_DIR, exist_ok=True)
-    with open(path, "wb") as f:
-        f.write(response.content)
+    
+    async with httpx.AsyncClient(timeout=600.0) as client:
+        async with client.stream("GET", url) as response:
+            if response.status_code != 200:
+                raise Exception(f"Download error: {response.status_code}")
+            
+            with open(path, "wb") as f:
+                async for chunk in response.aiter_bytes(chunk_size=1024 * 1024):
+                    f.write(chunk)
+
+    size_mb = os.path.getsize(path) / (1024 * 1024)
+    logger.info(f"[DOWNLOAD] Saved: {path} ({size_mb:.1f} MB)")
 
 
 # ================= GENERATION =================
@@ -462,7 +473,10 @@ async def generate_all_photos():
 
     logger.info(f"[GENERATE] Submitted {len(job_ids)}/{len(specs)} jobs")
 
-    urls = await asyncio.gather(*[poll_job(job_id) for job_id in job_ids], return_exceptions=True)
+    urls = await asyncio.gather(
+        *[poll_job(job_id) for job_id in job_ids],
+        return_exceptions=True
+    )
 
     logger.info(f"[GENERATE] Received {len(urls)} results")
 
@@ -482,7 +496,6 @@ async def generate_all_photos():
             await download_image(url, path)
             paths.append(path)
             final_urls.append(url)
-            logger.info(f"[DOWNLOAD] Saved index {index}")
         except Exception as e:
             logger.error(f"[DOWNLOAD] Index {index}: {e}")
 
@@ -527,10 +540,8 @@ async def regenerate_photo(index, current_specs):
     else:
         prompt = build_back_prompt(new_spec)
 
-    bg_url = bg
-
     try:
-        job_id = await asyncio.to_thread(submit_job, prompt, new_spec["ref"], bg_url)
+        job_id = await asyncio.to_thread(submit_job, prompt, new_spec["ref"], bg)
         logger.info(f"[REGEN] Job: {job_id}")
     except Exception as e:
         logger.error(f"[REGEN] Submit failed: {e}")
