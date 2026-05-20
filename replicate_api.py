@@ -146,50 +146,70 @@ def build_front_prompt(spec):
     uid = f" UID:{spec['seed']}"
 
     prompt = (
-        "ACT AS A PROFESSIONAL FASHION PHOTOGRAPHER. HIGH-END EDITORIAL STYLE. "
-        "STRICT TWO-REFERENCE SYSTEM. "
-        "IMAGE 1 IS THE SUBJECT REFERENCE: use the exact person, face, clothing, chest logo, fabric texture and body proportions from IMAGE 1. "
-        "IMAGE 2 IS THE ENVIRONMENT REFERENCE: use the exact architecture, background, pavement, spatial layout, perspective and lighting mood from IMAGE 2. "
-        "DO NOT redesign the subject. DO NOT invent a new background. DO NOT change the logo. "
+        "Ultra-realistic RAW 9:16 professional fashion photograph. "
+        "Front view shot integrated into provided background location. "
+        "Evening or golden hour time of day. Realistic warm evening atmosphere. "
 
-        "COMPOSITION: "
-        "9:16 vertical portrait. "
+        "SUBJECT INTEGRATION - CRITICAL: "
+        "Use the EXACT person from IMAGE 1. "
+        "Place this exact person naturally into the EXACT location from IMAGE 2. "
+        "Match ALL lighting, perspective, depth and atmospheric conditions from IMAGE 2. "
+        "Subject authentically PART of environment, not floating, not composited. "
+        "Looks like real photograph taken at that location. NOT CGI. NOT composite. "
+
+        "FRONT VIEW - CRITICAL: "
+        "Subject facing camera directly. FRONT VIEW ONLY. "
+        "Torso 100% front-facing to camera. "
+        "Chest area fully visible and flat. "
+        "No side angles. No turned body. "
+
+        "CHEST LOGO - CRITICAL: "
+        "Chest logo from IMAGE 1 must be EXACTLY preserved. "
+        "Same size, same position, same proportions. "
+        "Logo must be razor-sharp and perfectly readable. "
+        "No blur, no warping, no distortion, no redesign. "
+
+        "SUBJECT POSITIONING: "
+        "Subject in CENTER of frame. "
         "Framing from head to mid-thigh. "
-        "Subject occupies 70 to 75 percent of frame height. "
-        "Natural eye-level perspective. "
-
-        "BODY POSITIONING - CRITICAL: "
-        "The subject from IMAGE 1 is physically placed inside the environment from IMAGE 2. "
-        "Lower back and hip lean naturally against the architectural surface from IMAGE 2. "
-        "Torso must be rotated 100 percent front-facing toward the camera. "
-        "Chest must remain perfectly flat, centered and fully visible. "
-        "Realistic contact shadows where body touches the surface from IMAGE 2. "
-        "Realistic ground contact shadows under the feet. "
+        "Subject occupies 70-75 percent of frame height. "
+        "Subject leaning naturally against the architectural surface from IMAGE 2. "
+        "Realistic contact shadows where body touches the surface. "
+        "Realistic ground shadows under feet. "
         "No floating. No cutout look. "
         f"Pose: {spec['pose']}. "
 
-        "LOGO PRIORITY - CRITICAL: "
-        "Chest logo from IMAGE 1 must be preserved exactly in size, shape, placement and proportions. "
-        "Logo must be the sharpest area of the image. "
-        "No perspective skew, no warping, no blur, no redesign. "
-        "Logo fully readable and centered. "
+        "HUMAN SCALE AND PROPORTIONS - CRITICAL: "
+        "Subject at correct realistic human scale relative to background from IMAGE 2. "
+        "Perfect body proportions matching IMAGE 1 exactly. "
+        "Natural athletic posture. "
 
-        "LIGHTING - CRITICAL: "
-        "Match exact light direction, color temperature and ambient mood from IMAGE 2. "
-        "Add subtle key light on chest to improve logo clarity. "
-        "Natural bounce light from pavement and nearby surfaces. "
-        "No studio flash. No mismatched shadows. "
+        "EVENING LIGHTING - CRITICAL: "
+        "Match exact lighting conditions from IMAGE 2 precisely. "
+        "Subject lit CONSISTENTLY with background environment. "
+        "Shadows and COLOR TEMPERATURE match IMAGE 2 exactly. "
+        "Add subtle key light on chest to enhance logo visibility. "
+        "No artificial lighting. No studio flash. No mismatched shadows. "
 
-        "TEXTURE AND OPTICS: "
-        "iPhone 17 Pro Max, 24mm lens, f/1.7, Smart HDR-5, 4K resolution. "
-        "Ultra-detailed fabric micro-texture from IMAGE 1. "
-        "Realistic cotton grain, denim weave, natural folds. "
-        "No plastic skin. No CGI look. "
+        "HOODIE - CRITICAL: "
+        "Premium black hoodie exactly as in IMAGE 1. "
+        "NO front pocket. NO kangaroo pocket. NO zipper. "
+        "Hood DOWN. Face clearly visible. "
+        "Smooth premium fabric texture. "
 
-        "FINAL RESULT: "
-        "One seamless photorealistic luxury editorial photograph. "
-        "Subject from IMAGE 1 naturally integrated into environment from IMAGE 2. "
-        "Magazine quality. Premium streetwear campaign aesthetic."
+        "PHOTOGRAPHY QUALITY - CRITICAL: "
+        "Sharp focus throughout entire image. "
+        "Subject and background equally sharp. "
+        "ONE unified realistic photograph. "
+        "Ultra-realistic seamless integration. "
+        "4K resolution. Professional fashion magazine quality. "
+
+        "Generate realistic front-view fashion photograph where subject from IMAGE 1 "
+        "is authentically integrated into the exact location from IMAGE 2, "
+        "torso 100% front-facing to camera, chest logo perfectly preserved, "
+        "realistic evening lighting and shadows. "
+        "Result must look like single real photograph taken at that location. "
+        "NOT composite. NOT manipulation. REAL PHOTOGRAPH."
     )
 
     prompt += uid
@@ -307,7 +327,8 @@ def submit_job(prompt, image_url, background_url=None):
         f"[POLZA] Submit -> model={MODEL_NAME} | "
         f"resolution={IMAGE_RESOLUTION} | "
         f"images_count={len(images)} | "
-        f"has_background={bool(background_url)}"
+        f"image_1={images[0]['data']} | "
+        f"image_2={images[1]['data'] if len(images) > 1 else 'НЕТ ФОНА'}"
     )
 
     response = requests.post(
@@ -416,14 +437,14 @@ async def poll_job(job_id, retry_count=0, max_retries=3):
 
 
 async def download_image(url, path):
-    """Стриминговое скачивание для тяжелых 4K файлов (17+ МБ)"""
+    """Стриминговое скачивание для тяжелых 4K файлов"""
     os.makedirs(SAVE_DIR, exist_ok=True)
-    
+
     async with httpx.AsyncClient(timeout=600.0) as client:
         async with client.stream("GET", url) as response:
             if response.status_code != 200:
                 raise Exception(f"Download error: {response.status_code}")
-            
+
             with open(path, "wb") as f:
                 async for chunk in response.aiter_bytes(chunk_size=1024 * 1024):
                     f.write(chunk)
@@ -442,7 +463,10 @@ async def generate_all_photos():
     max_job_retries = 3
 
     for i, spec in enumerate(specs):
-        logger.info(f"[GENERATE] Processing spec {i}: side={spec['side']} bg={spec['background']}")
+        logger.info(
+            f"[GENERATE] Spec {i}: side={spec['side']} | "
+            f"ref={spec['ref']} | bg={spec['background']}"
+        )
 
         if spec["side"] == "front":
             prompt = build_front_prompt(spec)
@@ -454,7 +478,9 @@ async def generate_all_photos():
         job_id = None
         for attempt in range(max_job_retries):
             try:
-                job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"], bg_url)
+                job_id = await asyncio.to_thread(
+                    submit_job, prompt, spec["ref"], bg_url
+                )
                 if job_id:
                     logger.info(f"[GENERATE] Spec {i} submitted: {job_id}")
                     break
