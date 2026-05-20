@@ -83,11 +83,11 @@ FRONT_POSES = [
 # ================= BACK POSES =================
 
 BACK_POSES = [
-    "walking away, hood UP covering head completely, both arms swinging naturally with stride, relaxed walking pace, back view only",
-    "walking away, hood UP covering head completely, right hand behind head on neck above shoulders, left arm swinging naturally, back view only",
-    "walking away, hood UP covering head completely, left hand behind head on neck above shoulders, right arm swinging naturally, back view only",
-    "standing facing away, hood UP covering head completely, right hand raised adjusting hood near head, left hand touching hood fabric, back view only",
-    "standing facing away, hood UP covering head completely, both hands raised adjusting hood, fingers touching hood fabric near head, back view only"
+    "walking away, hood UP covering head completely, both arms swinging naturally with stride, relaxed walking pace, natural movement",
+    "walking away, hood UP covering head completely, right hand behind head on neck above shoulders, left arm swinging naturally with stride, natural walking motion",
+    "walking away, hood UP covering head completely, left hand behind head on neck above shoulders, right arm swinging naturally with stride, natural walking motion",
+    "standing facing away, hood UP covering head completely, right hand raised adjusting hood near head, left hand also raised touching hood fabric on other side, active positioning",
+    "standing facing away, hood UP covering head completely, both hands raised adjusting hood, fingers touching hood fabric near head and shoulders, engaged posture"
 ]
 
 # ================= HELPERS =================
@@ -104,30 +104,29 @@ def get_random_background(bg_list, used_set):
 
 def get_unique_specs():
     specs = []
-    sides = ["back", "front", "back"]
-
     used_front_poses = set()
     used_back_poses = set()
+    sides = ["back", "front", "back"]
 
     for side in sides:
         if side == "front":
             ref = REF_FRONT
             bg = get_random_background(FRONT_BACKGROUNDS, used_backgrounds_front)
-            pose_list = FRONT_POSES
-            used_poses = used_front_poses
+            available_poses = [p for p in FRONT_POSES if p not in used_front_poses]
+            if not available_poses:
+                used_front_poses.clear()
+                available_poses = FRONT_POSES
+            pose = random.choice(available_poses)
+            used_front_poses.add(pose)
         else:
             ref = REF_BACK
             bg = get_random_background(BACK_BACKGROUNDS, used_backgrounds_back)
-            pose_list = BACK_POSES
-            used_poses = used_back_poses
-
-        available_poses = [p for p in pose_list if p not in used_poses]
-        if not available_poses:
-            available_poses = pose_list
-            used_poses.clear()
-
-        pose = random.choice(available_poses)
-        used_poses.add(pose)
+            available_poses = [p for p in BACK_POSES if p not in used_back_poses]
+            if not available_poses:
+                used_back_poses.clear()
+                available_poses = BACK_POSES
+            pose = random.choice(available_poses)
+            used_back_poses.add(pose)
 
         specs.append({
             "side": side,
@@ -147,46 +146,48 @@ def build_front_prompt(spec):
 
     prompt = (
         "ACT AS A PROFESSIONAL FASHION PHOTOGRAPHER. HIGH-END EDITORIAL STYLE. "
-        "STRICT TWO-REFERENCE SYSTEM: "
-        "IMAGE 1 is the MASTER SUBJECT REFERENCE - use the exact person, face, clothing, chest logo, fabric texture and body proportions from IMAGE 1. "
-        "IMAGE 2 is the MASTER ENVIRONMENT REFERENCE - use the exact architecture, background, pavement, spatial layout, perspective and lighting from IMAGE 2. "
-        "DO NOT redesign the subject. DO NOT invent a new background. "
+        "STRICT TWO-REFERENCE SYSTEM. "
+        "IMAGE 1 IS THE SUBJECT REFERENCE: use the exact person, face, clothing, chest logo, fabric texture and body proportions from IMAGE 1. "
+        "IMAGE 2 IS THE ENVIRONMENT REFERENCE: use the exact architecture, background, pavement, spatial layout, perspective and lighting mood from IMAGE 2. "
+        "DO NOT redesign the subject. DO NOT invent a new background. DO NOT change the logo. "
 
         "COMPOSITION: "
         "9:16 vertical portrait. "
-        "Subject fills 70 to 75 percent of the frame vertically. "
         "Framing from head to mid-thigh. "
+        "Subject occupies 70 to 75 percent of frame height. "
         "Natural eye-level perspective. "
 
-        "CRITICAL BODY RULE: "
-        "The torso must be rotated 100 percent front-facing toward the camera. "
-        "The chest must remain perfectly flat and fully visible. "
-        "The chest logo from IMAGE 1 must be razor-sharp, undistorted, centered, and perfectly readable. "
-        "No perspective warping on the logo. No blur. No redesign. "
-
-        "PHYSICAL INTERACTION: "
+        "BODY POSITIONING - CRITICAL: "
         "The subject from IMAGE 1 is physically placed inside the environment from IMAGE 2. "
-        "The lower back and hip lean naturally against the architectural surface from IMAGE 2. "
-        "Realistic contact shadows and ambient occlusion where the body touches the surface. "
+        "Lower back and hip lean naturally against the architectural surface from IMAGE 2. "
+        "Torso must be rotated 100 percent front-facing toward the camera. "
+        "Chest must remain perfectly flat, centered and fully visible. "
+        "Realistic contact shadows where body touches the surface from IMAGE 2. "
         "Realistic ground contact shadows under the feet. "
-        "No floating. No cutout look. No pasted-on effect. "
+        "No floating. No cutout look. "
         f"Pose: {spec['pose']}. "
 
-        "LIGHTING: "
-        "Match the exact light direction, color temperature and ambient mood from IMAGE 2. "
-        "Add a subtle controlled key light focused on the chest to enhance logo clarity. "
+        "LOGO PRIORITY - CRITICAL: "
+        "Chest logo from IMAGE 1 must be preserved exactly in size, shape, placement and proportions. "
+        "Logo must be the sharpest area of the image. "
+        "No perspective skew, no warping, no blur, no redesign. "
+        "Logo fully readable and centered. "
+
+        "LIGHTING - CRITICAL: "
+        "Match exact light direction, color temperature and ambient mood from IMAGE 2. "
+        "Add subtle key light on chest to improve logo clarity. "
         "Natural bounce light from pavement and nearby surfaces. "
         "No studio flash. No mismatched shadows. "
 
         "TEXTURE AND OPTICS: "
         "iPhone 17 Pro Max, 24mm lens, f/1.7, Smart HDR-5, 4K resolution. "
         "Ultra-detailed fabric micro-texture from IMAGE 1. "
-        "Realistic cotton grain, denim weave, natural folds, premium stitching. "
-        "No plastic skin. No CGI look. No artificial oversharpening. "
+        "Realistic cotton grain, denim weave, natural folds. "
+        "No plastic skin. No CGI look. "
 
         "FINAL RESULT: "
         "One seamless photorealistic luxury editorial photograph. "
-        "The subject from IMAGE 1 naturally integrated into the environment from IMAGE 2. "
+        "Subject from IMAGE 1 naturally integrated into environment from IMAGE 2. "
         "Magazine quality. Premium streetwear campaign aesthetic."
     )
 
@@ -205,42 +206,67 @@ def build_back_prompt(spec):
 
     prompt = (
         "Ultra-realistic RAW 9:16 professional environmental photograph. "
-        "IMAGE 1 is the SUBJECT REFERENCE. "
-        "IMAGE 2 is the BACKGROUND REFERENCE. "
-        "Integrate the subject from IMAGE 1 into the exact location from IMAGE 2. "
+        "Back view shot integrated into provided background location. "
+        "Evening or golden hour time of day. Realistic warm evening atmosphere. "
 
-        "HOOD MANDATORY - CRITICAL: "
-        "Hood MUST be UP on head, completely covering head. "
+        "HOOD MANDATORY - CRITICAL: Hood MUST be UP on head, completely covering head. "
+        "This is MANDATORY requirement. Hood covering head from back view. "
         "Hood fabric clearly visible covering head and upper back. "
-        "Face completely hidden. BACK VIEW ONLY. No exceptions. "
+        "Face completely hidden, BACK VIEW ONLY. NO exceptions - hood is ALWAYS UP. "
 
         "HAND AND ARM POSITIONING - CRITICAL: "
-        "Hands must NEVER touch hips, buttocks, lower back, hip area or waist level. "
-        "If walking: arms swing naturally OR one hand behind head at neck. "
-        "If standing: both hands actively adjusting hood near head. "
+        "FORBIDDEN ZONES - hands must NEVER touch: hips, buttocks, lower back, hip area, back pockets, waist level, anywhere near lower torso. "
+        "ALLOWED when WALKING: arms swing naturally at sides with motion. "
+        "ALLOWED when STANDING: both hands actively adjusting hood near head. "
+        "NO idle standing with hands hanging free. NEVER touching lower body or hip area. "
+
+        "HUMAN SCALE AND PROPORTIONS - CRITICAL: Subject MUST be at CORRECT HUMAN SCALE. "
+        "Subject height proportional to standard doors (2.1 meters), windows (1.5 meters), railings (1.2 meters), ground features. "
+        "Normal adult human (1.75 meters tall). NOT giant filling frame. NOT tiny dwarf. HUMAN SCALE correct. "
+        "Head approximately 1/7 of total body height. Torso approximately 1/3 of body. Legs approximately 1/2 of body. "
+        "Proportions must match real human anatomy exactly. Real-world scale maintained throughout. "
+
+        "BACKGROUND INTEGRATION - CRITICAL: Subject naturally and realistically placed in exact location from background reference. "
+        "Subject authentically PART of environment, not floating, not composited. "
+        "Match ALL lighting, perspective, depth and atmospheric conditions from background. "
+
+        "SUBJECT POSITIONING: Place in CENTER-MID area of frame, naturally integrated. "
+        "Subject scale 10-15 percent of frame height (correct human size). "
+        "Full body visible from head to feet, standing or walking naturally. "
+        "Feet MUST clearly touch ground surface visible in background. "
+        "Subject must cast REALISTIC SHADOWS matching background's light direction and time of day. "
+        "Perspective and depth MUST match background photograph exactly. "
+
+        "SUBJECT APPEARANCE AND CLOTHING: Black hoodie with HOOD UP completely covering head. "
+        "Face completely hidden, BACK VIEW ONLY. Hood clearly visible on head from behind. "
+        "Black wide-leg baggy denim jeans, heavy texture clearly visible. "
+        "Arms and hands positioned according to activity: "
+        "If WALKING: arms swing naturally OR one hand behind head at neck above shoulders. "
+        "If STANDING: both hands actively adjusting hood. "
+        "ABSOLUTELY NO hands on hips, lower back, or buttocks area. "
+        "ABSOLUTELY NO standing with idle hands. Natural confident posture. "
+
+        "EVENING LIGHTING INTEGRATION - CRITICAL: This is EVENING or GOLDEN HOUR photograph - warm evening light. "
+        "Match exact lighting conditions from background photograph precisely. "
+        "Subject lit CONSISTENTLY with background environment. "
+        "Shadows, highlights and COLOR TEMPERATURE match background exactly. "
+        "Light source direction MUST match background's light angle. "
+        "EVENING LIGHT creates LONGER SHADOWS - render these REALISTICALLY on ground. "
+        "Color temperature: WARM GOLDEN/AMBER TONES for evening atmosphere. "
+        "No artificial lighting, no flash, no studio setup. "
+        "Light behaves realistically across subject, ground and surroundings. "
+
+        "PHOTOGRAPHY QUALITY - CRITICAL: Sharp focus throughout entire image. "
+        "Subject and background equally sharp and detailed. No blur, no bokeh, no selective focus. "
+        "ONE unified realistic photograph. Ultra-realistic seamless integration, NOT composited or artificial. "
+        "Looks like real photograph taken at location, NOT CGI or edited composite. "
+
         f"Pose: {spec['pose']}. "
 
-        "HUMAN SCALE - CRITICAL: "
-        "Subject at correct realistic human scale relative to the background from IMAGE 2. "
-        "Full body visible from head to feet. "
-        "Feet must clearly touch the ground surface from IMAGE 2. "
-
-        "BACKGROUND INTEGRATION - CRITICAL: "
-        "Use the exact environment from IMAGE 2. "
-        "Match perspective, depth, scale and atmosphere from IMAGE 2 precisely. "
-        "Subject must feel naturally grounded in the scene. "
-        "No floating. No pasted-on look. "
-
-        "LIGHTING - CRITICAL: "
-        "Match exact lighting conditions, color temperature and light direction from IMAGE 2. "
-        "Render realistic evening or golden hour atmosphere. "
-        "Realistic ground contact shadows under the feet. "
-        "No studio flash. No artificial lighting. "
-
-        "QUALITY: "
-        "4K resolution. Sharp focus throughout. "
-        "One unified realistic photograph. "
-        "Not CGI. Not composite. Looks like a real photo taken at that location."
+        "Generate natural realistic evening photograph where subject is authentically integrated into background location at CORRECT HUMAN SCALE with realistic proportions, "
+        "HOOD UP on head (MANDATORY), hands positioned correctly (adjusting hood when standing, or swinging when walking), "
+        "realistic evening lighting and shadows. Result must look like single real photograph taken at that location in evening. "
+        "NOT composite. NOT manipulation. REAL PHOTOGRAPH. Professional quality rendering."
     )
 
     prompt += uid
@@ -255,12 +281,12 @@ def build_back_prompt(spec):
 
 # ================= POLZA API =================
 
-def submit_job(prompt, subject_url, background_url=None):
+def submit_job(prompt, image_url, background_url=None):
     polza_key = os.getenv("POLZA_API_KEY")
     if not polza_key:
         raise Exception("POLZA_API_KEY not set")
 
-    images = [{"type": "url", "data": subject_url}]
+    images = [{"type": "url", "data": image_url}]
     if background_url:
         images.append({"type": "url", "data": background_url})
 
@@ -277,8 +303,10 @@ def submit_job(prompt, subject_url, background_url=None):
     }
 
     logger.info(
-        f"[POLZA] Submit -> model={MODEL_NAME} | resolution={IMAGE_RESOLUTION} | "
-        f"images_count={len(images)} | has_background={bool(background_url)}"
+        f"[POLZA] Submit -> model={MODEL_NAME} | "
+        f"resolution={IMAGE_RESOLUTION} | "
+        f"images_count={len(images)} | "
+        f"has_background={bool(background_url)}"
     )
 
     response = requests.post(
@@ -288,7 +316,7 @@ def submit_job(prompt, subject_url, background_url=None):
             "Content-Type": "application/json"
         },
         json=payload,
-        timeout=60
+        timeout=30
     )
 
     try:
@@ -308,15 +336,18 @@ def submit_job(prompt, subject_url, background_url=None):
 def extract_url(obj, depth=0):
     if depth > 10:
         return None
+
     if isinstance(obj, str):
         if obj.startswith("http") and "ibb.co" not in obj:
             return obj
         return None
+
     if isinstance(obj, list):
         for item in obj:
             found = extract_url(item, depth + 1)
             if found:
                 return found
+
     if isinstance(obj, dict):
         priority_keys = ["output", "result", "url", "image", "images", "file", "src", "data"]
         for key in priority_keys:
@@ -328,10 +359,11 @@ def extract_url(obj, depth=0):
             found = extract_url(value, depth + 1)
             if found:
                 return found
+
     return None
 
 
-async def poll_job(job_id):
+async def poll_job(job_id, retry_count=0, max_retries=3):
     polza_key = os.getenv("POLZA_API_KEY")
     max_wait = 1200
     interval = 5
@@ -356,16 +388,22 @@ async def poll_job(job_id):
                 continue
 
             status = str(data.get("status", "")).lower()
-            logger.info(f"[POLZA] Job {job_id}: waited={waited}s status={status}")
+            logger.info(f"[POLZA] Job {job_id}: waited {waited}s, status={status}")
 
             if status in {"failed", "error", "canceled", "cancelled"}:
                 error_msg = str(data.get("error", {}))
                 logger.error(f"[POLZA] Job failed: {error_msg}")
+
+                if "BAD_GATEWAY" in error_msg and retry_count < max_retries:
+                    logger.info(f"[POLZA] Retrying job...")
+                    await asyncio.sleep(10)
+                    return None
+
                 raise Exception(f"Polza job failed: {data}")
 
             url = extract_url(data)
             if url:
-                logger.info(f"[POLZA] Result URL: {url}")
+                logger.info(f"[POLZA] Generated: {url}")
                 return url
 
         except Exception as e:
@@ -373,12 +411,11 @@ async def poll_job(job_id):
                 raise
             logger.warning(f"[POLZA] Poll error: {e}")
 
-    raise Exception(f"Timeout after {max_wait}s")
+    raise Exception(f"Timeout {max_wait}s")
 
 
 async def download_image(url, path):
-    response = await asyncio.to_thread(requests.get, url, timeout=120)
-    response.raise_for_status()
+    response = await asyncio.to_thread(requests.get, url, timeout=60)
     os.makedirs(SAVE_DIR, exist_ok=True)
     with open(path, "wb") as f:
         f.write(response.content)
@@ -394,17 +431,19 @@ async def generate_all_photos():
     max_job_retries = 3
 
     for i, spec in enumerate(specs):
-        logger.info(f"[GENERATE] Spec {i}: side={spec['side']} bg={spec['background']}")
+        logger.info(f"[GENERATE] Processing spec {i}: side={spec['side']} bg={spec['background']}")
 
-        prompt = build_front_prompt(spec) if spec["side"] == "front" else build_back_prompt(spec)
+        if spec["side"] == "front":
+            prompt = build_front_prompt(spec)
+        else:
+            prompt = build_back_prompt(spec)
+
         bg_url = spec["background"]
 
         job_id = None
         for attempt in range(max_job_retries):
             try:
-                job_id = await asyncio.to_thread(
-                    submit_job, prompt, spec["ref"], bg_url
-                )
+                job_id = await asyncio.to_thread(submit_job, prompt, spec["ref"], bg_url)
                 if job_id:
                     logger.info(f"[GENERATE] Spec {i} submitted: {job_id}")
                     break
@@ -418,16 +457,14 @@ async def generate_all_photos():
             continue
 
         job_ids.append(job_id)
-
         if i < len(specs) - 1:
             await asyncio.sleep(3)
 
     logger.info(f"[GENERATE] Submitted {len(job_ids)}/{len(specs)} jobs")
 
-    urls = await asyncio.gather(
-        *[poll_job(job_id) for job_id in job_ids],
-        return_exceptions=True
-    )
+    urls = await asyncio.gather(*[poll_job(job_id) for job_id in job_ids], return_exceptions=True)
+
+    logger.info(f"[GENERATE] Received {len(urls)} results")
 
     paths = []
     final_urls = []
@@ -445,11 +482,11 @@ async def generate_all_photos():
             await download_image(url, path)
             paths.append(path)
             final_urls.append(url)
-            logger.info(f"[DOWNLOAD] Saved index {index}: {path}")
+            logger.info(f"[DOWNLOAD] Saved index {index}")
         except Exception as e:
             logger.error(f"[DOWNLOAD] Index {index}: {e}")
 
-    logger.info(f"[GENERATE] Done: {len(paths)}/{len(specs)} photos saved")
+    logger.info(f"[GENERATE] Final: {len(paths)}/{len(specs)} photos saved")
     return paths, specs, final_urls
 
 
@@ -468,14 +505,14 @@ async def regenerate_photo(index, current_specs):
         available_poses = [p for p in FRONT_POSES if p != old_spec.get("pose")]
         if not available_poses:
             available_poses = FRONT_POSES
+        pose = random.choice(available_poses)
     else:
         ref = REF_BACK
         bg = get_random_background(BACK_BACKGROUNDS, used_backgrounds_back)
         available_poses = [p for p in BACK_POSES if p != old_spec.get("pose")]
         if not available_poses:
             available_poses = BACK_POSES
-
-    pose = random.choice(available_poses)
+        pose = random.choice(available_poses)
 
     new_spec = {
         "side": side,
@@ -485,11 +522,16 @@ async def regenerate_photo(index, current_specs):
         "background": bg
     }
 
-    prompt = build_front_prompt(new_spec) if side == "front" else build_back_prompt(new_spec)
+    if side == "front":
+        prompt = build_front_prompt(new_spec)
+    else:
+        prompt = build_back_prompt(new_spec)
+
+    bg_url = bg
 
     try:
-        job_id = await asyncio.to_thread(submit_job, prompt, ref, bg)
-        logger.info(f"[REGEN] Job submitted: {job_id}")
+        job_id = await asyncio.to_thread(submit_job, prompt, new_spec["ref"], bg_url)
+        logger.info(f"[REGEN] Job: {job_id}")
     except Exception as e:
         logger.error(f"[REGEN] Submit failed: {e}")
         raise
@@ -497,15 +539,14 @@ async def regenerate_photo(index, current_specs):
     try:
         url = await poll_job(job_id)
         if not url:
-            raise Exception("No URL returned")
+            raise Exception("No URL")
     except Exception as e:
         logger.error(f"[REGEN] Poll failed: {e}")
         raise
 
-    path = os.path.join(SAVE_DIR, f"ai_regen_{int(time.time() * 1000)}_{index}.png")
+    path = os.path.join(SAVE_DIR, f"ai_{int(time.time() * 1000)}_regen_{index}.png")
     try:
         await download_image(url, path)
-        logger.info(f"[REGEN] Saved: {path}")
     except Exception as e:
         logger.error(f"[REGEN] Download failed: {e}")
         raise
