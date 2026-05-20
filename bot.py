@@ -12,6 +12,7 @@ from slides import get_random_photos, create_slides
 from replicate_api import generate_all_photos, regenerate_photo
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 USER_DATA = {}
 USER_DATA_FILE = "user_data.json"
@@ -49,8 +50,8 @@ def save_user_data():
     try:
         with open(USER_DATA_FILE, "w", encoding="utf-8") as f:
             json.dump(USER_DATA, f, ensure_ascii=False, indent=2)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error(f"[STORAGE] Save error: {e}")
 
 
 def get_user_storage(user_id):
@@ -62,6 +63,12 @@ def get_user_storage(user_id):
 
 def get_random_caption():
     return random.choice(POV_PHRASES)
+
+
+def get_clean_urls(storage):
+    """Возвращает только валидные URL из storage, без None и Exception объектов"""
+    raw = storage.get("urls", [])
+    return [u for u in raw if u and isinstance(u, str) and u.startswith("http")]
 
 
 # ---------------- BUFFER API ----------------
@@ -118,6 +125,12 @@ async def get_profiles(api_key):
 
 
 async def send_to_buffer(api_key, profile_id, image_urls, caption):
+    # Финальная чистка URLs перед отправкой в Buffer
+    clean_urls = [u for u in image_urls if u and isinstance(u, str) and u.startswith("http")]
+
+    if not clean_urls:
+        raise Exception("Нет валидных URL для отправки в Buffer")
+
     mutation = """
     mutation CreatePost($input: CreatePostInput!) {
       createPost(input: $input) {
@@ -139,7 +152,7 @@ async def send_to_buffer(api_key, profile_id, image_urls, caption):
             "schedulingType": "notification",
             "mode": "addToQueue",
             "assets": {
-                "images": [{"url": url} for url in image_urls]
+                "images": [{"url": url} for url in clean_urls]
             }
         }
     }
@@ -218,7 +231,31 @@ def build_start_keyboard(user_id):
 # ---------------- SEND MEDIA ----------------
 
 async def send_media(context, user_id, paths):
-    """Отправляет все фото в альбоме"""
+    """Отправляет фото как документы чтобы не терять качество"""
+    valid_paths = [p for p in paths if p and os.path.exists(p)]
+    if not valid_paths:
+        raise Exception("Файлы не найдены")
+
+    opened_files = []
+    try:
+        for path in valid_paths:
+            f = open(path, "rb")
+            opened_files.append(f)
+            await context.bot.send_document(
+                chat_id=user_id,
+                document=f,
+                filename=os.path.basename(path)
+            )
+    finally:
+        for f in opened_files:
+            try:
+                f.close()
+            except Exception:
+                pass
+
+
+async def send_preview(context, user_id, paths):
+    """Отправляет сжатое превью (для быстрого просмотра)"""
     valid_paths = [p for p in paths if p and os.path.exists(p)]
     if not valid_paths:
         raise Exception("Файлы не найдены")
@@ -226,12 +263,10 @@ async def send_media(context, user_id, paths):
     opened_files = []
     try:
         if len(valid_paths) == 1:
-            # Одно фото - отправляем как обычное фото
             f = open(valid_paths[0], "rb")
             opened_files.append(f)
             await context.bot.send_photo(chat_id=user_id, photo=f)
         else:
-            # Несколько фото - отправляем как альбом
             media = []
             for path in valid_paths:
                 f = open(path, "rb")
@@ -289,7 +324,7 @@ async def generate_slides(update: Update, context: ContextTypes.DEFAULT_TYPE):
         storage.pop("specs", None)
         save_user_data()
 
-        await send_media(context, user_id, paths)
+        await send_preview(context, user_id, paths)
 
         await context.bot.send_message(
             chat_id=user_id,
@@ -297,6 +332,7 @@ async def generate_slides(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     except Exception as e:
+        logger.error(f"[SLIDES] Error: {e}")
         await context.bot.send_message(
             chat_id=user_id,
             text=f"❌ Ошибка слайдов: {e}"
@@ -312,18 +348,36 @@ async def background_ai_generate(context, user_id):
         if not paths:
             await context.bot.send_message(
                 chat_id=user_id,
-                text="❌ Ошибка генерации"
+                text="❌ Ошибка генерации — не получено ни одного фото"
             )
             return
 
+        # Сериализуем specs для JSON (убираем не-сериализуемые объекты)
+        safe_specs = []
+        for s in specs:
+            safe_specs.append({
+                k: v for k, v in s.items()
+                if isinstance(v, (str, int, float, bool, type(None)))
+            })
+
+        # Чистим URLs от Exception объектов
+        safe_urls = [
+            u if (u and isinstance(u, str) and u.startswith("http")) else None
+            for u in urls
+        ]
+
         storage = get_user_storage(user_id)
         storage["paths"] = paths
-        storage["specs"] = specs
-        storage["urls"] = urls
+        storage["specs"] = safe_specs
+        storage["urls"] = safe_urls
         storage["caption"] = get_random_caption()
         storage["mode"] = "ai"
         save_user_data()
 
+        # Превью в чат
+        await send_preview(context, user_id, paths)
+
+        # Оригиналы как документы
         await send_media(context, user_id, paths)
 
         await context.bot.send_message(
@@ -333,6 +387,8 @@ async def background_ai_generate(context, user_id):
         )
 
     except Exception as e:
+        import traceback
+        logger.error(f"[AI_GENERATE] Error: {traceback.format_exc()}")
         await context.bot.send_message(
             chat_id=user_id,
             text=f"❌ Ошибка: {e}"
@@ -379,7 +435,7 @@ async def regen_caption_handler(update: Update, context: ContextTypes.DEFAULT_TY
     )
 
 
-# ---------------- REGEN PHOTO (ИСПРАВЛЕННАЯ) ----------------
+# ---------------- REGEN PHOTO ----------------
 
 async def regen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -413,38 +469,46 @@ async def regen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await context.bot.send_message(
         chat_id=user_id,
-        text=f"🔄 Перегенерация фото {index+1}..."
+        text=f"🔄 Перегенерация фото {index + 1}..."
     )
 
     try:
-        # Передаем весь список specs для правильной регенерации
         new_path, new_spec, new_url = await regenerate_photo(index, storage["specs"])
 
         if not new_path or not new_spec or not new_url:
             await context.bot.send_message(
                 chat_id=user_id,
-                text="❌ Ошибка генерации - пустой результат"
+                text="❌ Ошибка генерации — пустой результат"
             )
             return
 
-        # Обновляем данные
+        # Сериализуем новый spec
+        safe_spec = {
+            k: v for k, v in new_spec.items()
+            if isinstance(v, (str, int, float, bool, type(None)))
+        }
+
+        # Обновляем storage
         storage["paths"][index] = new_path
-        storage["specs"][index] = new_spec
-        storage["urls"][index] = new_url
+        storage["specs"][index] = safe_spec
+        storage["urls"][index] = new_url if (new_url and isinstance(new_url, str)) else None
         save_user_data()
 
-        # ОТПРАВЛЯЕМ ВСЕ 3 ФОТО - 2 старых + 1 новое!
-        await send_media(context, user_id, storage["paths"])
+        # Превью нового фото
+        await send_preview(context, user_id, [new_path])
+
+        # Оригинал нового фото как документ
+        await send_media(context, user_id, [new_path])
 
         await context.bot.send_message(
             chat_id=user_id,
-            text=f"✅ Фото {index+1} обновлено\n\n{storage['caption']}",
+            text=f"✅ Фото {index + 1} обновлено\n\n{storage['caption']}",
             reply_markup=build_ai_keyboard(user_id, len(storage["paths"]))
         )
 
     except Exception as e:
         import traceback
-        logging.error(f"Regen error: {traceback.format_exc()}")
+        logger.error(f"[REGEN] Error: {traceback.format_exc()}")
         await context.bot.send_message(
             chat_id=user_id,
             text=f"❌ Ошибка: {e}"
@@ -526,6 +590,7 @@ async def buffer_token_message_handler(update: Update, context: ContextTypes.DEF
         )
 
     except Exception as e:
+        logger.error(f"[BUFFER_CONNECT] Error: {e}")
         await update.message.reply_text(f"❌ Не удалось привязать Buffer: {e}")
 
 
@@ -540,7 +605,6 @@ async def buffer_send_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     buffer_api_key = storage.get("buffer_api_key")
     buffer_profile_id = storage.get("buffer_profile_id")
-    image_urls = storage.get("urls")
     caption = storage.get("caption", get_random_caption())
 
     if not buffer_api_key or not buffer_profile_id:
@@ -557,10 +621,13 @@ async def buffer_send_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
         )
         return
 
+    # Берём только валидные URL
+    image_urls = get_clean_urls(storage)
+
     if not image_urls:
         await context.bot.send_message(
             chat_id=user_id,
-            text="❌ Сначала сгенерируй AI фотосессию"
+            text="❌ Нет валидных URL для отправки. Сначала сгенерируй AI фотосессию"
         )
         return
 
@@ -586,6 +653,7 @@ async def buffer_send_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     except Exception as e:
         error_text = str(e)
+        logger.error(f"[BUFFER_SEND] Error: {e}")
 
         if "Unauthorized" in error_text or "401" in error_text:
             storage.pop("buffer_api_key", None)
@@ -596,7 +664,8 @@ async def buffer_send_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
 
             await context.bot.send_message(
                 chat_id=user_id,
-                text="❌ API ключ Buffer недействителен. Привяжи заново."
+                text="❌ API ключ Buffer недействителен. Привяжи заново.",
+                reply_markup=build_start_keyboard(user_id)
             )
             return
 
@@ -618,7 +687,7 @@ def main():
     app.add_handler(CallbackQueryHandler(generate_slides, pattern="^slides$"))
     app.add_handler(CallbackQueryHandler(ai_handler, pattern="^ai$"))
     app.add_handler(CallbackQueryHandler(regen_caption_handler, pattern="^regen_caption$"))
-    app.add_handler(CallbackQueryHandler(regen_handler, pattern="^regen_"))
+    app.add_handler(CallbackQueryHandler(regen_handler, pattern="^regen_\\d+$"))
     app.add_handler(CallbackQueryHandler(buffer_connect_handler, pattern="^buffer_connect$"))
     app.add_handler(CallbackQueryHandler(buffer_send_handler, pattern="^buffer_send$"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, buffer_token_message_handler))
