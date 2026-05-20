@@ -9,7 +9,17 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Mess
 
 from config import BOT_TOKEN
 from slides import get_random_photos, create_slides
-from replicate_api import generate_all_photos, regenerate_photo
+from replicate_api import (
+    generate_all_photos,
+    regenerate_photo,
+    get_unique_specs,
+    build_front_prompt,
+    build_back_prompt,
+    MODEL_NAME,
+    IMAGE_RESOLUTION,
+    ASPECT_RATIO,
+    OUTPUT_FORMAT
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -66,7 +76,6 @@ def get_random_caption():
 
 
 def get_clean_urls(storage):
-    """Возвращает только валидные URL из storage, без None и Exception объектов"""
     raw = storage.get("urls", [])
     return [u for u in raw if u and isinstance(u, str) and u.startswith("http")]
 
@@ -125,9 +134,7 @@ async def get_profiles(api_key):
 
 
 async def send_to_buffer(api_key, profile_id, image_urls, caption):
-    # Финальная чистка URLs перед отправкой в Buffer
     clean_urls = [u for u in image_urls if u and isinstance(u, str) and u.startswith("http")]
-
     if not clean_urls:
         raise Exception("Нет валидных URL для отправки в Buffer")
 
@@ -230,32 +237,8 @@ def build_start_keyboard(user_id):
 
 # ---------------- SEND MEDIA ----------------
 
-async def send_media(context, user_id, paths):
-    """Отправляет фото как документы чтобы не терять качество"""
-    valid_paths = [p for p in paths if p and os.path.exists(p)]
-    if not valid_paths:
-        raise Exception("Файлы не найдены")
-
-    opened_files = []
-    try:
-        for path in valid_paths:
-            f = open(path, "rb")
-            opened_files.append(f)
-            await context.bot.send_document(
-                chat_id=user_id,
-                document=f,
-                filename=os.path.basename(path)
-            )
-    finally:
-        for f in opened_files:
-            try:
-                f.close()
-            except Exception:
-                pass
-
-
 async def send_preview(context, user_id, paths):
-    """Отправляет сжатое превью (для быстрого просмотра)"""
+    """Сжатое превью для быстрого просмотра"""
     valid_paths = [p for p in paths if p and os.path.exists(p)]
     if not valid_paths:
         raise Exception("Файлы не найдены")
@@ -273,6 +256,30 @@ async def send_preview(context, user_id, paths):
                 opened_files.append(f)
                 media.append(InputMediaPhoto(f))
             await context.bot.send_media_group(chat_id=user_id, media=media)
+    finally:
+        for f in opened_files:
+            try:
+                f.close()
+            except Exception:
+                pass
+
+
+async def send_media(context, user_id, paths):
+    """Оригиналы как документы без потери качества"""
+    valid_paths = [p for p in paths if p and os.path.exists(p)]
+    if not valid_paths:
+        raise Exception("Файлы не найдены")
+
+    opened_files = []
+    try:
+        for path in valid_paths:
+            f = open(path, "rb")
+            opened_files.append(f)
+            await context.bot.send_document(
+                chat_id=user_id,
+                document=f,
+                filename=os.path.basename(path)
+            )
     finally:
         for f in opened_files:
             try:
@@ -299,6 +306,35 @@ async def go_start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Выберите режим:",
         reply_markup=build_start_keyboard(user_id)
     )
+
+
+# ---------------- DEBUG ----------------
+
+async def debug_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    specs = get_unique_specs()
+    message = "🔍 DEBUG — что улетит в Polza:\n\n"
+
+    for i, spec in enumerate(specs):
+        if spec["side"] == "front":
+            prompt = build_front_prompt(spec)
+        else:
+            prompt = build_back_prompt(spec)
+
+        message += (
+            f"📸 ФОТО {i+1} ({spec['side'].upper()})\n"
+            f"🤖 Модель: {MODEL_NAME}\n"
+            f"📐 Разрешение: {IMAGE_RESOLUTION}\n"
+            f"📏 Соотношение: {ASPECT_RATIO}\n"
+            f"🖼 Формат: {OUTPUT_FORMAT}\n"
+            f"🧍 Субъект (фото 1): {spec['ref']}\n"
+            f"🌆 Фон (фото 2): {spec['background']}\n"
+            f"📦 Images в запросе: 2\n"
+            f"✏️ Промпт ({len(prompt)} символов):\n"
+            f"{prompt[:200]}...\n"
+            f"{'─' * 30}\n"
+        )
+
+    await update.message.reply_text(message)
 
 
 # ---------------- SLIDES ----------------
@@ -352,7 +388,6 @@ async def background_ai_generate(context, user_id):
             )
             return
 
-        # Сериализуем specs для JSON (убираем не-сериализуемые объекты)
         safe_specs = []
         for s in specs:
             safe_specs.append({
@@ -360,7 +395,6 @@ async def background_ai_generate(context, user_id):
                 if isinstance(v, (str, int, float, bool, type(None)))
             })
 
-        # Чистим URLs от Exception объектов
         safe_urls = [
             u if (u and isinstance(u, str) and u.startswith("http")) else None
             for u in urls
@@ -374,10 +408,7 @@ async def background_ai_generate(context, user_id):
         storage["mode"] = "ai"
         save_user_data()
 
-        # Превью в чат
         await send_preview(context, user_id, paths)
-
-        # Оригиналы как документы
         await send_media(context, user_id, paths)
 
         await context.bot.send_message(
@@ -417,7 +448,6 @@ async def regen_caption_handler(update: Update, context: ContextTypes.DEFAULT_TY
     storage = get_user_storage(user_id)
 
     old_caption = storage.get("caption", "")
-
     new_caption = old_caption
     for _ in range(20):
         candidate = get_random_caption()
@@ -482,22 +512,17 @@ async def regen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
 
-        # Сериализуем новый spec
         safe_spec = {
             k: v for k, v in new_spec.items()
             if isinstance(v, (str, int, float, bool, type(None)))
         }
 
-        # Обновляем storage
         storage["paths"][index] = new_path
         storage["specs"][index] = safe_spec
         storage["urls"][index] = new_url if (new_url and isinstance(new_url, str)) else None
         save_user_data()
 
-        # Превью нового фото
         await send_preview(context, user_id, [new_path])
-
-        # Оригинал нового фото как документ
         await send_media(context, user_id, [new_path])
 
         await context.bot.send_message(
@@ -621,13 +646,12 @@ async def buffer_send_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
         )
         return
 
-    # Берём только валидные URL
     image_urls = get_clean_urls(storage)
 
     if not image_urls:
         await context.bot.send_message(
             chat_id=user_id,
-            text="❌ Нет валидных URL для отправки. Сначала сгенерируй AI фотосессию"
+            text="❌ Нет валидных URL. Сначала сгенерируй AI фотосессию"
         )
         return
 
@@ -683,6 +707,7 @@ def main():
     app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("debug", debug_handler))
     app.add_handler(CallbackQueryHandler(go_start_handler, pattern="^go_start$"))
     app.add_handler(CallbackQueryHandler(generate_slides, pattern="^slides$"))
     app.add_handler(CallbackQueryHandler(ai_handler, pattern="^ai$"))
