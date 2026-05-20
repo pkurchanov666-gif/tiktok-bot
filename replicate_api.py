@@ -10,11 +10,12 @@ logger = logging.getLogger(__name__)
 SAVE_DIR = "generations"
 MAX_PROMPT_LENGTH = 4900
 
-# ================= POLZA SETTINGS =================
+# ================= MODEL SETTINGS =================
 
-MODEL_NAME = "black-forest-labs/flux.2-pro"
-IMAGE_RESOLUTION = "4K"   # было 1K, теперь 4K
+MODEL_NAME = "google/gemini-3.1-flash-image-preview"
+IMAGE_RESOLUTION = "4K"
 ASPECT_RATIO = "9:16"
+OUTPUT_FORMAT = "png"
 
 # ================= REFS =================
 
@@ -35,7 +36,7 @@ FRONT_BACKGROUNDS = [
     "https://i.ibb.co/HL426hmw/5219908140244082502.jpg",
     "https://i.ibb.co/JjQ1yJmp/5219908140244082503.jpg",
     "https://i.ibb.co/7tTD8rLt/5219908140244082498.jpg",
-    "https://i.ibb.co/0R04rmYz/5219908140244082497.jpg",
+    "https://i.ibb.co/0R04rmYz/5219908140244082497.jpg"
 ]
 
 # ================= BACK BACKGROUNDS =================
@@ -60,31 +61,33 @@ BACK_BACKGROUNDS = [
     "https://i.ibb.co/LXTr6Hn7/5188269594370577185.jpg",
     "https://i.ibb.co/TDqy7wjw/5188269594370577186.jpg",
     "https://i.ibb.co/bMFggbS5/5188269594370577197.jpg",
-    "https://i.ibb.co/gMqqyZC1/5188269594370577198.jpg",
+    "https://i.ibb.co/gMqqyZC1/5188269594370577198.jpg"
 ]
 
 used_backgrounds_front = set()
 used_backgrounds_back = set()
 
 # ================= FRONT POSES =================
-# ТОЛЬКО для фото СПЕРЕДИ
 
 FRONT_POSES = [
-    "natural front-facing editorial pose, torso turned fully toward camera, arms relaxed down by the sides, one leg slightly forward, body lightly leaning against the background structure",
-    "front-facing confident pose, torso square to camera, one hand relaxed near upper thigh, the other arm relaxed naturally, lower back leaning lightly against the surface",
-    "front-facing relaxed pose, torso fully visible and flat to camera, shoulders relaxed, one leg slightly advanced, subtle contact with the structure behind the body",
-    "front-facing fashion pose, chest area fully unobstructed, both arms relaxed near the body, slight lean through lower back and hip into the architectural surface",
+    "leaning naturally, right fingertips resting lightly on hood fabric near temple, left hand resting loosely on upper thigh, relaxed elbows, torso 100% front-facing to camera",
+    "leaning naturally, both hands resting lightly on both sides of hood, chin slightly down, torso 100% front-facing, shoulders relaxed against surface",
+    "leaning naturally, left fingertips resting lightly on hood fabric near cheek, right arm relaxed along outer thigh, torso 100% front-facing to camera",
+    "leaning naturally, right hand resting flat on upper thigh, left arm relaxed at side, balanced posture, torso 100% front-facing to camera",
+    "leaning naturally, right hand resting on back of head, left arm relaxed along outer thigh, torso 100% front-facing to camera",
+    "leaning naturally, left hand resting on back of head, right arm relaxed along outer thigh, torso 100% front-facing to camera",
+    "leaning naturally, both hands relaxed near hood opening, shoulders against surface, torso 100% front-facing to camera",
+    "leaning naturally, right hand resting on back of head, left hand resting on upper thigh, chin slightly down, torso 100% front-facing to camera"
 ]
 
 # ================= BACK POSES =================
-# ТОЛЬКО для фото СЗАДИ
 
 BACK_POSES = [
-    "walking away, hood UP covering head completely, both arms swinging naturally with stride, relaxed walking pace, natural movement",
-    "walking away, hood UP covering head completely, right hand behind head on neck above shoulders, left arm swinging naturally with stride, natural walking motion",
-    "walking away, hood UP covering head completely, left hand behind head on neck above shoulders, right arm swinging naturally with stride, natural walking motion",
-    "standing facing away, hood UP covering head completely, right hand raised adjusting hood near head, left hand also raised touching hood fabric on other side, active positioning",
-    "standing facing away, hood UP covering head completely, both hands raised adjusting hood, fingers touching hood fabric near head and shoulders, engaged posture",
+    "walking away, hood UP covering head completely, both arms swinging naturally with stride, relaxed walking pace, back view only",
+    "walking away, hood UP covering head completely, right hand behind head on neck above shoulders, left arm swinging naturally, back view only",
+    "walking away, hood UP covering head completely, left hand behind head on neck above shoulders, right arm swinging naturally, back view only",
+    "standing facing away, hood UP covering head completely, right hand raised adjusting hood near head, left hand touching hood fabric, back view only",
+    "standing facing away, hood UP covering head completely, both hands raised adjusting hood, fingers touching hood fabric near head, back view only"
 ]
 
 # ================= HELPERS =================
@@ -99,51 +102,43 @@ def get_random_background(bg_list, used_set):
     return bg
 
 
-def build_specs_sequence():
-    # порядок генерации
-    return ["back", "front", "back"]
-
-
 def get_unique_specs():
     specs = []
+    sides = ["back", "front", "back"]
 
     used_front_poses = set()
     used_back_poses = set()
 
-    for side in build_specs_sequence():
+    for side in sides:
         if side == "front":
             ref = REF_FRONT
             bg = get_random_background(FRONT_BACKGROUNDS, used_backgrounds_front)
-
-            available_poses = [p for p in FRONT_POSES if p not in used_front_poses]
-            if not available_poses:
-                available_poses = FRONT_POSES
-                used_front_poses.clear()
-
-            pose = random.choice(available_poses)
-            used_front_poses.add(pose)
-
+            pose_list = FRONT_POSES
+            used_poses = used_front_poses
         else:
             ref = REF_BACK
             bg = get_random_background(BACK_BACKGROUNDS, used_backgrounds_back)
+            pose_list = BACK_POSES
+            used_poses = used_back_poses
 
-            available_poses = [p for p in BACK_POSES if p not in used_back_poses]
-            if not available_poses:
-                available_poses = BACK_POSES
-                used_back_poses.clear()
+        available_poses = [p for p in pose_list if p not in used_poses]
+        if not available_poses:
+            available_poses = pose_list
+            used_poses.clear()
 
-            pose = random.choice(available_poses)
-            used_back_poses.add(pose)
+        pose = random.choice(available_poses)
+        used_poses.add(pose)
 
         specs.append({
             "side": side,
             "pose": pose,
             "seed": random.randint(100000, 999999),
             "ref": ref,
-            "background": bg,
+            "background": bg
         })
 
     return specs
+
 
 # ================= PROMPTS =================
 
@@ -151,69 +146,48 @@ def build_front_prompt(spec):
     uid = f" UID:{spec['seed']}"
 
     prompt = (
-        "Ultra-realistic RAW professional fashion editorial, 9:16 vertical composition. "
-        "STRICT TWO-REFERENCE GENERATION. "
-        "Reference Photo 1 is the subject. "
-        "Reference Photo 2 is the background and environment. "
-
-        "CRITICAL REFERENCE LOCK: "
-        "Use the exact person from Reference Photo 1. "
-        "Use the exact location, architecture, perspective, pavement, framing logic, lighting mood and spatial layout from Reference Photo 2. "
-        "Do not redesign the subject. "
-        "Do not redesign the environment. "
-        "Do not invent a new background. "
+        "ACT AS A PROFESSIONAL FASHION PHOTOGRAPHER. HIGH-END EDITORIAL STYLE. "
+        "STRICT TWO-REFERENCE SYSTEM: "
+        "IMAGE 1 is the MASTER SUBJECT REFERENCE - use the exact person, face, clothing, chest logo, fabric texture and body proportions from IMAGE 1. "
+        "IMAGE 2 is the MASTER ENVIRONMENT REFERENCE - use the exact architecture, background, pavement, spatial layout, perspective and lighting from IMAGE 2. "
+        "DO NOT redesign the subject. DO NOT invent a new background. "
 
         "COMPOSITION: "
-        "Strict front-facing close fashion shot. "
-        "Frame from head to mid-thigh. "
-        "Subject occupies approximately 70 to 75 percent of frame height. "
+        "9:16 vertical portrait. "
+        "Subject fills 70 to 75 percent of the frame vertically. "
+        "Framing from head to mid-thigh. "
         "Natural eye-level perspective. "
-        "Professional editorial composition. "
 
-        "BODY POSITIONING AND INTERACTION: "
-        "The subject from Reference Photo 1 is physically placed inside the exact environment from Reference Photo 2. "
-        "The body must interact naturally with the background structure from Reference Photo 2. "
-        "The lower back and hip lightly lean against the architectural or structural surface visible in Reference Photo 2. "
-        "The torso must be rotated fully front-facing toward the camera. "
-        "The chest plane must remain flat, centered, unobstructed and clearly visible. "
+        "CRITICAL BODY RULE: "
+        "The torso must be rotated 100 percent front-facing toward the camera. "
+        "The chest must remain perfectly flat and fully visible. "
+        "The chest logo from IMAGE 1 must be razor-sharp, undistorted, centered, and perfectly readable. "
+        "No perspective warping on the logo. No blur. No redesign. "
+
+        "PHYSICAL INTERACTION: "
+        "The subject from IMAGE 1 is physically placed inside the environment from IMAGE 2. "
+        "The lower back and hip lean naturally against the architectural surface from IMAGE 2. "
+        "Realistic contact shadows and ambient occlusion where the body touches the surface. "
+        "Realistic ground contact shadows under the feet. "
+        "No floating. No cutout look. No pasted-on effect. "
         f"Pose: {spec['pose']}. "
 
-        "LOGO PRIORITY - CRITICAL: "
-        "The chest logo from Reference Photo 1 must remain exact in size, shape, placement, proportions and visual weight. "
-        "The logo must be the sharpest area of the image. "
-        "No perspective skew, no warping, no stretching, no blur, no redesign. "
-        "The logo must remain fully readable and centered on the chest. "
-
-        "LIGHT MATCHING - CRITICAL: "
-        "Match the exact light direction, color temperature, ambience, exposure mood and background lighting from Reference Photo 2. "
-        "Use the environmental light of Reference Photo 2 as the main base light. "
-        "Add only a subtle controlled professional key light on the chest area to improve logo clarity while preserving realism. "
-        "Add realistic contact shadows where the body touches the surface from Reference Photo 2. "
-        "Add realistic ground contact shadows under the feet. "
+        "LIGHTING: "
+        "Match the exact light direction, color temperature and ambient mood from IMAGE 2. "
+        "Add a subtle controlled key light focused on the chest to enhance logo clarity. "
         "Natural bounce light from pavement and nearby surfaces. "
-        "No studio flash look. "
-        "No mismatched shadows. "
-        "No contradictory lighting. "
+        "No studio flash. No mismatched shadows. "
 
-        "TEXTURE AND MATERIAL PHYSICS: "
-        "Preserve original fabric detail from Reference Photo 1. "
-        "Visible cotton grain, realistic textile density, natural folds, realistic denim weave, realistic stitching, realistic shadow falloff. "
-        "Clear material separation between matte clothing from Reference Photo 1 and environmental surfaces from Reference Photo 2. "
-        "No plastic smoothing. "
-        "No CGI look. "
-        "No artificial oversharpening. "
-
-        "CAMERA AND OPTICS: "
-        "Shot on iPhone 17 Pro Max, 24mm equivalent lens, f/1.7 aperture, Smart HDR-5 look. "
-        "Subject in critical sharp focus. "
-        "Background from Reference Photo 2 remains clearly recognizable and structurally correct. "
-        "No scale distortion. "
-        "No warped verticals. "
+        "TEXTURE AND OPTICS: "
+        "iPhone 17 Pro Max, 24mm lens, f/1.7, Smart HDR-5, 4K resolution. "
+        "Ultra-detailed fabric micro-texture from IMAGE 1. "
+        "Realistic cotton grain, denim weave, natural folds, premium stitching. "
+        "No plastic skin. No CGI look. No artificial oversharpening. "
 
         "FINAL RESULT: "
-        "The final image must look like one real professional luxury editorial photograph made in the exact place from Reference Photo 2 "
-        "with the exact subject from Reference Photo 1 seamlessly integrated into that environment. "
-        "Photorealistic, premium, ultra-detailed, realistic, high-end fashion campaign quality."
+        "One seamless photorealistic luxury editorial photograph. "
+        "The subject from IMAGE 1 naturally integrated into the environment from IMAGE 2. "
+        "Magazine quality. Premium streetwear campaign aesthetic."
     )
 
     prompt += uid
@@ -231,44 +205,42 @@ def build_back_prompt(spec):
 
     prompt = (
         "Ultra-realistic RAW 9:16 professional environmental photograph. "
-        "Reference Photo 1 is the subject. "
-        "Reference Photo 2 is the background location. "
-        "Back view shot integrated into provided background location. "
-        "Evening or golden hour time of day. Realistic warm evening atmosphere. "
+        "IMAGE 1 is the SUBJECT REFERENCE. "
+        "IMAGE 2 is the BACKGROUND REFERENCE. "
+        "Integrate the subject from IMAGE 1 into the exact location from IMAGE 2. "
 
         "HOOD MANDATORY - CRITICAL: "
         "Hood MUST be UP on head, completely covering head. "
         "Hood fabric clearly visible covering head and upper back. "
-        "Face completely hidden, BACK VIEW ONLY. "
+        "Face completely hidden. BACK VIEW ONLY. No exceptions. "
 
         "HAND AND ARM POSITIONING - CRITICAL: "
-        "Hands must NEVER touch hips, buttocks, lower back, hip area, back pockets or waist level. "
-        "If walking: arms swing naturally OR one hand behind head at neck above shoulders. "
+        "Hands must NEVER touch hips, buttocks, lower back, hip area or waist level. "
+        "If walking: arms swing naturally OR one hand behind head at neck. "
         "If standing: both hands actively adjusting hood near head. "
         f"Pose: {spec['pose']}. "
 
-        "HUMAN SCALE AND PROPORTIONS - CRITICAL: "
-        "Subject must be at correct realistic human scale relative to the background architecture. "
-        "Not too large. Not too small. "
+        "HUMAN SCALE - CRITICAL: "
+        "Subject at correct realistic human scale relative to the background from IMAGE 2. "
         "Full body visible from head to feet. "
-        "Feet must clearly touch the ground. "
+        "Feet must clearly touch the ground surface from IMAGE 2. "
 
         "BACKGROUND INTEGRATION - CRITICAL: "
-        "Use the exact environment from Reference Photo 2. "
-        "Match perspective, depth, scale, architecture and atmosphere from Reference Photo 2. "
-        "The subject must feel naturally grounded in the scene. "
-        "No pasted-on look. No floating. "
+        "Use the exact environment from IMAGE 2. "
+        "Match perspective, depth, scale and atmosphere from IMAGE 2 precisely. "
+        "Subject must feel naturally grounded in the scene. "
+        "No floating. No pasted-on look. "
 
-        "LIGHT MATCHING - CRITICAL: "
-        "Match the exact lighting conditions, color temperature and light direction from Reference Photo 2. "
-        "Render realistic evening shadows and ground contact shadows. "
-        "No studio flash. No artificial mismatched lighting. "
+        "LIGHTING - CRITICAL: "
+        "Match exact lighting conditions, color temperature and light direction from IMAGE 2. "
+        "Render realistic evening or golden hour atmosphere. "
+        "Realistic ground contact shadows under the feet. "
+        "No studio flash. No artificial lighting. "
 
-        "PHOTOGRAPHY QUALITY - CRITICAL: "
-        "Sharp focus throughout image. "
-        "Realistic seamless integration. "
-        "Looks like one real photograph taken at that location. "
-        "Not CGI. Not composite. Real photo."
+        "QUALITY: "
+        "4K resolution. Sharp focus throughout. "
+        "One unified realistic photograph. "
+        "Not CGI. Not composite. Looks like a real photo taken at that location."
     )
 
     prompt += uid
@@ -280,12 +252,13 @@ def build_back_prompt(spec):
     logger.info(f"[PROMPT] BACK: {len(prompt)}/{MAX_PROMPT_LENGTH} chars")
     return prompt
 
+
 # ================= POLZA API =================
 
 def submit_job(prompt, subject_url, background_url=None):
     polza_key = os.getenv("POLZA_API_KEY")
     if not polza_key:
-        raise Exception("POLZA_API_KEY not found")
+        raise Exception("POLZA_API_KEY not set")
 
     images = [{"type": "url", "data": subject_url}]
     if background_url:
@@ -297,14 +270,15 @@ def submit_job(prompt, subject_url, background_url=None):
             "prompt": prompt,
             "aspect_ratio": ASPECT_RATIO,
             "image_resolution": IMAGE_RESOLUTION,
+            "output_format": OUTPUT_FORMAT,
             "images": images
         },
         "async": True
     }
 
     logger.info(
-        f"[POLZA] Submit payload -> model={MODEL_NAME}, resolution={IMAGE_RESOLUTION}, "
-        f"images_count={len(images)}, has_background={bool(background_url)}"
+        f"[POLZA] Submit -> model={MODEL_NAME} | resolution={IMAGE_RESOLUTION} | "
+        f"images_count={len(images)} | has_background={bool(background_url)}"
     )
 
     response = requests.post(
@@ -334,18 +308,15 @@ def submit_job(prompt, subject_url, background_url=None):
 def extract_url(obj, depth=0):
     if depth > 10:
         return None
-
     if isinstance(obj, str):
         if obj.startswith("http") and "ibb.co" not in obj:
             return obj
         return None
-
     if isinstance(obj, list):
         for item in obj:
             found = extract_url(item, depth + 1)
             if found:
                 return found
-
     if isinstance(obj, dict):
         priority_keys = ["output", "result", "url", "image", "images", "file", "src", "data"]
         for key in priority_keys:
@@ -357,11 +328,10 @@ def extract_url(obj, depth=0):
             found = extract_url(value, depth + 1)
             if found:
                 return found
-
     return None
 
 
-async def poll_job(job_id, retry_count=0, max_retries=3):
+async def poll_job(job_id):
     polza_key = os.getenv("POLZA_API_KEY")
     max_wait = 1200
     interval = 5
@@ -386,22 +356,16 @@ async def poll_job(job_id, retry_count=0, max_retries=3):
                 continue
 
             status = str(data.get("status", "")).lower()
-            logger.info(f"[POLZA] Job {job_id}: waited {waited}s, status={status}")
+            logger.info(f"[POLZA] Job {job_id}: waited={waited}s status={status}")
 
             if status in {"failed", "error", "canceled", "cancelled"}:
                 error_msg = str(data.get("error", {}))
                 logger.error(f"[POLZA] Job failed: {error_msg}")
-
-                if "BAD_GATEWAY" in error_msg and retry_count < max_retries:
-                    logger.info("[POLZA] Retrying after BAD_GATEWAY...")
-                    await asyncio.sleep(10)
-                    return None
-
                 raise Exception(f"Polza job failed: {data}")
 
             url = extract_url(data)
             if url:
-                logger.info(f"[POLZA] Generated URL: {url}")
+                logger.info(f"[POLZA] Result URL: {url}")
                 return url
 
         except Exception as e:
@@ -409,7 +373,7 @@ async def poll_job(job_id, retry_count=0, max_retries=3):
                 raise
             logger.warning(f"[POLZA] Poll error: {e}")
 
-    raise Exception(f"Timeout {max_wait}s")
+    raise Exception(f"Timeout after {max_wait}s")
 
 
 async def download_image(url, path):
@@ -418,6 +382,7 @@ async def download_image(url, path):
     os.makedirs(SAVE_DIR, exist_ok=True)
     with open(path, "wb") as f:
         f.write(response.content)
+
 
 # ================= GENERATION =================
 
@@ -429,23 +394,16 @@ async def generate_all_photos():
     max_job_retries = 3
 
     for i, spec in enumerate(specs):
-        logger.info(f"[GENERATE] Processing spec {i}: {spec['side']}")
+        logger.info(f"[GENERATE] Spec {i}: side={spec['side']} bg={spec['background']}")
 
-        if spec["side"] == "front":
-            prompt = build_front_prompt(spec)
-        else:
-            prompt = build_back_prompt(spec)
-
+        prompt = build_front_prompt(spec) if spec["side"] == "front" else build_back_prompt(spec)
         bg_url = spec["background"]
 
         job_id = None
         for attempt in range(max_job_retries):
             try:
                 job_id = await asyncio.to_thread(
-                    submit_job,
-                    prompt,
-                    spec["ref"],
-                    bg_url
+                    submit_job, prompt, spec["ref"], bg_url
                 )
                 if job_id:
                     logger.info(f"[GENERATE] Spec {i} submitted: {job_id}")
@@ -466,8 +424,10 @@ async def generate_all_photos():
 
     logger.info(f"[GENERATE] Submitted {len(job_ids)}/{len(specs)} jobs")
 
-    urls = await asyncio.gather(*[poll_job(job_id) for job_id in job_ids], return_exceptions=True)
-    logger.info(f"[GENERATE] Received {len(urls)} results")
+    urls = await asyncio.gather(
+        *[poll_job(job_id) for job_id in job_ids],
+        return_exceptions=True
+    )
 
     paths = []
     final_urls = []
@@ -485,11 +445,11 @@ async def generate_all_photos():
             await download_image(url, path)
             paths.append(path)
             final_urls.append(url)
-            logger.info(f"[DOWNLOAD] Saved index {index}")
+            logger.info(f"[DOWNLOAD] Saved index {index}: {path}")
         except Exception as e:
             logger.error(f"[DOWNLOAD] Index {index}: {e}")
 
-    logger.info(f"[GENERATE] Final: {len(paths)}/{len(specs)} photos saved")
+    logger.info(f"[GENERATE] Done: {len(paths)}/{len(specs)} photos saved")
     return paths, specs, final_urls
 
 
@@ -503,49 +463,33 @@ async def regenerate_photo(index, current_specs):
     side = old_spec["side"]
 
     if side == "front":
+        ref = REF_FRONT
         bg = get_random_background(FRONT_BACKGROUNDS, used_backgrounds_front)
-
         available_poses = [p for p in FRONT_POSES if p != old_spec.get("pose")]
         if not available_poses:
             available_poses = FRONT_POSES
-
-        pose = random.choice(available_poses)
-
-        new_spec = {
-            "side": side,
-            "pose": pose,
-            "seed": random.randint(100000, 999999),
-            "ref": REF_FRONT,
-            "background": bg
-        }
-        prompt = build_front_prompt(new_spec)
-
     else:
+        ref = REF_BACK
         bg = get_random_background(BACK_BACKGROUNDS, used_backgrounds_back)
-
         available_poses = [p for p in BACK_POSES if p != old_spec.get("pose")]
         if not available_poses:
             available_poses = BACK_POSES
 
-        pose = random.choice(available_poses)
+    pose = random.choice(available_poses)
 
-        new_spec = {
-            "side": side,
-            "pose": pose,
-            "seed": random.randint(100000, 999999),
-            "ref": REF_BACK,
-            "background": bg
-        }
-        prompt = build_back_prompt(new_spec)
+    new_spec = {
+        "side": side,
+        "pose": pose,
+        "seed": random.randint(100000, 999999),
+        "ref": ref,
+        "background": bg
+    }
+
+    prompt = build_front_prompt(new_spec) if side == "front" else build_back_prompt(new_spec)
 
     try:
-        job_id = await asyncio.to_thread(
-            submit_job,
-            prompt,
-            new_spec["ref"],
-            new_spec["background"]
-        )
-        logger.info(f"[REGEN] Job: {job_id}")
+        job_id = await asyncio.to_thread(submit_job, prompt, ref, bg)
+        logger.info(f"[REGEN] Job submitted: {job_id}")
     except Exception as e:
         logger.error(f"[REGEN] Submit failed: {e}")
         raise
@@ -553,14 +497,15 @@ async def regenerate_photo(index, current_specs):
     try:
         url = await poll_job(job_id)
         if not url:
-            raise Exception("No URL")
+            raise Exception("No URL returned")
     except Exception as e:
         logger.error(f"[REGEN] Poll failed: {e}")
         raise
 
-    path = os.path.join(SAVE_DIR, f"ai_{int(time.time() * 1000)}_regen_{index}.png")
+    path = os.path.join(SAVE_DIR, f"ai_regen_{int(time.time() * 1000)}_{index}.png")
     try:
         await download_image(url, path)
+        logger.info(f"[REGEN] Saved: {path}")
     except Exception as e:
         logger.error(f"[REGEN] Download failed: {e}")
         raise
