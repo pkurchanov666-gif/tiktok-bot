@@ -153,6 +153,7 @@ def build_front_prompt(spec):
         "IMAGE 1 is the subject. Use exact person, face, clothing, logo from IMAGE 1. "
         "IMAGE 2 is the background. Place subject into exact location from IMAGE 2. "
         "Do not redesign subject. Do not invent background. "
+        "Do not add objects not present in IMAGE 2. "
 
         "FRONT VIEW: "
         "Torso 100% front-facing to camera. "
@@ -166,24 +167,30 @@ def build_front_prompt(spec):
 
         "POSITIONING: "
         "Subject centered. Head to mid-thigh framing. "
-        "Leaning against surface from IMAGE 2. "
-        "Realistic contact shadows. Ground shadows. No floating. "
+        "Standing naturally in the location from IMAGE 2. "
+        "Do NOT add extra walls, railings, pillars or surfaces not in IMAGE 2. "
+        "Do NOT invent architectural elements. Only what is in IMAGE 2. "
+        "Realistic ground contact shadows under feet. No floating. "
         f"Pose: {spec['pose']}. "
+
+        "BACKGROUND - CRITICAL: "
+        "Background must be the EXACT scene from IMAGE 2. "
+        "No invented objects. No added surfaces. No extra elements. "
+        "Background must be tack sharp. Sharper than or equal to IMAGE 2. "
+        "No bokeh. No blur. No depth of field. No selective focus. "
+        "Every detail crisp and clear. f/8 aperture. Everything in focus. "
 
         "LIGHTING: "
         "Match exact lighting from IMAGE 2. "
-        "Warm golden evening tones. Long shadows on ground. "
+        "Warm golden evening tones. Realistic shadows. "
         "No studio flash. No mismatched shadows. "
 
         "HOODIE: "
         "Black hoodie as in IMAGE 1. Hood DOWN. Face visible. "
         "NO pocket. NO zipper. Smooth fabric. "
 
-        "JEANS: "
-        "Wide baggy black denim as in IMAGE 1. Heavy texture visible. "
-
         "QUALITY: "
-        "4K. Sharp focus. Seamless integration. "
+        "Maximum sharpness front to back. 4K. "
         "Real photograph. Not composite. Not CGI."
     )
 
@@ -224,6 +231,7 @@ def build_back_prompt(spec):
         "BACKGROUND: "
         "Exact location from IMAGE 2. Match perspective, depth, scale. "
         "Subject authentically part of environment. Not floating. "
+        "No added objects not present in IMAGE 2. "
 
         "LIGHTING: "
         "Match exact lighting from IMAGE 2. "
