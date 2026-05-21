@@ -3,6 +3,10 @@ import random
 import json
 import os
 import httpx
+import requests
+import base64
+from io import BytesIO
+from PIL import Image
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, ContextTypes, filters
@@ -78,6 +82,39 @@ def get_random_caption():
 def get_clean_urls(storage):
     raw = storage.get("urls", [])
     return [u for u in raw if u and isinstance(u, str) and u.startswith("http")]
+
+
+# ---------------- COMPRESS FOR BUFFER ----------------
+
+def compress_for_tiktok(path):
+    """
+    Сжимает фото до максимума TikTok (1080x1920).
+    Оригинал 4K остается нетронутым.
+    """
+    img = Image.open(path)
+    img.thumbnail((1080, 1920), Image.LANCZOS)
+    buffer = BytesIO()
+    img.save(buffer, format="JPEG", quality=95)
+    buffer.seek(0)
+    return buffer
+
+
+def upload_to_imgbb(image_buffer):
+    """Загружает сжатое фото на ImgBB и возвращает URL"""
+    imgbb_key = os.getenv("IMGBB_API_KEY")
+    if not imgbb_key:
+        raise Exception("IMGBB_API_KEY not set")
+
+    img_data = base64.b64encode(image_buffer.read()).decode("utf-8")
+    response = requests.post(
+        "https://api.imgbb.com/1/upload",
+        data={"key": imgbb_key, "image": img_data},
+        timeout=60
+    )
+    data = response.json()
+    if not data.get("success"):
+        raise Exception(f"ImgBB upload failed: {data}")
+    return data["data"]["url"]
 
 
 # ---------------- BUFFER API ----------------
@@ -239,9 +276,9 @@ def build_start_keyboard(user_id):
 
 async def send_files(context, user_id, paths):
     """
-    Отправляем все файлы как документы.
-    Telegram принимает документы до 50MB — наши 22MB пройдут без проблем.
-    Качество не теряется в отличие от send_photo (лимит 10MB).
+    Отправляет файлы как документы.
+    Telegram принимает до 50MB — наши 22MB проходят.
+    Качество не теряется.
     """
     valid_paths = [p for p in paths if p and os.path.exists(p)]
     if not valid_paths:
@@ -498,7 +535,8 @@ async def regen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         storage["urls"][index] = new_url if (new_url and isinstance(new_url, str)) else None
         save_user_data()
 
-        await send_files(context, user_id, [new_path])
+        # Отправляем все 3 фото: новое + 2 старых
+        await send_files(context, user_id, storage["paths"])
 
         await context.bot.send_message(
             chat_id=user_id,
@@ -621,25 +659,34 @@ async def buffer_send_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
         )
         return
 
-    image_urls = get_clean_urls(storage)
+    paths = storage.get("paths", [])
+    valid_paths = [p for p in paths if p and os.path.exists(p)]
 
-    if not image_urls:
+    if not valid_paths:
         await context.bot.send_message(
             chat_id=user_id,
-            text="❌ Нет валидных URL. Сначала сгенерируй AI фотосессию"
+            text="❌ Файлы не найдены. Сгенерируй заново"
         )
         return
 
     await context.bot.send_message(
         chat_id=user_id,
-        text="📤 Отправляю в Buffer..."
+        text="📤 Сжимаю до TikTok формата и отправляю в Buffer..."
     )
 
     try:
+        # Сжимаем до 1080x1920 и загружаем на ImgBB
+        compressed_urls = []
+        for path in valid_paths:
+            compressed = compress_for_tiktok(path)
+            url = upload_to_imgbb(compressed)
+            compressed_urls.append(url)
+            logger.info(f"[BUFFER] Uploaded compressed: {url}")
+
         await send_to_buffer(
             api_key=buffer_api_key,
             profile_id=buffer_profile_id,
-            image_urls=image_urls,
+            image_urls=compressed_urls,
             caption=caption
         )
 
@@ -647,7 +694,9 @@ async def buffer_send_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
 
         await context.bot.send_message(
             chat_id=user_id,
-            text=f"✅ Отправлено в Buffer\nПрофиль: {profile_name}"
+            text=f"✅ Отправлено в Buffer\nПрофиль: {profile_name}\n\n"
+                 f"📱 Фото сжаты до 1080x1920 для TikTok\n"
+                 f"🖼 Оригинал 4K остался у тебя в чате"
         )
 
     except Exception as e:
