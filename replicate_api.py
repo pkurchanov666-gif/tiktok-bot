@@ -9,7 +9,7 @@ import httpx
 logger = logging.getLogger(__name__)
 
 SAVE_DIR = "generations"
-MAX_PROMPT_LENGTH = 4900
+MAX_PROMPT_LENGTH = 2700
 
 # ================= MODEL SETTINGS =================
 
@@ -147,78 +147,52 @@ def build_front_prompt(spec):
 
     prompt = (
         "Ultra-realistic RAW 9:16 professional fashion photograph. "
-        "Front view shot integrated into provided background location. "
-        "Evening or golden hour time of day. Realistic warm evening atmosphere. "
+        "Front view. Evening atmosphere. "
 
-        "SUBJECT INTEGRATION - CRITICAL: "
-        "Use the EXACT person from IMAGE 1. "
-        "Place this exact person naturally into the EXACT location from IMAGE 2. "
-        "Match ALL lighting, perspective, depth and atmospheric conditions from IMAGE 2. "
-        "Subject authentically PART of environment, not floating, not composited. "
-        "Looks like real photograph taken at that location. NOT CGI. NOT composite. "
+        "REFERENCES: "
+        "IMAGE 1 is the subject. Use exact person, face, clothing, logo from IMAGE 1. "
+        "IMAGE 2 is the background. Place subject into exact location from IMAGE 2. "
+        "Do not redesign subject. Do not invent background. "
 
-        "FRONT VIEW - CRITICAL: "
-        "Subject facing camera directly. FRONT VIEW ONLY. "
+        "FRONT VIEW: "
         "Torso 100% front-facing to camera. "
-        "Chest area fully visible and flat. "
-        "No side angles. No turned body. "
+        "Chest flat and fully visible. No side angles. "
+        "Face visible exactly as IMAGE 1. "
 
-        "CHEST LOGO - CRITICAL: "
-        "Chest logo from IMAGE 1 must be EXACTLY preserved. "
-        "Same size, same position, same proportions. "
-        "Logo must be razor-sharp and perfectly readable. "
-        "No blur, no warping, no distortion, no redesign. "
+        "LOGO: "
+        "Chest logo from IMAGE 1 preserved exactly. "
+        "Same size, position, proportions. Razor-sharp. No blur. No distortion. "
+        "Key light on chest to enhance logo visibility. "
 
-        "SUBJECT POSITIONING: "
-        "Subject in CENTER of frame. "
-        "Framing from head to mid-thigh. "
-        "Subject occupies 70-75 percent of frame height. "
-        "Subject leaning naturally against the architectural surface from IMAGE 2. "
-        "Realistic contact shadows where body touches the surface. "
-        "Realistic ground shadows under feet. "
-        "No floating. No cutout look. "
+        "POSITIONING: "
+        "Subject centered. Head to mid-thigh framing. "
+        "Leaning against surface from IMAGE 2. "
+        "Realistic contact shadows. Ground shadows. No floating. "
         f"Pose: {spec['pose']}. "
 
-        "HUMAN SCALE AND PROPORTIONS - CRITICAL: "
-        "Subject at correct realistic human scale relative to background from IMAGE 2. "
-        "Perfect body proportions matching IMAGE 1 exactly. "
-        "Natural athletic posture. "
+        "LIGHTING: "
+        "Match exact lighting from IMAGE 2. "
+        "Warm golden evening tones. Long shadows on ground. "
+        "No studio flash. No mismatched shadows. "
 
-        "EVENING LIGHTING - CRITICAL: "
-        "Match exact lighting conditions from IMAGE 2 precisely. "
-        "Subject lit CONSISTENTLY with background environment. "
-        "Shadows and COLOR TEMPERATURE match IMAGE 2 exactly. "
-        "Add subtle key light on chest to enhance logo visibility. "
-        "No artificial lighting. No studio flash. No mismatched shadows. "
+        "HOODIE: "
+        "Black hoodie as in IMAGE 1. Hood DOWN. Face visible. "
+        "NO pocket. NO zipper. Smooth fabric. "
 
-        "HOODIE - CRITICAL: "
-        "Premium black hoodie exactly as in IMAGE 1. "
-        "NO front pocket. NO kangaroo pocket. NO zipper. "
-        "Hood DOWN. Face clearly visible. "
-        "Smooth premium fabric texture. "
+        "JEANS: "
+        "Wide baggy black denim as in IMAGE 1. Heavy texture visible. "
 
-        "PHOTOGRAPHY QUALITY - CRITICAL: "
-        "Sharp focus throughout entire image. "
-        "Subject and background equally sharp. "
-        "ONE unified realistic photograph. "
-        "Ultra-realistic seamless integration. "
-        "4K resolution. Professional fashion magazine quality. "
-
-        "Generate realistic front-view fashion photograph where subject from IMAGE 1 "
-        "is authentically integrated into the exact location from IMAGE 2, "
-        "torso 100% front-facing to camera, chest logo perfectly preserved, "
-        "realistic evening lighting and shadows. "
-        "Result must look like single real photograph taken at that location. "
-        "NOT composite. NOT manipulation. REAL PHOTOGRAPH."
+        "QUALITY: "
+        "4K. Sharp focus. Seamless integration. "
+        "Real photograph. Not composite. Not CGI."
     )
 
     prompt += uid
 
     if len(prompt) > MAX_PROMPT_LENGTH:
-        logger.warning(f"[PROMPT] FRONT too long: {len(prompt)} > {MAX_PROMPT_LENGTH}")
         prompt = prompt[:MAX_PROMPT_LENGTH]
 
-    logger.info(f"[PROMPT] FRONT: {len(prompt)}/{MAX_PROMPT_LENGTH} chars")
+    logger.info(f"[PROMPT] FRONT: {len(prompt)} chars")
     return prompt
 
 
@@ -227,76 +201,52 @@ def build_back_prompt(spec):
 
     prompt = (
         "Ultra-realistic RAW 9:16 professional environmental photograph. "
-        "Back view shot integrated into provided background location. "
-        "Evening or golden hour time of day. Realistic warm evening atmosphere. "
+        "Back view. Evening atmosphere. "
 
-        "HOOD MANDATORY - CRITICAL: Hood MUST be UP on head, completely covering head. "
-        "This is MANDATORY requirement. Hood covering head from back view. "
-        "Hood fabric clearly visible covering head and upper back. "
-        "Face completely hidden, BACK VIEW ONLY. NO exceptions - hood is ALWAYS UP. "
+        "REFERENCES: "
+        "IMAGE 1 is the subject. IMAGE 2 is the background location. "
+        "Place subject from IMAGE 1 into exact location from IMAGE 2. "
 
-        "HAND AND ARM POSITIONING - CRITICAL: "
-        "FORBIDDEN ZONES - hands must NEVER touch: hips, buttocks, lower back, hip area, back pockets, waist level, anywhere near lower torso. "
-        "ALLOWED when WALKING: arms swing naturally at sides with motion. "
-        "ALLOWED when STANDING: both hands actively adjusting hood near head. "
-        "NO idle standing with hands hanging free. NEVER touching lower body or hip area. "
+        "HOOD MANDATORY: "
+        "Hood MUST be UP covering head completely. No exceptions. "
+        "Face completely hidden. Back view only. "
 
-        "HUMAN SCALE AND PROPORTIONS - CRITICAL: Subject MUST be at CORRECT HUMAN SCALE. "
-        "Subject height proportional to standard doors (2.1 meters), windows (1.5 meters), railings (1.2 meters), ground features. "
-        "Normal adult human (1.75 meters tall). NOT giant filling frame. NOT tiny dwarf. HUMAN SCALE correct. "
-        "Head approximately 1/7 of total body height. Torso approximately 1/3 of body. Legs approximately 1/2 of body. "
-        "Proportions must match real human anatomy exactly. Real-world scale maintained throughout. "
+        "HANDS: "
+        "NEVER touch hips, buttocks, lower back, waist. "
+        "If walking: arms swing naturally. "
+        "If standing: both hands adjusting hood near head. "
 
-        "BACKGROUND INTEGRATION - CRITICAL: Subject naturally and realistically placed in exact location from background reference. "
-        "Subject authentically PART of environment, not floating, not composited. "
-        "Match ALL lighting, perspective, depth and atmospheric conditions from background. "
+        "SCALE: "
+        "Correct human scale relative to IMAGE 2 architecture. "
+        "Normal adult 1.75m tall. Full body visible head to feet. "
+        "Feet touching ground. Realistic shadows on ground. "
 
-        "SUBJECT POSITIONING: Place in CENTER-MID area of frame, naturally integrated. "
-        "Subject scale 10-15 percent of frame height (correct human size). "
-        "Full body visible from head to feet, standing or walking naturally. "
-        "Feet MUST clearly touch ground surface visible in background. "
-        "Subject must cast REALISTIC SHADOWS matching background's light direction and time of day. "
-        "Perspective and depth MUST match background photograph exactly. "
+        "BACKGROUND: "
+        "Exact location from IMAGE 2. Match perspective, depth, scale. "
+        "Subject authentically part of environment. Not floating. "
 
-        "SUBJECT APPEARANCE AND CLOTHING: Black hoodie with HOOD UP completely covering head. "
-        "Face completely hidden, BACK VIEW ONLY. Hood clearly visible on head from behind. "
-        "Black wide-leg baggy denim jeans, heavy texture clearly visible. "
-        "Arms and hands positioned according to activity: "
-        "If WALKING: arms swing naturally OR one hand behind head at neck above shoulders. "
-        "If STANDING: both hands actively adjusting hood. "
-        "ABSOLUTELY NO hands on hips, lower back, or buttocks area. "
-        "ABSOLUTELY NO standing with idle hands. Natural confident posture. "
+        "LIGHTING: "
+        "Match exact lighting from IMAGE 2. "
+        "Warm golden evening tones. Long realistic shadows. "
+        "No studio flash. No artificial lighting. "
 
-        "EVENING LIGHTING INTEGRATION - CRITICAL: This is EVENING or GOLDEN HOUR photograph - warm evening light. "
-        "Match exact lighting conditions from background photograph precisely. "
-        "Subject lit CONSISTENTLY with background environment. "
-        "Shadows, highlights and COLOR TEMPERATURE match background exactly. "
-        "Light source direction MUST match background's light angle. "
-        "EVENING LIGHT creates LONGER SHADOWS - render these REALISTICALLY on ground. "
-        "Color temperature: WARM GOLDEN/AMBER TONES for evening atmosphere. "
-        "No artificial lighting, no flash, no studio setup. "
-        "Light behaves realistically across subject, ground and surroundings. "
+        "CLOTHING: "
+        "Black hoodie hood UP. Black wide baggy denim jeans. "
+        "Heavy fabric texture visible. "
 
-        "PHOTOGRAPHY QUALITY - CRITICAL: Sharp focus throughout entire image. "
-        "Subject and background equally sharp and detailed. No blur, no bokeh, no selective focus. "
-        "ONE unified realistic photograph. Ultra-realistic seamless integration, NOT composited or artificial. "
-        "Looks like real photograph taken at location, NOT CGI or edited composite. "
+        "QUALITY: "
+        "4K. Sharp focus throughout. Seamless integration. "
+        "Real photograph at that location. Not CGI. Not composite. "
 
-        f"Pose: {spec['pose']}. "
-
-        "Generate natural realistic evening photograph where subject is authentically integrated into background location at CORRECT HUMAN SCALE with realistic proportions, "
-        "HOOD UP on head (MANDATORY), hands positioned correctly (adjusting hood when standing, or swinging when walking), "
-        "realistic evening lighting and shadows. Result must look like single real photograph taken at that location in evening. "
-        "NOT composite. NOT manipulation. REAL PHOTOGRAPH. Professional quality rendering."
+        f"Pose: {spec['pose']}."
     )
 
     prompt += uid
 
     if len(prompt) > MAX_PROMPT_LENGTH:
-        logger.warning(f"[PROMPT] BACK too long: {len(prompt)} > {MAX_PROMPT_LENGTH}")
         prompt = prompt[:MAX_PROMPT_LENGTH]
 
-    logger.info(f"[PROMPT] BACK: {len(prompt)}/{MAX_PROMPT_LENGTH} chars")
+    logger.info(f"[PROMPT] BACK: {len(prompt)} chars")
     return prompt
 
 
@@ -437,7 +387,6 @@ async def poll_job(job_id, retry_count=0, max_retries=3):
 
 
 async def download_image(url, path):
-    """Стриминговое скачивание для тяжелых 4K файлов"""
     os.makedirs(SAVE_DIR, exist_ok=True)
 
     async with httpx.AsyncClient(timeout=600.0) as client:
