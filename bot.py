@@ -4,7 +4,7 @@ import json
 import os
 import httpx
 
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, ContextTypes, filters
 
 from config import BOT_TOKEN
@@ -237,35 +237,12 @@ def build_start_keyboard(user_id):
 
 # ---------------- SEND MEDIA ----------------
 
-async def send_preview(context, user_id, paths):
-    """Сжатое превью для быстрого просмотра"""
-    valid_paths = [p for p in paths if p and os.path.exists(p)]
-    if not valid_paths:
-        raise Exception("Файлы не найдены")
-
-    opened_files = []
-    try:
-        if len(valid_paths) == 1:
-            f = open(valid_paths[0], "rb")
-            opened_files.append(f)
-            await context.bot.send_photo(chat_id=user_id, photo=f)
-        else:
-            media = []
-            for path in valid_paths:
-                f = open(path, "rb")
-                opened_files.append(f)
-                media.append(InputMediaPhoto(f))
-            await context.bot.send_media_group(chat_id=user_id, media=media)
-    finally:
-        for f in opened_files:
-            try:
-                f.close()
-            except Exception:
-                pass
-
-
-async def send_media(context, user_id, paths):
-    """Оригиналы как документы без потери качества"""
+async def send_files(context, user_id, paths):
+    """
+    Отправляем все файлы как документы.
+    Telegram принимает документы до 50MB — наши 22MB пройдут без проблем.
+    Качество не теряется в отличие от send_photo (лимит 10MB).
+    """
     valid_paths = [p for p in paths if p and os.path.exists(p)]
     if not valid_paths:
         raise Exception("Файлы не найдены")
@@ -360,7 +337,7 @@ async def generate_slides(update: Update, context: ContextTypes.DEFAULT_TYPE):
         storage.pop("specs", None)
         save_user_data()
 
-        await send_preview(context, user_id, paths)
+        await send_files(context, user_id, paths)
 
         await context.bot.send_message(
             chat_id=user_id,
@@ -408,8 +385,7 @@ async def background_ai_generate(context, user_id):
         storage["mode"] = "ai"
         save_user_data()
 
-        await send_preview(context, user_id, paths)
-        await send_media(context, user_id, paths)
+        await send_files(context, user_id, paths)
 
         await context.bot.send_message(
             chat_id=user_id,
@@ -522,8 +498,7 @@ async def regen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         storage["urls"][index] = new_url if (new_url and isinstance(new_url, str)) else None
         save_user_data()
 
-        await send_preview(context, user_id, [new_path])
-        await send_media(context, user_id, [new_path])
+        await send_files(context, user_id, [new_path])
 
         await context.bot.send_message(
             chat_id=user_id,
