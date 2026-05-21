@@ -20,7 +20,7 @@ OUTPUT_FORMAT = "png"
 
 # ================= REFS =================
 
-REF_FRONT = "https://i.ibb.co/0RWjBVdH/5215527801883138653.jpg"
+REF_FRONT = "https://i.ibb.co/PZdf7ZzZ/image-ba2e4627-604b-4064-b4a1-973ebdfc8e6a-5.png"
 REF_BACK = "https://i.ibb.co/TMBfNb1x/5451731499716647027.jpg"
 
 # ================= FRONT BACKGROUNDS =================
