@@ -2,6 +2,7 @@ import logging
 import random
 import json
 import os
+import asyncio
 import httpx
 import requests
 import base64
@@ -19,10 +20,18 @@ from replicate_api import (
     get_unique_specs,
     build_front_prompt,
     build_back_prompt,
+    submit_job,
+    poll_job,
+    download_image,
     MODEL_NAME,
     IMAGE_RESOLUTION,
     ASPECT_RATIO,
-    OUTPUT_FORMAT
+    OUTPUT_FORMAT,
+    SAVE_DIR,
+    REF_FRONT,
+    REF_BACK,
+    FRONT_POSES,
+    BACK_POSES
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -87,10 +96,6 @@ def get_clean_urls(storage):
 # ---------------- COMPRESS FOR BUFFER ----------------
 
 def compress_for_tiktok(path):
-    """
-    Сжимает фото до максимума TikTok (1080x1920).
-    Оригинал 4K остается нетронутым.
-    """
     img = Image.open(path)
     img.thumbnail((1080, 1920), Image.LANCZOS)
     buffer = BytesIO()
@@ -100,11 +105,9 @@ def compress_for_tiktok(path):
 
 
 def upload_to_imgbb(image_buffer):
-    """Загружает сжатое фото на ImgBB и возвращает URL"""
     imgbb_key = os.getenv("IMGBB_API_KEY")
     if not imgbb_key:
         raise Exception("IMGBB_API_KEY not set")
-
     img_data = base64.b64encode(image_buffer.read()).decode("utf-8")
     response = requests.post(
         "https://api.imgbb.com/1/upload",
@@ -256,7 +259,8 @@ def build_start_keyboard(user_id):
 
     buttons = [
         [InlineKeyboardButton("🎬 Слайды", callback_data="slides")],
-        [InlineKeyboardButton("📸 AI Фотосессия", callback_data="ai")]
+        [InlineKeyboardButton("📸 AI Фотосессия", callback_data="ai")],
+        [InlineKeyboardButton("🖼 Свои фоны", callback_data="custom_bg")]
     ]
 
     if buffer_connected:
@@ -275,11 +279,6 @@ def build_start_keyboard(user_id):
 # ---------------- SEND MEDIA ----------------
 
 async def send_files(context, user_id, paths):
-    """
-    Отправляет файлы как документы.
-    Telegram принимает до 50MB — наши 22MB проходят.
-    Качество не теряется.
-    """
     valid_paths = [p for p in paths if p and os.path.exists(p)]
     if not valid_paths:
         raise Exception("Файлы не найдены")
@@ -449,6 +448,163 @@ async def ai_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.application.create_task(
         background_ai_generate(context, user_id)
     )
+
+
+# ---------------- CUSTOM BACKGROUNDS ----------------
+
+async def custom_bg_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    user_id = query.from_user.id
+
+    storage = get_user_storage(user_id)
+    storage["awaiting_custom_bg"] = True
+    storage["custom_bgs"] = []
+    save_user_data()
+
+    await context.bot.send_message(
+        chat_id=user_id,
+        text=(
+            "🖼 Режим своих фонов\n\n"
+            "Отправь 3 фото фонов по одному.\n"
+            "Порядок: фон 1 → фон 2 → фон 3\n\n"
+            "Отправлено: 0/3"
+        )
+    )
+
+
+async def custom_bg_photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message or not update.message.photo:
+        return
+
+    user_id = update.message.from_user.id
+    storage = get_user_storage(user_id)
+
+    if not storage.get("awaiting_custom_bg"):
+        return
+
+    # Берём фото в максимальном разрешении
+    photo = update.message.photo[-1]
+    file = await context.bot.get_file(photo.file_id)
+    file_url = file.file_path
+
+    custom_bgs = storage.get("custom_bgs", [])
+    custom_bgs.append(file_url)
+    storage["custom_bgs"] = custom_bgs
+    save_user_data()
+
+    count = len(custom_bgs)
+
+    if count < 3:
+        await update.message.reply_text(
+            f"✅ Фон {count} принят.\n"
+            f"Отправлено: {count}/3\n\n"
+            f"Отправь следующий фон."
+        )
+    else:
+        storage["awaiting_custom_bg"] = False
+        save_user_data()
+
+        await update.message.reply_text(
+            "✅ Все 3 фона получены!\n"
+            "⏳ Запускаю генерацию..."
+        )
+
+        context.application.create_task(
+            background_custom_generate(context, user_id, custom_bgs)
+        )
+
+
+async def background_custom_generate(context, user_id, custom_bgs):
+    try:
+        sides = ["back", "front", "back"]
+        specs = []
+
+        for i, side in enumerate(sides):
+            if side == "front":
+                ref = REF_FRONT
+                pose = random.choice(FRONT_POSES)
+            else:
+                ref = REF_BACK
+                pose = random.choice(BACK_POSES)
+
+            specs.append({
+                "side": side,
+                "pose": pose,
+                "seed": random.randint(100000, 999999),
+                "ref": ref,
+                "background": custom_bgs[i]
+            })
+
+        job_ids = []
+        for spec in specs:
+            if spec["side"] == "front":
+                prompt = build_front_prompt(spec)
+            else:
+                prompt = build_back_prompt(spec)
+
+            job_id = await asyncio.to_thread(
+                submit_job, prompt, spec["ref"], spec["background"]
+            )
+            job_ids.append(job_id)
+            await asyncio.sleep(2)
+
+        urls = await asyncio.gather(
+            *[poll_job(jid) for jid in job_ids],
+            return_exceptions=True
+        )
+
+        paths = []
+        final_urls = []
+
+        for idx, url in enumerate(urls):
+            if isinstance(url, Exception):
+                logger.error(f"[CUSTOM_GEN] Index {idx}: {url}")
+                continue
+            if not url:
+                continue
+            import time
+            path = os.path.join(SAVE_DIR, f"custom_{int(time.time()*1000)}_{idx}.png")
+            await download_image(url, path)
+            paths.append(path)
+            final_urls.append(url)
+
+        if not paths:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text="❌ Ошибка генерации — не получено ни одного фото"
+            )
+            return
+
+        safe_specs = [
+            {k: v for k, v in s.items()
+             if isinstance(v, (str, int, float, bool, type(None)))}
+            for s in specs
+        ]
+
+        storage = get_user_storage(user_id)
+        storage["paths"] = paths
+        storage["specs"] = safe_specs
+        storage["urls"] = final_urls
+        storage["caption"] = get_random_caption()
+        storage["mode"] = "ai"
+        save_user_data()
+
+        await send_files(context, user_id, paths)
+
+        await context.bot.send_message(
+            chat_id=user_id,
+            text=f"✅ Кастомная фотосессия готова\n\n{storage['caption']}",
+            reply_markup=build_ai_keyboard(user_id, len(paths))
+        )
+
+    except Exception as e:
+        import traceback
+        logger.error(f"[CUSTOM_GEN] Error: {traceback.format_exc()}")
+        await context.bot.send_message(
+            chat_id=user_id,
+            text=f"❌ Ошибка: {e}"
+        )
 
 
 # ---------------- REGEN CAPTION ----------------
@@ -675,7 +831,6 @@ async def buffer_send_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     )
 
     try:
-        # Сжимаем до 1080x1920 и загружаем на ImgBB
         compressed_urls = []
         for path in valid_paths:
             compressed = compress_for_tiktok(path)
@@ -694,9 +849,12 @@ async def buffer_send_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
 
         await context.bot.send_message(
             chat_id=user_id,
-            text=f"✅ Отправлено в Buffer\nПрофиль: {profile_name}\n\n"
-                 f"📱 Фото сжаты до 1080x1920 для TikTok\n"
-                 f"🖼 Оригинал 4K остался у тебя в чате"
+            text=(
+                f"✅ Отправлено в Buffer\n"
+                f"Профиль: {profile_name}\n\n"
+                f"📱 Фото сжаты до 1080x1920 для TikTok\n"
+                f"🖼 Оригинал 4K остался у тебя в чате"
+            )
         )
 
     except Exception as e:
@@ -735,10 +893,12 @@ def main():
     app.add_handler(CallbackQueryHandler(go_start_handler, pattern="^go_start$"))
     app.add_handler(CallbackQueryHandler(generate_slides, pattern="^slides$"))
     app.add_handler(CallbackQueryHandler(ai_handler, pattern="^ai$"))
+    app.add_handler(CallbackQueryHandler(custom_bg_handler, pattern="^custom_bg$"))
     app.add_handler(CallbackQueryHandler(regen_caption_handler, pattern="^regen_caption$"))
     app.add_handler(CallbackQueryHandler(regen_handler, pattern="^regen_\\d+$"))
     app.add_handler(CallbackQueryHandler(buffer_connect_handler, pattern="^buffer_connect$"))
     app.add_handler(CallbackQueryHandler(buffer_send_handler, pattern="^buffer_send$"))
+    app.add_handler(MessageHandler(filters.PHOTO, custom_bg_photo_handler))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, buffer_token_message_handler))
 
     print("Бот погнал!")
